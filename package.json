@@ -1,0 +1,28 @@
+{
+  "name": "circuit-tiles",
+  "version": "1.0.0",
+  "description": "Build circuits with tiled modules",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rimraf out/*.js && npx tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/willgarrett610/circuit-tiles.git"
+  },
+  "author": "Will Garrett, Justin Fernald",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/willgarrett610/circuit-tiles/issues"
+  },
+  "homepage": "https://github.com/willgarrett610/circuit-tiles#readme",
+  "devDependencies": {
+    "@types/node": "^15.12.4",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.3.4"
+  },
+  "dependencies": {
+    "canvaskit-wasm": "^0.28.0"
+  }
+}
