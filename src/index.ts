@@ -1,16 +1,7 @@
-console.log("test"[1][1][1]);
-
-// const CanvasKitInit = require("/node_modules/canvaskit-wasm/bin/canvaskit.js");
-// import {} from "./node_modules/canvaskit-wasm/types"
-import {
-    Canvas,
-    CanvasKit,
-    CanvasKitInit,
-    Surface,
-} from "canvaskit-wasm";
+import { Canvas, CanvasKit, CanvasKitInit, Surface } from "canvaskit-wasm";
 
 CanvasKitInit({
-    locateFile: (file: any) => __dirname + "/bin/" + file,
+    locateFile: (file: string) => __dirname + "/bin/" + file,
 }).then((CK: CanvasKit) => {
     const surface: Surface | null = CK.MakeCanvasSurface("main");
     if (!surface) return;

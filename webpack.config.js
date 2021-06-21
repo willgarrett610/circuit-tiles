@@ -12,7 +12,7 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.tsx?$/,
+                test: /\.ts$/,
                 use: "ts-loader",
                 exclude: /node_modules/,
             },
@@ -20,7 +20,11 @@ module.exports = {
     },
     resolve: {
         extensions: [".ts", ".js"],
-        modules: ['node_modules'],
+        modules: ["node_modules"],
+        fallback: {
+            fs: false,
+            path: require.resolve("path-browserify"),
+        },
     },
     output: {
         filename: "main.js",
@@ -32,8 +36,8 @@ module.exports = {
         }),
         new CopyPlugin({
             patterns: [
-                { from: 'node_modules/canvaskit-wasm/bin/canvaskit.wasm' }
-            ]
+                { from: "node_modules/canvaskit-wasm/bin/canvaskit.wasm" },
+            ],
         }),
     ],
     // browser: {
