@@ -1,28 +1,38 @@
 {
-  "name": "circuit-tiles",
-  "version": "1.0.0",
-  "description": "Build circuits with tiled modules",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rimraf out/*.js && npx tsc"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/willgarrett610/circuit-tiles.git"
-  },
-  "author": "Will Garrett, Justin Fernald",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/willgarrett610/circuit-tiles/issues"
-  },
-  "homepage": "https://github.com/willgarrett610/circuit-tiles#readme",
-  "devDependencies": {
-    "@types/node": "^15.12.4",
-    "rimraf": "^3.0.2",
-    "typescript": "^4.3.4"
-  },
-  "dependencies": {
-    "canvaskit-wasm": "^0.28.0"
-  }
+    "name": "circuit-tiles",
+    "version": "1.0.0",
+    "description": "Build circuits with tiled modules",
+    "private": true,
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "webpack",
+        "watch": "webpack --watch",
+        "start": "webpack serve --open"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/willgarrett610/circuit-tiles.git"
+    },
+    "author": "Will Garrett, Justin Fernald",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/willgarrett610/circuit-tiles/issues"
+    },
+    "homepage": "https://github.com/willgarrett610/circuit-tiles#readme",
+    "devDependencies": {
+        "@types/node": "^15.12.4",
+        "@typescript-eslint/eslint-plugin": "^4.27.0",
+        "@typescript-eslint/parser": "^4.27.0",
+        "eslint": "^7.29.0",
+        "html-webpack-plugin": "^5.3.1",
+        "prettier": "2.3.1",
+        "ts-loader": "^9.2.3",
+        "typescript": "^4.3.4",
+        "webpack": "^5.39.1",
+        "webpack-cli": "^4.7.2",
+        "webpack-dev-server": "^3.11.2"
+    },
+    "dependencies": {
+        "canvaskit-wasm": "^0.28.0"
+    }
 }
