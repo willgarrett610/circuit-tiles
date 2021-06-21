@@ -7,6 +7,7 @@ import { Canvas, CanvasKit, Surface } from "canvaskit-wasm";
 }).then((CK: CanvasKit) => {
     const surface: Surface | null = CK.MakeCanvasSurface("main");
     if (!surface) return;
+    const surf: any = surface;
     const paint = new CK.Paint();
     paint.setColor(CK.Color4f(0.9, 0, 0, 1.0));
     paint.setStyle(CK.PaintStyle.Stroke);
@@ -34,7 +35,8 @@ import { Canvas, CanvasKit, Surface } from "canvaskit-wasm";
         canvas.clear(CK.WHITE);
         const rr = CK.RRectXY(CK.LTRBRect(x, y, x + w, y + h), 25, 15);
         canvas.drawRRect(rr, paint);
-        (surface as any).requestAnimationFrame(drawFrame);
+        surf.requestAnimationFrame(drawFrame);
     }
-    (surface as any).requestAnimationFrame(drawFrame);
+
+    surf.requestAnimationFrame(drawFrame);
 });
