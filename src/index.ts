@@ -1,7 +1,11 @@
-import { Canvas, CanvasKit, CanvasKitInit, Surface } from "canvaskit-wasm";
+import CanvasKitInit from "canvaskit-wasm";
 
-CanvasKitInit({
-    locateFile: (file: string) => __dirname + "/bin/" + file,
+import { Canvas, CanvasKit, Surface } from "canvaskit-wasm";
+
+console.log(CanvasKitInit);
+
+(CanvasKitInit as any)({
+    locateFile: (file: string) => file,
 }).then((CK: CanvasKit) => {
     const surface: Surface | null = CK.MakeCanvasSurface("main");
     if (!surface) return;

@@ -23,7 +23,7 @@ module.exports = {
         modules: ["node_modules"],
         fallback: {
             fs: false,
-            path: require.resolve("path-browserify"),
+            path: false,
         },
     },
     output: {
