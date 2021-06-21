@@ -1,5 +1,6 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
     mode: "development",
@@ -19,6 +20,7 @@ module.exports = {
     },
     resolve: {
         extensions: [".ts", ".js"],
+        modules: ['node_modules'],
     },
     output: {
         filename: "main.js",
@@ -28,5 +30,18 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: "src/index.html",
         }),
+        new CopyPlugin({
+            patterns: [
+                { from: 'node_modules/canvaskit-wasm/bin/canvaskit.wasm' }
+            ]
+        }),
     ],
+    // browser: {
+    //     fs: false
+    // },
+    // resolve: {
+    //   fallback: {
+    //     fs: false
+    //   }
+    // }
 };
