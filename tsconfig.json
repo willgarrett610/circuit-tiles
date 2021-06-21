@@ -6,7 +6,7 @@
         "outDir": "./dist" /* Redirect output structure to the directory. */,
         "rootDir": "./src" /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */,
         "composite": true /* Enable project compilation */,
-        "strict": true /* Enable all strict type-checking options. */,
+        "strict": false /* Enable all strict type-checking options. */,
         "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
         "moduleResolution": "Node",
         /* Advanced Options */
