@@ -14,9 +14,9 @@ import { Canvas, CanvasKit, Surface } from "canvaskit-wasm";
 
         console.log(heightOutput);
 
-        let canvasElmt:any = document.getElementById("main");
-        canvasElmt.width = widthOutput;
-        canvasElmt.height = heightOutput;
+        const canvasElement: any = document.getElementById("main");
+        canvasElement.width = widthOutput;
+        canvasElement.height = heightOutput;
 
         surface = CK.MakeCanvasSurface("main");
         surf = surface;
@@ -24,7 +24,7 @@ import { Canvas, CanvasKit, Surface } from "canvaskit-wasm";
 
     setupSurface();
 
-    window.onresize = e => {
+    window.onresize = () => {
         setupSurface();
     };
 
@@ -40,7 +40,7 @@ import { Canvas, CanvasKit, Surface } from "canvaskit-wasm";
     let dirX = 1; // box is always moving at a constant speed in one of the four diagonal directions
     let dirY = 1;
 
-    function drawFrame(canvas:Canvas) {
+    function drawFrame(canvas: Canvas) {
         // boundary check
         if (x < 0 || x + w > window.innerWidth) {
             dirX *= -1; // reverse x direction when hitting side walls
