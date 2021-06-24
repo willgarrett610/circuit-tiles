@@ -1,6 +1,6 @@
 import CanvasKitInit from "canvaskit-wasm";
-
 import { Canvas, CanvasKit, Surface } from "canvaskit-wasm";
+import { createGrid } from "./create-grid";
 
 (CanvasKitInit as any)({
     locateFile: (file: string) => file,
@@ -12,8 +12,6 @@ import { Canvas, CanvasKit, Surface } from "canvaskit-wasm";
         const heightOutput = window.innerHeight;
         const widthOutput = window.innerWidth;
 
-        console.log(heightOutput);
-
         const canvasElement: any = document.getElementById("main");
         canvasElement.width = widthOutput;
         canvasElement.height = heightOutput;
@@ -24,9 +22,7 @@ import { Canvas, CanvasKit, Surface } from "canvaskit-wasm";
 
     setupSurface();
 
-    window.onresize = () => {
-        setupSurface();
-    };
+    window.onresize = setupSurface;
 
     const paint = new CK.Paint();
     paint.setColor(CK.Color4f(0.9, 0, 0, 1.0));
@@ -52,7 +48,8 @@ import { Canvas, CanvasKit, Surface } from "canvaskit-wasm";
         x += dirX;
         y += dirY;
 
-        canvas.clear(CK.WHITE);
+        canvas.clear(CK.Color4f(0.2, 0.2, 0.2));
+        createGrid(CK, surface, canvas, 100, 20, 10);
         const rr = CK.RRectXY(CK.LTRBRect(x, y, x + w, y + h), 25, 15);
         canvas.drawRRect(rr, paint);
         surf.requestAnimationFrame(drawFrame);
