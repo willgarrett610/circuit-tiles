@@ -1,14 +1,11 @@
-const HtmlWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
     mode: "development",
     entry: "./src/index.ts",
-    devtool: "inline-source-map",
-    devServer: {
-        contentBase: "./dist",
-    },
+    devtool: "source-map",
     module: {
         rules: [
             {
@@ -18,34 +15,22 @@ module.exports = {
             },
         ],
     },
-    resolve: {
-        extensions: [".ts", ".js"],
-        modules: ["node_modules"],
-        fallback: {
-            fs: false,
-            path: false,
-        },
-    },
+    resolve: { extensions: [".ts", ".js"] },
     output: {
-        filename: "main.js",
+        filename: "bundle.js",
         path: path.resolve(__dirname, "dist"),
+        devtoolModuleFilenameTemplate: "../../[resource-path]",
     },
     plugins: [
         new HtmlWebpackPlugin({
             template: "src/index.html",
         }),
-        new CopyPlugin({
-            patterns: [
-                { from: "node_modules/canvaskit-wasm/bin/canvaskit.wasm" },
-            ],
-        }),
+        new CopyPlugin([{ from: "assets", to: "assets" }]),
     ],
-    // browser: {
-    //     fs: false
-    // },
-    // resolve: {
-    //   fallback: {
-    //     fs: false
-    //   }
-    // }
+    devServer: {
+        contentBase: path.join(__dirname, "dist"),
+        port: 3000,
+        hot: true,
+        writeToDisk: true,
+    },
 };
