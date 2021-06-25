@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 import { createGrid } from "./components/create-grid";
-import { dimensions, height, onResize, width } from "./utils";
+import { dimensions, height, onMouseMove, onResize, width } from "./utils";
 
 const load = (app: PIXI.Application) =>
     new Promise<void>((resolve) =>
@@ -22,16 +22,25 @@ const main = async () => {
 
     app.renderer.backgroundColor = 0x333333;
 
-    let { container: grid, update: updateGrid } = createGrid(100);
+    let {
+        container: grid,
+        update: updateGrid,
+        screenToGrid,
+        gridToScreen,
+    } = createGrid(100);
 
     app.stage.addChild(grid);
 
     let sprite = new PIXI.Sprite(app.loader.resources.doge.texture);
-    sprite.width = 200;
-    sprite.height = 200;
+    sprite.width = 20;
+    sprite.height = 20;
     sprite.x = width() / 2 - sprite.width / 2;
     sprite.y = height() / 2 - sprite.height / 2;
     app.stage.addChild(sprite);
+
+    onMouseMove((e) => {
+        console.log(screenToGrid(e.clientX, e.clientY));
+    });
 
     onResize(() => {
         app.renderer.resize(...dimensions());
@@ -39,20 +48,22 @@ const main = async () => {
         sprite.y = height() / 2 - sprite.height / 2;
     });
 
-    let velocity = { x: 1, y: 1 };
+    // let velocity = { x: 1, y: 1 };
 
     function update(delta: number) {
-        if (sprite.x <= 0 || sprite.x >= width() - sprite.width)
-            velocity.x = -velocity.x;
+        // if (sprite.x <= 0 || sprite.x >= width() - sprite.width)
+        //     velocity.x = -velocity.x;
 
-        if (sprite.y <= 0 || sprite.y >= height() - sprite.height)
-            velocity.y = -velocity.y;
-        sprite.x += velocity.x * delta;
-        sprite.y += velocity.y * delta;
+        // if (sprite.y <= 0 || sprite.y >= height() - sprite.height)
+        //     velocity.y = -velocity.y;
+        // sprite.x += velocity.x * delta;
+        // sprite.y += velocity.y * delta;
 
-        grid.x += 0.15 * delta;
-        grid.y += 0.1 * delta;
+        // grid.x += 0.15 * delta;
+        // grid.y += 0.1 * delta;
         updateGrid();
+        sprite.x = gridToScreen(0.5, 0.5).x;
+        sprite.y = gridToScreen(0.5, 0.5).y;
     }
     app.ticker.add(update);
 };

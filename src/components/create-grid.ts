@@ -1,10 +1,22 @@
 import * as PIXI from "pixi.js";
-import { dimensions, onResize } from "../utils";
+import {
+    dimensions,
+    mouseDown,
+    onMouseMove,
+    onResize,
+    onScroll,
+} from "../utils";
 import { Line } from "../utils/line";
+import { clamp } from "../utils/math";
 
 export function createGrid(
     size: number
-): { container: PIXI.Container; update: () => void } {
+): {
+    container: PIXI.Container;
+    update: () => void;
+    screenToGrid: (x: number, y: number) => { x: number; y: number };
+    gridToScreen: (x: number, y: number) => { x: number; y: number };
+} {
     let container = new PIXI.Container();
 
     const generate = (width: number, height: number): PIXI.Graphics[] => {
@@ -48,7 +60,44 @@ export function createGrid(
         generate(...dimensions()).forEach((child) => container.addChild(child));
     };
 
+    /**
+     * From screen space to grid space
+     * @param x X in screen space
+     * @param y Y in screen space
+     * @returns Coordinates in grid space
+     */
+    const screenToGrid = (x: number, y: number) => ({
+        x: Math.floor((-container.x + x) / size),
+        y: Math.floor((-container.y + y) / size),
+    });
+
+    /**
+     * From grid space to screen space (Top Left corner)
+     * @param x X in grid space
+     * @param y Y in grid space
+     * @returns Coordinates in screen space
+     */
+    const gridToScreen = (x: number, y: number) => ({
+        x: Math.floor(x) * size + container.x,
+        y: Math.floor(y) * size + container.y,
+    });
+
     onResize(update);
 
-    return { container, update };
+    onScroll((e) => {
+        size -= e.deltaY * 0.1;
+        size = clamp(size, 20, 350);
+        console.log({ size });
+        update();
+    });
+
+    onMouseMove((e) => {
+        if (!mouseDown.left) return;
+
+        container.x += e.movementX;
+        container.y += e.movementY;
+        update();
+    });
+
+    return { container, update, screenToGrid, gridToScreen };
 }
