@@ -1,9 +1,12 @@
 import * as PIXI from "pixi.js";
-import { createGrid } from "./create-grid";
+import { createGrid } from "./components/create-grid";
+import { dimensions, height, onResize, width } from "./utils";
 
 const load = (app: PIXI.Application) =>
     new Promise<void>((resolve) =>
-        app.loader.add("assets/sprites/doge-icon.svg").load(() => resolve())
+        app.loader
+            .add("doge", "assets/sprites/doge-icon.svg")
+            .load(() => resolve())
     );
 
 const main = async () => {
@@ -16,48 +19,42 @@ const main = async () => {
     document.body.appendChild(app.view);
 
     await load(app);
-    let sprite = new PIXI.Sprite(
-        app.loader.resources["assets/sprites/doge-icon.svg"].texture
-    );
 
-    sprite.width = 200;
-    sprite.height = 200;
-    sprite.x = window.innerWidth / 2 - sprite.width / 2;
-    sprite.y = window.innerHeight / 2 - sprite.height / 2;
-    app.stage.addChild(sprite);
+    app.renderer.backgroundColor = 0x333333;
 
-    let grid = createGrid(app, 100, 0, 0);
+    let { container: grid, update: updateGrid } = createGrid(100);
+
     app.stage.addChild(grid);
 
-    window.addEventListener("resize", () => {
-        app.renderer.resize(window.innerWidth, window.innerHeight);
-        sprite.x = window.innerWidth / 2 - sprite.width / 2;
-        sprite.y = window.innerHeight / 2 - sprite.height / 2;
+    let sprite = new PIXI.Sprite(app.loader.resources.doge.texture);
+    sprite.width = 200;
+    sprite.height = 200;
+    sprite.x = width() / 2 - sprite.width / 2;
+    sprite.y = height() / 2 - sprite.height / 2;
+    app.stage.addChild(sprite);
+
+    onResize(() => {
+        app.renderer.resize(...dimensions());
+        sprite.x = width() / 2 - sprite.width / 2;
+        sprite.y = height() / 2 - sprite.height / 2;
     });
 
-    let context = {
-        velocity: { x: 1, y: 1 },
-        sprite,
-    };
+    let velocity = { x: 1, y: 1 };
 
-    app.ticker.add(update, context);
+    function update(delta: number) {
+        if (sprite.x <= 0 || sprite.x >= width() - sprite.width)
+            velocity.x = -velocity.x;
+
+        if (sprite.y <= 0 || sprite.y >= height() - sprite.height)
+            velocity.y = -velocity.y;
+        sprite.x += velocity.x * delta;
+        sprite.y += velocity.y * delta;
+
+        grid.x += 0.15 * delta;
+        grid.y += 0.1 * delta;
+        updateGrid();
+    }
+    app.ticker.add(update);
 };
-
-function update(this: any, delta: number) {
-    if (
-        this.sprite.x <= 0 ||
-        this.sprite.x >= window.innerWidth - this.sprite.width
-    ) {
-        this.velocity.x = -this.velocity.x;
-    }
-    if (
-        this.sprite.y <= 0 ||
-        this.sprite.y >= window.innerHeight - this.sprite.height
-    ) {
-        this.velocity.y = -this.velocity.y;
-    }
-    this.sprite.x += this.velocity.x;
-    this.sprite.y += this.velocity.y;
-}
 
 main();
