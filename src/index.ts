@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
-import { createGrid } from "./components/create-grid";
+import Grid from "./components/grid";
 import { dimensions, height, onMouseMove, onResize, width } from "./utils";
+import config from "./config";
 
 const load = (app: PIXI.Application) =>
     new Promise<void>((resolve) =>
@@ -20,14 +21,9 @@ const main = async () => {
 
     await load(app);
 
-    app.renderer.backgroundColor = 0x333333;
+    app.renderer.backgroundColor = config.backgroundColor;
 
-    let {
-        container: grid,
-        update: updateGrid,
-        screenToGrid,
-        gridToScreen,
-    } = createGrid(100);
+    let grid = new Grid(100);
 
     app.stage.addChild(grid);
 
@@ -39,7 +35,7 @@ const main = async () => {
     app.stage.addChild(sprite);
 
     onMouseMove((e) => {
-        console.log(screenToGrid(e.clientX, e.clientY));
+        // console.log(grid.screenToGrid(e.clientX, e.clientY));
     });
 
     onResize(() => {
@@ -61,9 +57,9 @@ const main = async () => {
 
         // grid.x += 0.15 * delta;
         // grid.y += 0.1 * delta;
-        updateGrid();
-        sprite.x = gridToScreen(0.5, 0.5).x;
-        sprite.y = gridToScreen(0.5, 0.5).y;
+        grid.update();
+        sprite.x = grid.gridToScreen(0.5, 0.5).x;
+        sprite.y = grid.gridToScreen(0.5, 0.5).y;
     }
     app.ticker.add(update);
 };
