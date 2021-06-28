@@ -14,12 +14,14 @@ export function onResize(listener: (this: Window, ev: UIEvent) => any) {
     window.addEventListener("resize", listener);
 }
 
-export function onMouseMove(listener: (this: Window, ev: MouseEvent) => any) {
-    window.addEventListener("mousemove", listener);
+export interface DisplayObjectScrollEvent {
+    object: PIXI.DisplayObject;
+    listener: (ev: WheelEvent) => any;
 }
 
-export function onScroll(listener: (this: Window, ev: WheelEvent) => any) {
-    window.addEventListener("wheel", listener);
+export const scrollListeners: Array<DisplayObjectScrollEvent> = [];
+export function onScroll(object: PIXI.DisplayObject, listener: (ev: WheelEvent) => any) {
+    scrollListeners.push({object, listener});
 }
 
 export const mouseDown = {left: false, middle: false, right: false};
@@ -31,3 +33,4 @@ export const pressedKeys: {[key: string]: boolean} = {};
 window.addEventListener("keyup", (e) => pressedKeys[e.key] = false);
 window.addEventListener("keydown", (e) => pressedKeys[e.key] = true);
 
+// window.addEventListener("keydown", e => console.log(e.key));

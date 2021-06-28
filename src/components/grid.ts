@@ -2,11 +2,9 @@ import * as PIXI from "pixi.js";
 import {
     dimensions,
     mouseDown,
-    onMouseMove,
     onResize,
-    onScroll,
+    onScroll
 } from "../utils";
-import { Line } from "../utils/line";
 import { clamp } from "../utils/math";
 import config from "../config";
 import Tile from "./tiles/tile";
@@ -28,9 +26,13 @@ export default class Grid extends PIXI.Container {
         
         onResize(this.update.bind(this));
 
-        onScroll(this.scroll.bind(this));
+        this.interactive = true;
 
-        onMouseMove(this.mouseMove.bind(this));
+        // this.on("wheel", (e:PIXI.FederatedEvent) => console.log("scroll"));
+        onScroll(this, this.scroll.bind(this));
+
+        this.on("mousemove", this.mouseMove.bind(this));
+        // onMouseMove(this.mouseMove.bind(this));
     }
 
     public addTile() {
@@ -60,12 +62,13 @@ export default class Grid extends PIXI.Container {
         this.update();
     }
 
-    public mouseMove(e: MouseEvent) {
+    public mouseMove(event: any) {
+        let e = event.data.originalEvent as PointerEvent;
         this.mousePos = [e.pageX, e.pageY];
 
         // console.log(this.mousePos);
 
-        if (!mouseDown.left) return;
+        if (!mouseDown.left || !e.shiftKey) return;
 
         this.x += e.movementX;
         this.y += e.movementY;
@@ -81,18 +84,17 @@ export default class Grid extends PIXI.Container {
         const tileXCount = Math.floor(width / this.size);
         const tileYCount = Math.floor(height / this.size);
 
+        let lineGraphics = new PIXI.Graphics();
+
         let output = [];
         for (
             let x = -Math.ceil(this.x / this.size);
             x <= tileXCount - Math.floor(this.x / this.size);
             x++
         ) {
-            var line = new Line(
-                [x * this.size, -this.y, x * this.size, -this.y + height],
-                config.lineWidth,
-                config.lineColor
-            );
-            output.push(line);
+            lineGraphics.beginFill(config.lineColor);
+            lineGraphics.lineStyle(0);
+            lineGraphics.drawRect(x * this.size, -this.y, config.lineWidth, height);
         }
 
         for (
@@ -100,26 +102,22 @@ export default class Grid extends PIXI.Container {
             y <= tileYCount - Math.floor(this.y / this.size);
             y++
         ) {
-            var line = new Line(
-                [-this.x, y * this.size, -this.x + width, y * this.size],
-                config.lineWidth,
-                config.lineColor
-            );
-            output.push(line);
+            lineGraphics.beginFill(config.lineColor);
+            lineGraphics.lineStyle(0);
+            lineGraphics.drawRect(-this.x, y * this.size, width, config.lineWidth);
         }
 
         let gridPos = this.screenToGrid(this.mousePos[0], this.mousePos[1]);
         gridPos.x = Math.floor(gridPos.x)*this.size;
         gridPos.y = Math.floor(gridPos.y)*this.size;
 
-        console.log(gridPos);
-
         let hlTile = new PIXI.Graphics();
         hlTile.beginFill(config.highlightTileColor);
-        hlTile.lineStyle(1, config.highlightTileColor);
-        hlTile.drawRect(gridPos.x + config.lineWidth, gridPos.y + config.lineWidth, this.size - (config.lineWidth * 2), this.size - (config.lineWidth * 2));
+        hlTile.lineStyle(0);
+        hlTile.drawRect(gridPos.x + (config.lineWidth / 2), gridPos.y + (config.lineWidth / 2), this.size, this.size);
 
         output.push(hlTile);
+        output.push(lineGraphics);
 
         return output;
     }
