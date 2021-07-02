@@ -46,7 +46,5 @@ window.addEventListener(
 );
 
 export const pressedKeys: { [key: string]: boolean } = {};
-window.addEventListener("keyup", (e) => (pressedKeys[e.key] = false));
-window.addEventListener("keydown", (e) => (pressedKeys[e.key] = true));
-
-// window.addEventListener("keydown", e => console.log(e.key));
+window.addEventListener("keyup", (e) => (pressedKeys[e.code] = false));
+window.addEventListener("keydown", (e) => (pressedKeys[e.code] = true));

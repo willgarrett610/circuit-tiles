@@ -1,5 +1,12 @@
 import * as PIXI from "pixi.js";
-import { dimensions, mouseDown, onKeyDown, onResize, onScroll } from "../utils";
+import {
+    dimensions,
+    mouseDown,
+    onKeyDown,
+    onResize,
+    onScroll,
+    pressedKeys,
+} from "../utils";
 import { clamp } from "../utils/math";
 import config from "../config";
 import Tile from "./tiles/tile";
@@ -36,7 +43,6 @@ export default class Grid extends PIXI.Container {
     scroll(e: WheelEvent) {
         let mult = 1 / (config.zoomCoeff * e.deltaY);
         if (mult < 0) mult = -1 / mult;
-        // console.log(mult);
 
         let prevPos = this.screenToGrid(e.pageX, e.pageY);
 
@@ -45,13 +51,8 @@ export default class Grid extends PIXI.Container {
 
         let newPos = this.screenToGrid(e.pageX, e.pageY);
 
-        // console.log(prevPos);
-        // console.log(newPos);
-
         this.x += (newPos.x - prevPos.x) * this.size;
         this.y += (newPos.y - prevPos.y) * this.size;
-
-        // console.log({ size: this.size });
 
         this.update();
     }
@@ -59,23 +60,17 @@ export default class Grid extends PIXI.Container {
     mouseMove(event: any) {
         let e = event.data.originalEvent as PointerEvent;
         this.mousePos = [e.pageX, e.pageY];
-
-        // console.log(this.mousePos);
-        if (!mouseDown.left || !e.shiftKey) return;
-
-        this.x += e.movementX;
-        this.y += e.movementY;
-
-        // console.log({x: this.x, y: this.y});
+        if (mouseDown.left && (e.shiftKey || pressedKeys["Space"])) {
+            this.x += e.movementX;
+            this.y += e.movementY;
+        }
 
         this.update();
     }
 
     keyDown = (e: KeyboardEvent) => {
-        console.log(e);
         if (e.ctrlKey && !e.shiftKey) {
             if (e.code === "Equal") {
-                console.log("zoom in");
                 e.preventDefault();
 
                 let mult = 1 / (config.zoomCoeff * -100);
@@ -98,7 +93,6 @@ export default class Grid extends PIXI.Container {
             }
 
             if (e.code === "Minus") {
-                console.log("zoom out");
                 e.preventDefault();
 
                 let mult = 1 / (config.zoomCoeff * 100);
@@ -121,7 +115,6 @@ export default class Grid extends PIXI.Container {
             }
 
             if (e.code === "Digit0") {
-                console.log("zoom home");
                 e.preventDefault();
 
                 let prevPos = this.screenToGrid(
@@ -141,7 +134,6 @@ export default class Grid extends PIXI.Container {
         }
 
         if (!e.ctrlKey && !e.shiftKey && e.code === "KeyH") {
-            console.log("go home");
             e.preventDefault();
             this.x = 0;
             this.y = 0;
@@ -187,7 +179,7 @@ export default class Grid extends PIXI.Container {
             );
         }
 
-        let gridPos = this.screenToGrid(this.mousePos[0], this.mousePos[1]);
+        let gridPos = this.screenToGrid(...this.mousePos);
         gridPos.x = Math.floor(gridPos.x) * this.size;
         gridPos.y = Math.floor(gridPos.y) * this.size;
 

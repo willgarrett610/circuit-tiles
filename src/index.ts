@@ -11,6 +11,8 @@ import {
 import config from "./config";
 import GUIWindow from "./components/gui/gui_window";
 
+PIXI.utils.skipHello();
+
 const load = (app: PIXI.Application) =>
     new Promise<void>((resolve) =>
         app.loader
@@ -47,14 +49,8 @@ const main = async () => {
 
     app.stage.addChild(guiTest);
 
-    // onMouseMove((e) => {
-    //     // console.log(grid.screenToGrid(e.clientX, e.clientY));
-    // });
-
     onResize(() => {
         app.renderer.resize(...dimensions());
-        sprite.x = width() / 2 - sprite.width / 2;
-        sprite.y = height() / 2 - sprite.height / 2;
     });
 
     window.addEventListener("contextmenu", (e) => e.preventDefault());
@@ -64,7 +60,6 @@ const main = async () => {
             new PIXI.Point(e.pageX, e.pageY),
             app.stage
         );
-        // console.log(grid);
         if (hitObject != null) {
             scrollListeners.forEach((eventObj: DisplayObjectScrollEvent) => {
                 if (eventObj.object == hitObject) eventObj.listener(e);
@@ -72,20 +67,7 @@ const main = async () => {
         }
     });
 
-    // let velocity = { x: 1, y: 1 };
-
     function update(delta: number) {
-        // if (sprite.x <= 0 || sprite.x >= width() - sprite.width)
-        //     velocity.x = -velocity.x;
-
-        // if (sprite.y <= 0 || sprite.y >= height() - sprite.height)
-        //     velocity.y = -velocity.y;
-        // sprite.x += velocity.x * delta;
-        // sprite.y += velocity.y * delta;
-
-        // grid.x += 0.15 * delta;
-        // grid.y += 0.1 * delta;
-        grid.update();
         guiTest.draw();
         sprite.x = grid.gridToScreen(0.5, 0.5).x;
         sprite.y = grid.gridToScreen(0.5, 0.5).y;
