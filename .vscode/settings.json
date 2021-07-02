@@ -1,7 +1,7 @@
 {
     "liveServer.settings.root": "./dist",
     "files.exclude": {
-        "**/.git": true,
+        "**/.git": true
         // "dist/": true,
         // "node_modules/": true
     }

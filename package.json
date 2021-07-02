@@ -6,7 +6,8 @@
     "scripts": {
         "build": "webpack",
         "watch": "webpack --watch",
-        "start": "webpack-dev-server -d"
+        "start": "webpack-dev-server -d",
+        "format": "prettier --write ."
     },
     "repository": {
         "type": "git",
@@ -21,7 +22,7 @@
     "devDependencies": {
         "copy-webpack-plugin": "5.1.1",
         "html-webpack-plugin": "4.0.4",
-        "prettier": "2.0.4",
+        "prettier": "^2.3.2",
         "ts-loader": "6.2.2",
         "typescript": "^4.3.4",
         "webpack": "4.42.1",

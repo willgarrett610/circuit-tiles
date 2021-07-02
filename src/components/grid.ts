@@ -1,52 +1,46 @@
 import * as PIXI from "pixi.js";
-import {
-    dimensions,
-    mouseDown,
-    onResize,
-    onScroll
-} from "../utils";
+import { dimensions, mouseDown, onKeyDown, onResize, onScroll } from "../utils";
 import { clamp } from "../utils/math";
 import config from "../config";
 import Tile from "./tiles/tile";
 
 export default class Grid extends PIXI.Container {
-
+    startingSize: number;
     size: number;
-    tiles: Array<Tile>;
+    tiles: Tile[];
 
     mousePos: [x: number, y: number];
 
     constructor(size: number) {
         super();
+        this.startingSize = size;
         this.size = size;
-        this.tiles = new Array<Tile>();
-        this.mousePos = [0,0];
+        this.tiles = [];
+        this.mousePos = [0, 0];
 
         this.generateChildren().forEach((child) => this.addChild(child));
-        
+
         onResize(this.update.bind(this));
 
         this.interactive = true;
 
-        // this.on("wheel", (e:PIXI.FederatedEvent) => console.log("scroll"));
         onScroll(this, this.scroll.bind(this));
 
         this.on("mousemove", this.mouseMove.bind(this));
-        // onMouseMove(this.mouseMove.bind(this));
+
+        onKeyDown(this.keyDown);
     }
 
-    public addTile() {
-        
-    }
+    addTile() {}
 
-    public scroll(e: WheelEvent) {
-        let mult = 1/(config.zoomCoeff * e.deltaY);
-        if (mult < 0) mult = -1/mult;
+    scroll(e: WheelEvent) {
+        let mult = 1 / (config.zoomCoeff * e.deltaY);
+        if (mult < 0) mult = -1 / mult;
         // console.log(mult);
 
         let prevPos = this.screenToGrid(e.pageX, e.pageY);
 
-        this.size = Math.round(mult*this.size);
+        this.size = Math.round(mult * this.size);
         this.size = clamp(this.size, 20, 350);
 
         let newPos = this.screenToGrid(e.pageX, e.pageY);
@@ -54,20 +48,19 @@ export default class Grid extends PIXI.Container {
         // console.log(prevPos);
         // console.log(newPos);
 
-        this.x += (newPos.x-prevPos.x) * this.size;
-        this.y += (newPos.y-prevPos.y) * this.size;
+        this.x += (newPos.x - prevPos.x) * this.size;
+        this.y += (newPos.y - prevPos.y) * this.size;
 
         // console.log({ size: this.size });
 
         this.update();
     }
 
-    public mouseMove(event: any) {
+    mouseMove(event: any) {
         let e = event.data.originalEvent as PointerEvent;
         this.mousePos = [e.pageX, e.pageY];
 
         // console.log(this.mousePos);
-
         if (!mouseDown.left || !e.shiftKey) return;
 
         this.x += e.movementX;
@@ -78,7 +71,84 @@ export default class Grid extends PIXI.Container {
         this.update();
     }
 
-    public generateChildren(): PIXI.Graphics[] {
+    keyDown = (e: KeyboardEvent) => {
+        console.log(e);
+        if (e.ctrlKey && !e.shiftKey) {
+            if (e.code === "Equal") {
+                console.log("zoom in");
+                e.preventDefault();
+
+                let mult = 1 / (config.zoomCoeff * -100);
+                if (mult < 0) mult = -1 / mult;
+
+                let prevPos = this.screenToGrid(
+                    this.width / 2,
+                    this.height / 2
+                );
+
+                this.size = Math.round(mult * this.size);
+                this.size = clamp(this.size, 20, 350);
+
+                let newPos = this.screenToGrid(this.width / 2, this.height / 2);
+
+                this.x += (newPos.x - prevPos.x) * this.size;
+                this.y += (newPos.y - prevPos.y) * this.size;
+
+                this.update();
+            }
+
+            if (e.code === "Minus") {
+                console.log("zoom out");
+                e.preventDefault();
+
+                let mult = 1 / (config.zoomCoeff * 100);
+                if (mult < 0) mult = -1 / mult;
+
+                let prevPos = this.screenToGrid(
+                    this.width / 2,
+                    this.height / 2
+                );
+
+                this.size = Math.round(mult * this.size);
+                this.size = clamp(this.size, 20, 350);
+
+                let newPos = this.screenToGrid(this.width / 2, this.height / 2);
+
+                this.x += (newPos.x - prevPos.x) * this.size;
+                this.y += (newPos.y - prevPos.y) * this.size;
+
+                this.update();
+            }
+
+            if (e.code === "Digit0") {
+                console.log("zoom home");
+                e.preventDefault();
+
+                let prevPos = this.screenToGrid(
+                    this.width / 2,
+                    this.height / 2
+                );
+
+                this.size = this.startingSize;
+
+                let newPos = this.screenToGrid(this.width / 2, this.height / 2);
+
+                this.x += (newPos.x - prevPos.x) * this.size;
+                this.y += (newPos.y - prevPos.y) * this.size;
+
+                this.update();
+            }
+        }
+
+        if (!e.ctrlKey && !e.shiftKey && e.code === "KeyH") {
+            console.log("go home");
+            e.preventDefault();
+            this.x = 0;
+            this.y = 0;
+        }
+    };
+
+    generateChildren(): PIXI.Graphics[] {
         let width = dimensions()[0];
         let height = dimensions()[1];
         const tileXCount = Math.floor(width / this.size);
@@ -94,7 +164,12 @@ export default class Grid extends PIXI.Container {
         ) {
             lineGraphics.beginFill(config.lineColor);
             lineGraphics.lineStyle(0);
-            lineGraphics.drawRect(x * this.size, -this.y, config.lineWidth, height);
+            lineGraphics.drawRect(
+                x * this.size,
+                -this.y,
+                config.lineWidth,
+                height
+            );
         }
 
         for (
@@ -104,17 +179,27 @@ export default class Grid extends PIXI.Container {
         ) {
             lineGraphics.beginFill(config.lineColor);
             lineGraphics.lineStyle(0);
-            lineGraphics.drawRect(-this.x, y * this.size, width, config.lineWidth);
+            lineGraphics.drawRect(
+                -this.x,
+                y * this.size,
+                width,
+                config.lineWidth
+            );
         }
 
         let gridPos = this.screenToGrid(this.mousePos[0], this.mousePos[1]);
-        gridPos.x = Math.floor(gridPos.x)*this.size;
-        gridPos.y = Math.floor(gridPos.y)*this.size;
+        gridPos.x = Math.floor(gridPos.x) * this.size;
+        gridPos.y = Math.floor(gridPos.y) * this.size;
 
         let hlTile = new PIXI.Graphics();
         hlTile.beginFill(config.highlightTileColor);
         hlTile.lineStyle(0);
-        hlTile.drawRect(gridPos.x + (config.lineWidth / 2), gridPos.y + (config.lineWidth / 2), this.size, this.size);
+        hlTile.drawRect(
+            gridPos.x + config.lineWidth / 2,
+            gridPos.y + config.lineWidth / 2,
+            this.size,
+            this.size
+        );
 
         output.push(hlTile);
         output.push(lineGraphics);
@@ -122,7 +207,7 @@ export default class Grid extends PIXI.Container {
         return output;
     }
 
-    public update() {
+    update() {
         this.removeChildren();
         this.generateChildren().forEach((child) => this.addChild(child));
     }
@@ -133,10 +218,10 @@ export default class Grid extends PIXI.Container {
      * @param y Y in screen space
      * @returns Coordinates in grid space
      */
-    public screenToGrid = (x: number, y: number) => ({
+    screenToGrid = (x: number, y: number) => ({
         x: (-this.x + x) / this.size,
         y: (-this.y + y) / this.size,
-    })
+    });
 
     /**
      * From grid space to screen space (Top Left corner)
@@ -144,9 +229,8 @@ export default class Grid extends PIXI.Container {
      * @param y Y in grid space
      * @returns Coordinates in screen space
      */
-     public gridToScreen = (x: number, y: number) => ({
+    gridToScreen = (x: number, y: number) => ({
         x: Math.floor(x) * this.size + this.x,
         y: Math.floor(y) * this.size + this.y,
     });
-
 }

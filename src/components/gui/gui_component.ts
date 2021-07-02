@@ -5,15 +5,20 @@ interface GUIComponent {
     onClick?(e: PIXI.interaction.InteractionEvent): void;
 }
 
-abstract class GUIComponent extends PIXI.Container{
-
+abstract class GUIComponent extends PIXI.Container {
     backgroundColor: number;
     graphics: PIXI.Graphics;
     cWidth: number;
     cHeight: number;
     backgroundSprite: PIXI.Sprite;
 
-    constructor(x: number, y: number, width: number, height: number, backgroundColor: number = 0xffffff) {
+    constructor(
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+        backgroundColor: number = 0xffffff
+    ) {
         super();
 
         this.x = x;
@@ -53,7 +58,7 @@ abstract class GUIComponent extends PIXI.Container{
         this.draw();
     }
 
-    abstract draw():void;
+    abstract draw(): void;
 }
 
 export default GUIComponent;

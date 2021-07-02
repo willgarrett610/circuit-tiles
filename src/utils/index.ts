@@ -20,17 +20,33 @@ export interface DisplayObjectScrollEvent {
 }
 
 export const scrollListeners: Array<DisplayObjectScrollEvent> = [];
-export function onScroll(object: PIXI.DisplayObject, listener: (ev: WheelEvent) => any) {
-    scrollListeners.push({object, listener});
+export function onScroll(
+    object: PIXI.DisplayObject,
+    listener: (ev: WheelEvent) => any
+) {
+    scrollListeners.push({ object, listener });
 }
 
-export const mouseDown = {left: false, middle: false, right: false};
-window.addEventListener("mouseup", (e) => (mouseDown as any)[["left","middle","right"][e.button]] = false);
-window.addEventListener("mousedown", (e) => (mouseDown as any)[["left","middle","right"][e.button]] = true);
+export function onKeyDown(listener: (this: Window, ev: KeyboardEvent) => any) {
+    window.addEventListener("keydown", listener);
+}
 
+export function onKeyPress(listener: (this: Window, ev: KeyboardEvent) => any) {
+    window.addEventListener("keypress", listener);
+}
 
-export const pressedKeys: {[key: string]: boolean} = {};
-window.addEventListener("keyup", (e) => pressedKeys[e.key] = false);
-window.addEventListener("keydown", (e) => pressedKeys[e.key] = true);
+export const mouseDown = { left: false, middle: false, right: false };
+window.addEventListener(
+    "mouseup",
+    (e) => ((mouseDown as any)[["left", "middle", "right"][e.button]] = false)
+);
+window.addEventListener(
+    "mousedown",
+    (e) => ((mouseDown as any)[["left", "middle", "right"][e.button]] = true)
+);
+
+export const pressedKeys: { [key: string]: boolean } = {};
+window.addEventListener("keyup", (e) => (pressedKeys[e.key] = false));
+window.addEventListener("keydown", (e) => (pressedKeys[e.key] = true));
 
 // window.addEventListener("keydown", e => console.log(e.key));

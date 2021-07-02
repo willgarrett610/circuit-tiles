@@ -1,6 +1,13 @@
 import * as PIXI from "pixi.js";
 import Grid from "./components/grid";
-import { dimensions, height, onResize, width, scrollListeners, DisplayObjectScrollEvent } from "./utils";
+import {
+    dimensions,
+    height,
+    onResize,
+    width,
+    scrollListeners,
+    DisplayObjectScrollEvent,
+} from "./utils";
 import config from "./config";
 import GUIWindow from "./components/gui/gui_window";
 
@@ -35,7 +42,7 @@ const main = async () => {
     sprite.y = height() / 2 - sprite.height / 2;
     app.stage.addChild(sprite);
 
-    let guiTest = new GUIWindow(20,20,100,500,0xff0000);
+    let guiTest = new GUIWindow(20, 20, 100, 500, 0xff0000);
     guiTest.draw();
 
     app.stage.addChild(guiTest);
@@ -50,16 +57,17 @@ const main = async () => {
         sprite.y = height() / 2 - sprite.height / 2;
     });
 
-    window.addEventListener("contextmenu", e => e.preventDefault());
+    window.addEventListener("contextmenu", (e) => e.preventDefault());
 
     window.addEventListener("wheel", (e: WheelEvent) => {
-        let hitObject = app.renderer.plugins.interaction.hitTest(new PIXI.Point(e.pageX, e.pageY), app.stage);
+        let hitObject = app.renderer.plugins.interaction.hitTest(
+            new PIXI.Point(e.pageX, e.pageY),
+            app.stage
+        );
         // console.log(grid);
         if (hitObject != null) {
             scrollListeners.forEach((eventObj: DisplayObjectScrollEvent) => {
-                if (eventObj.object == hitObject) {
-                    eventObj.listener(e);
-                }
+                if (eventObj.object == hitObject) eventObj.listener(e);
             });
         }
     });
