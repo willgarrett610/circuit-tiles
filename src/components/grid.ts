@@ -19,6 +19,7 @@ export default class Grid extends PIXI.Container {
     tiles: { [key: string]: Tile };
 
     mousePos: [x: number, y: number];
+    prevMousePos: [x: number, y: number];
 
     lineGraphics: PIXI.Graphics;
     hlTile: PIXI.Graphics;
@@ -28,6 +29,7 @@ export default class Grid extends PIXI.Container {
         this.startingSize = size;
         this.size = size;
         this.tiles = {};
+        this.prevMousePos = [0, 0];
         this.mousePos = [0, 0];
 
         this.lineGraphics = new PIXI.Graphics();
@@ -45,17 +47,23 @@ export default class Grid extends PIXI.Container {
 
         onScroll(this, this.scroll);
 
+        this.on("mousedown", this.mouseDown);
+        this.on("mouseup", this.mouseUp);
         this.on("mousemove", this.mouseMove);
 
         onKeyDown(this.keyDown);
     }
 
-    addTile<T extends Tile>(x: number, y: number, tile: {new(x:number,y:number): T}): boolean {
+    addTile<T extends Tile>(
+        x: number,
+        y: number,
+        tile: { new (x: number, y: number): T }
+    ): boolean {
         if (this.tiles[`${x},${y}`]) return false;
         let tileObj = new tile(x, y);
         this.tiles[`${x},${y}`] = tileObj;
         console.log(this.tiles);
-        
+
         const tileGraphics: PIXI.Container = tileObj.getContainer(this.size);
         // const screenPoint = this.gridToScreen(tile.x, tile.y);
         this.addChild(tileGraphics);
@@ -80,26 +88,42 @@ export default class Grid extends PIXI.Container {
         this.y += (newPos.y - prevPos.y) * this.size;
 
         this.update();
-    }
+    };
+
+    mouseDown = (e: PIXI.interaction.InteractionEvent) => {
+        // e.data.local;
+    };
+
+    mouseUp = (e: PIXI.interaction.InteractionEvent) => {};
 
     mouseMove = (event: any) => {
         let e = event.data.originalEvent as PointerEvent;
+        this.prevMousePos = [...this.mousePos];
         this.mousePos = [e.pageX, e.pageY];
         if (mouseDown.left) {
             if (e.shiftKey || pressedKeys["Space"]) {
                 this.x += e.movementX;
                 this.y += e.movementY;
             } else {
-                const gridPoint = locationToTuple(
-                    this.screenToGrid(...this.mousePos, true)
+                const gridPoints = this.gridPointsBetween(
+                    ...locationToTuple(
+                        this.screenToGrid(...this.prevMousePos, true)
+                    ),
+                    ...locationToTuple(
+                        this.screenToGrid(...this.mousePos, true)
+                    )
                 );
-
-                this.addTile(...gridPoint, Wire);
+                for (let gridPoint of gridPoints) {
+                    this.addTile(...locationToTuple(gridPoint), Wire);
+                }
+                // const gridPoint = locationToTuple(
+                //     this.screenToGrid(...this.mousePos, true)
+                // );
             }
         }
 
         this.update();
-    }
+    };
 
     click = (event: PIXI.interaction.InteractionEvent) => {
         if (event.data.button == 0 && !event.data.originalEvent.shiftKey) {
@@ -111,7 +135,7 @@ export default class Grid extends PIXI.Container {
 
             this.update();
         }
-    }
+    };
 
     keyDown = (e: KeyboardEvent) => {
         if (e.ctrlKey && !e.shiftKey) {
@@ -241,13 +265,8 @@ export default class Grid extends PIXI.Container {
     }
 
     renderTiles() {
-        for (let [key, tile] of Object.entries(this.tiles)) {
-            // const tileGraphics: PIXI.Container = tile.draw(this.size);
-            // tileGraphics.x += tile.x * this.size;
-            // tileGraphics.y += tile.y * this.size;
-            // this.addChild(tileGraphics);
+        for (let [_, tile] of Object.entries(this.tiles))
             tile.update(this.size);
-        }
     }
 
     update = () => {
@@ -255,7 +274,56 @@ export default class Grid extends PIXI.Container {
         this.renderGrid();
         // this.generateChildren().forEach((child) => this.addChild(child));
         this.renderTiles();
-    }
+    };
+
+    gridPointsBetween = (x0: number, y0: number, x1: number, y1: number) => {
+        const dx = x1 - x0;
+        const dy = y1 - y0;
+        const nx = Math.abs(dx);
+        const ny = Math.abs(dy);
+        const signX = Math.sign(dx);
+        const signY = Math.sign(dy);
+
+        const point = { x: x0, y: y0 };
+        const points = [{ ...point }];
+
+        for (let ix = 0, iy = 0; ix < nx || iy < ny; ) {
+            if ((0.5 + ix) / nx < (0.5 + iy) / ny) {
+                point.x += signX;
+                ix++;
+            } else {
+                point.y += signY;
+                iy++;
+            }
+            points.push({ ...point });
+        }
+
+        return points;
+    };
+
+    /* 2.1. Orthogonal steps | https://www.redblobgames.com/grids/line-drawing.html
+        function walk_grid(p0, p1) {
+            let dx = p1.x-p0.x, dy = p1.y-p0.y;
+            let nx = Math.abs(dx), ny = Math.abs(dy);
+            let sign_x = dx > 0? 1 : -1, sign_y = dy > 0? 1 : -1;
+
+            let p = new Point(p0.x, p0.y);
+            let points = [new Point(p.x, p.y)];
+            for (let ix = 0, iy = 0; ix < nx || iy < ny;) {
+                if ((0.5+ix) / nx < (0.5+iy) / ny) {
+                    // next step is horizontal
+                    p.x += sign_x;
+                    ix++;
+                } else {
+                    // next step is vertical
+                    p.y += sign_y;
+                    iy++;
+                }
+                points.push(new Point(p.x, p.y));
+            }
+            return points;
+        }
+    */
 
     /**
      * From screen space to grid space
