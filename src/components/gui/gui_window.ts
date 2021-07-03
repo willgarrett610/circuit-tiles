@@ -3,7 +3,7 @@ import Button from "./button";
 import GUIComponent from "./gui_component";
 
 export default class GUIWindow extends PIXI.Container {
-    components: Array<GUIComponent>;
+    components: GUIComponent[];
     backgroundColor: number;
     cWidth: number;
     cHeight: number;
@@ -56,21 +56,20 @@ export default class GUIWindow extends PIXI.Container {
         btn.onClick = (e) => {
             console.log("test");
         };
-
+        console.log(btn);
         this.addChild(btn);
 
         this.draw();
     }
 
-    addChild<TChildren extends PIXI.DisplayObject[]>(
-        ...child: TChildren
-    ): TChildren[0] {
-        for (let c in child) {
-            if ((c as any).__proto__ instanceof GUIComponent) {
-                this.components.push(c as any);
-            }
+    addChild(
+        ...children: (PIXI.DisplayObject | GUIComponent)[]
+    ): PIXI.DisplayObject | GUIComponent {
+        for (let child of children) {
+            if (child instanceof GUIComponent)
+                this.components.push(child as GUIComponent);
         }
-        return super.addChild(...child);
+        return super.addChild(...children);
     }
 
     addChildAt<T extends PIXI.DisplayObject>(child: T, index: number): T {
@@ -115,7 +114,7 @@ export default class GUIWindow extends PIXI.Container {
         return children;
     }
 
-    draw() {
-        this.components.forEach((comp) => comp.drawComponent());
+    draw(delta?: number) {
+        this.components.forEach((comp) => comp.drawComponent(delta));
     }
 }

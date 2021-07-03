@@ -1,16 +1,16 @@
 import * as PIXI from "pixi.js";
-
-interface GUIComponent {
-    onHover?(): void;
-    onClick?(e: PIXI.interaction.InteractionEvent): void;
-}
-
 abstract class GUIComponent extends PIXI.Container {
     backgroundColor: number;
     graphics: PIXI.Graphics;
     cWidth: number;
     cHeight: number;
     backgroundSprite: PIXI.Sprite;
+    onHover?(): void;
+    onEndHover?(): void;
+    onClick?(e: PIXI.interaction.InteractionEvent): void;
+    onRightClick?(e: PIXI.interaction.InteractionEvent): void;
+    hovered: boolean = false;
+    active: boolean = false;
 
     constructor(
         x: number,
@@ -42,10 +42,26 @@ abstract class GUIComponent extends PIXI.Container {
 
         this.on("click", (e: PIXI.interaction.InteractionEvent) => {
             e.stopPropagation();
-            if (this.onClick != undefined) {
-                this.onClick(e);
-            }
+            this.onClick?.(e);
         });
+
+        this.on("rightclick", (e: PIXI.interaction.InteractionEvent) => {
+            e.stopPropagation();
+            this.onRightClick?.(e);
+        });
+
+        this.on("mouseover", () => {
+            this.onHover?.();
+            this.hovered = true;
+        });
+        this.on("mouseout", () => {
+            this.onEndHover?.();
+            this.hovered = false;
+        });
+
+        this.on("mousedown", () => (this.active = true));
+        this.on("mouseup", () => (this.active = false));
+        this.on("mouseupoutside", () => (this.active = false));
     }
 
     setBackgroundSprite(backgroundSprite: PIXI.Sprite) {
@@ -54,11 +70,11 @@ abstract class GUIComponent extends PIXI.Container {
         this.addChild(this.backgroundSprite);
     }
 
-    drawComponent() {
-        this.draw();
+    drawComponent(delta?: number) {
+        this.draw(delta);
     }
 
-    abstract draw(): void;
+    abstract draw(delta?: number): void;
 }
 
 export default GUIComponent;

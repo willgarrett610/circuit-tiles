@@ -35,6 +35,20 @@ export function onKeyPress(listener: (this: Window, ev: KeyboardEvent) => any) {
     window.addEventListener("keypress", listener);
 }
 
+export function locationToTuple(location: {
+    x: number;
+    y: number;
+}): [x: number, y: number] {
+    return [location.x, location.y];
+}
+
+export function locationToPair(location: [x: number, y: number]): {
+    x: number;
+    y: number;
+} {
+    return { x: location[0], y: location[1] };
+}
+
 export const mouseDown = { left: false, middle: false, right: false };
 window.addEventListener(
     "mouseup",

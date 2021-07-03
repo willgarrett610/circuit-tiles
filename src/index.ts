@@ -45,7 +45,7 @@ const main = async () => {
     app.stage.addChild(sprite);
 
     let guiTest = new GUIWindow(20, 20, 100, 500, 0xff0000);
-    guiTest.draw();
+    guiTest.draw(0);
 
     app.stage.addChild(guiTest);
 
@@ -68,10 +68,11 @@ const main = async () => {
     });
 
     function update(delta: number) {
-        guiTest.draw();
+        guiTest.draw(delta);
         sprite.x = grid.gridToScreen(0.5, 0.5).x;
         sprite.y = grid.gridToScreen(0.5, 0.5).y;
     }
+
     app.ticker.add(update);
 };
 

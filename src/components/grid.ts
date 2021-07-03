@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
 import {
     dimensions,
+    locationToTuple,
     mouseDown,
     onKeyDown,
     onResize,
@@ -10,6 +11,7 @@ import {
 import { clamp } from "../utils/math";
 import config from "../config";
 import Tile from "./tiles/tile";
+import Wire from "./tiles/wire-tile";
 
 export default class Grid extends PIXI.Container {
     startingSize: number;
@@ -41,6 +43,8 @@ export default class Grid extends PIXI.Container {
     addTile() {}
 
     scroll(e: WheelEvent) {
+        if (e.deltaY === 0) return;
+
         let mult = 1 / (config.zoomCoeff * e.deltaY);
         if (mult < 0) mult = -1 / mult;
 
@@ -60,9 +64,17 @@ export default class Grid extends PIXI.Container {
     mouseMove(event: any) {
         let e = event.data.originalEvent as PointerEvent;
         this.mousePos = [e.pageX, e.pageY];
-        if (mouseDown.left && (e.shiftKey || pressedKeys["Space"])) {
-            this.x += e.movementX;
-            this.y += e.movementY;
+        if (mouseDown.left) {
+            if (e.shiftKey || pressedKeys["Space"]) {
+                this.x += e.movementX;
+                this.y += e.movementY;
+            } else {
+                this.tiles.push(
+                    new Wire(
+                        ...locationToTuple(this.screenToGrid(...this.mousePos))
+                    )
+                );
+            }
         }
 
         this.update();
@@ -137,6 +149,7 @@ export default class Grid extends PIXI.Container {
             e.preventDefault();
             this.x = 0;
             this.y = 0;
+            this.update();
         }
     };
 
