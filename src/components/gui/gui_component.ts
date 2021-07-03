@@ -26,15 +26,15 @@ abstract class GUIComponent extends PIXI.Container {
         this.cWidth = width;
         this.cHeight = height;
 
-        this.backgroundColor = backgroundColor;
-
         this.interactive = true;
+
+        this.backgroundColor = backgroundColor;
 
         this.backgroundSprite = PIXI.Sprite.from(PIXI.Texture.WHITE);
         this.backgroundSprite.width = width;
         this.backgroundSprite.height = height;
-        this.backgroundSprite.tint = backgroundColor;
         this.backgroundSprite.interactive = true;
+        this.backgroundSprite.tint = backgroundColor;
 
         this.addChild(this.backgroundSprite);
 
@@ -64,17 +64,17 @@ abstract class GUIComponent extends PIXI.Container {
         this.on("mouseupoutside", () => (this.active = false));
     }
 
+    setBackgroundColor(backgroundColor: number = 0xffffff) {
+        this.backgroundColor = backgroundColor;
+        this.backgroundSprite.tint = backgroundColor;
+    }
+
     setBackgroundSprite(backgroundSprite: PIXI.Sprite) {
         this.removeChild(this.backgroundSprite);
         this.backgroundSprite = backgroundSprite;
         this.addChild(this.backgroundSprite);
     }
 
-    drawComponent(delta?: number) {
-        this.draw(delta);
-    }
-
-    abstract draw(delta?: number): void;
 }
 
 export default GUIComponent;

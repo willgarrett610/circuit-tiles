@@ -53,13 +53,13 @@ export default class GUIWindow extends PIXI.Container {
         });
 
         let btn = new Button(10, 10, 20, 20);
-        btn.onClick = (e) => {
+        btn.onClick = (e: any) => {
             console.log("test");
         };
         console.log(btn);
         this.addChild(btn);
 
-        this.draw();
+        // this.draw();
     }
 
     addChild(
@@ -114,7 +114,7 @@ export default class GUIWindow extends PIXI.Container {
         return children;
     }
 
-    draw(delta?: number) {
-        this.components.forEach((comp) => comp.drawComponent(delta));
-    }
+    // draw(delta?: number) {
+    //     this.components.forEach((comp) => comp.drawComponent(delta));
+    // }
 }

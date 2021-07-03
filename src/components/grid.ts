@@ -11,7 +11,7 @@ import {
 import { clamp } from "../utils/math";
 import config from "../config";
 import Wire from "./tiles/wire-tile";
-import Tile from "./tiles/tile";
+import { Tile } from "./tiles/tile";
 
 export default class Grid extends PIXI.Container {
     startingSize: number;
@@ -20,6 +20,9 @@ export default class Grid extends PIXI.Container {
 
     mousePos: [x: number, y: number];
 
+    lineGraphics: PIXI.Graphics;
+    hlTile: PIXI.Graphics;
+
     constructor(size: number) {
         super();
         this.startingSize = size;
@@ -27,28 +30,40 @@ export default class Grid extends PIXI.Container {
         this.tiles = {};
         this.mousePos = [0, 0];
 
-        this.generateChildren().forEach((child) => this.addChild(child));
+        this.lineGraphics = new PIXI.Graphics();
+        this.hlTile = new PIXI.Graphics();
 
-        onResize(this.update.bind(this));
+        this.addChild(this.lineGraphics);
+        this.addChild(this.hlTile);
+
+        // this.generateChildren().forEach((child) => this.addChild(child));
+        this.renderGrid();
+
+        onResize(this.update);
 
         this.interactive = true;
 
-        onScroll(this, this.scroll.bind(this));
+        onScroll(this, this.scroll);
 
-        this.on("mousemove", this.mouseMove.bind(this));
+        this.on("mousemove", this.mouseMove);
 
         onKeyDown(this.keyDown);
     }
 
-    addTile(x: number, y: number, tile: typeof Tile): boolean {
+    addTile<T extends Tile>(x: number, y: number, tile: {new(x:number,y:number): T}): boolean {
         if (this.tiles[`${x},${y}`]) return false;
-        this.tiles[`${x},${y}`] = new tile(x, y);
+        let tileObj = new tile(x, y);
+        this.tiles[`${x},${y}`] = tileObj;
         console.log(this.tiles);
+        
+        const tileGraphics: PIXI.Container = tileObj.getContainer(this.size);
+        // const screenPoint = this.gridToScreen(tile.x, tile.y);
+        this.addChild(tileGraphics);
 
         return true;
     }
 
-    scroll(e: WheelEvent) {
+    scroll = (e: WheelEvent) => {
         if (e.deltaY === 0) return;
 
         let mult = 1 / (config.zoomCoeff * e.deltaY);
@@ -67,7 +82,7 @@ export default class Grid extends PIXI.Container {
         this.update();
     }
 
-    mouseMove(event: any) {
+    mouseMove = (event: any) => {
         let e = event.data.originalEvent as PointerEvent;
         this.mousePos = [e.pageX, e.pageY];
         if (mouseDown.left) {
@@ -84,6 +99,18 @@ export default class Grid extends PIXI.Container {
         }
 
         this.update();
+    }
+
+    click = (event: PIXI.interaction.InteractionEvent) => {
+        if (event.data.button == 0 && !event.data.originalEvent.shiftKey) {
+            const gridPoint = locationToTuple(
+                this.screenToGrid(...this.mousePos, true)
+            );
+
+            this.addTile(...gridPoint, Wire);
+
+            this.update();
+        }
     }
 
     keyDown = (e: KeyboardEvent) => {
@@ -159,13 +186,13 @@ export default class Grid extends PIXI.Container {
         }
     };
 
-    generateChildren(): PIXI.Graphics[] {
+    renderGrid() {
         let width = dimensions()[0];
         let height = dimensions()[1];
         const tileXCount = Math.floor(width / this.size);
         const tileYCount = Math.floor(height / this.size);
 
-        let lineGraphics = new PIXI.Graphics();
+        this.lineGraphics.clear();
 
         let output = [];
         for (
@@ -173,9 +200,9 @@ export default class Grid extends PIXI.Container {
             x <= tileXCount - Math.floor(this.x / this.size);
             x++
         ) {
-            lineGraphics.beginFill(config.lineColor);
-            lineGraphics.lineStyle(0);
-            lineGraphics.drawRect(
+            this.lineGraphics.beginFill(config.lineColor);
+            this.lineGraphics.lineStyle(0);
+            this.lineGraphics.drawRect(
                 x * this.size,
                 -this.y,
                 config.lineWidth,
@@ -188,9 +215,9 @@ export default class Grid extends PIXI.Container {
             y <= tileYCount - Math.floor(this.y / this.size);
             y++
         ) {
-            lineGraphics.beginFill(config.lineColor);
-            lineGraphics.lineStyle(0);
-            lineGraphics.drawRect(
+            this.lineGraphics.beginFill(config.lineColor);
+            this.lineGraphics.lineStyle(0);
+            this.lineGraphics.drawRect(
                 -this.x,
                 y * this.size,
                 width,
@@ -202,37 +229,31 @@ export default class Grid extends PIXI.Container {
         gridPos.x = Math.floor(gridPos.x) * this.size;
         gridPos.y = Math.floor(gridPos.y) * this.size;
 
-        let hlTile = new PIXI.Graphics();
-        hlTile.beginFill(config.highlightTileColor);
-        hlTile.lineStyle(0);
-        hlTile.drawRect(
+        this.hlTile.clear();
+        this.hlTile.beginFill(config.highlightTileColor);
+        this.hlTile.lineStyle(0);
+        this.hlTile.drawRect(
             gridPos.x + config.lineWidth / 2,
             gridPos.y + config.lineWidth / 2,
             this.size,
             this.size
         );
-
-        output.push(hlTile);
-        output.push(lineGraphics);
-
-        return output;
     }
 
     renderTiles() {
         for (let [key, tile] of Object.entries(this.tiles)) {
-            const tileSprite = new PIXI.Sprite(tile.texture);
-            // const screenPoint = this.gridToScreen(tile.x, tile.y);
-            tileSprite.x = tile.x * this.size;
-            tileSprite.y = tile.y * this.size;
-            tileSprite.width = this.size;
-            tileSprite.height = this.size;
-            this.addChild(tileSprite);
+            // const tileGraphics: PIXI.Container = tile.draw(this.size);
+            // tileGraphics.x += tile.x * this.size;
+            // tileGraphics.y += tile.y * this.size;
+            // this.addChild(tileGraphics);
+            tile.update(this.size);
         }
     }
 
-    update() {
-        this.removeChildren();
-        this.generateChildren().forEach((child) => this.addChild(child));
+    update = () => {
+        // this.removeChildren();
+        this.renderGrid();
+        // this.generateChildren().forEach((child) => this.addChild(child));
         this.renderTiles();
     }
 

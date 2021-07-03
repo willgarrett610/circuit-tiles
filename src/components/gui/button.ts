@@ -1,9 +1,9 @@
 import GUIComponent from "./gui_component";
 
 export default class Button extends GUIComponent {
-    draw(): void {
-        // this.backgroundColor = 0x000000;
-        // console.log("hover:", this.hovered);
-        // console.log("active:", this.active);
-    }
+
+    drawNormal?(graphics: PIXI.Graphics): void;
+    drawHover?(graphics: PIXI.Graphics): void;
+    drawActive?(graphics: PIXI.Graphics): void;
+
 }
