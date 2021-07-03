@@ -1,18 +1,26 @@
 import { Direction } from "../../utils/directions";
-import Tile, { TileType } from "./tile";
+import Tile from "./tile";
+import { TileType } from "./tile";
+import * as PIXI from "pixi.js";
 
-class Wire implements Tile {
-    label?: string | undefined;
-    type: TileType;
+class Wire extends Tile {
+    label = undefined;
     x: number;
     y: number;
-    direction: Direction;
+    direction = Direction.NORMAL;
+    type = TileType.PRIMITIVE;
+    connect = {
+        up: false,
+        down: false,
+        left: false,
+        right: false,
+    };
+    texture = PIXI.Texture.from("assets/sprites/doge-icon.svg");
 
     constructor(x: number, y: number) {
+        super(x, y);
         this.x = x;
         this.y = y;
-        this.direction = Direction.NORMAL;
-        this.type = TileType.PRIMITIVE;
     }
 }
 

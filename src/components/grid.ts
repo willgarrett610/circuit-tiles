@@ -10,13 +10,13 @@ import {
 } from "../utils";
 import { clamp } from "../utils/math";
 import config from "../config";
-import Tile from "./tiles/tile";
 import Wire from "./tiles/wire-tile";
+import Tile from "./tiles/tile";
 
 export default class Grid extends PIXI.Container {
     startingSize: number;
     size: number;
-    tiles: Tile[];
+    tiles: { [key: string]: Tile };
 
     mousePos: [x: number, y: number];
 
@@ -24,7 +24,7 @@ export default class Grid extends PIXI.Container {
         super();
         this.startingSize = size;
         this.size = size;
-        this.tiles = [];
+        this.tiles = {};
         this.mousePos = [0, 0];
 
         this.generateChildren().forEach((child) => this.addChild(child));
@@ -40,7 +40,13 @@ export default class Grid extends PIXI.Container {
         onKeyDown(this.keyDown);
     }
 
-    addTile() {}
+    addTile(x: number, y: number, tile: typeof Tile): boolean {
+        if (this.tiles[`${x},${y}`]) return false;
+        this.tiles[`${x},${y}`] = new tile(x, y);
+        console.log(this.tiles);
+
+        return true;
+    }
 
     scroll(e: WheelEvent) {
         if (e.deltaY === 0) return;
@@ -69,11 +75,11 @@ export default class Grid extends PIXI.Container {
                 this.x += e.movementX;
                 this.y += e.movementY;
             } else {
-                this.tiles.push(
-                    new Wire(
-                        ...locationToTuple(this.screenToGrid(...this.mousePos))
-                    )
+                const gridPoint = locationToTuple(
+                    this.screenToGrid(...this.mousePos, true)
                 );
+
+                this.addTile(...gridPoint, Wire);
             }
         }
 
@@ -212,9 +218,22 @@ export default class Grid extends PIXI.Container {
         return output;
     }
 
+    renderTiles() {
+        for (let [key, tile] of Object.entries(this.tiles)) {
+            const tileSprite = new PIXI.Sprite(tile.texture);
+            // const screenPoint = this.gridToScreen(tile.x, tile.y);
+            tileSprite.x = tile.x * this.size;
+            tileSprite.y = tile.y * this.size;
+            tileSprite.width = this.size;
+            tileSprite.height = this.size;
+            this.addChild(tileSprite);
+        }
+    }
+
     update() {
         this.removeChildren();
         this.generateChildren().forEach((child) => this.addChild(child));
+        this.renderTiles();
     }
 
     /**
@@ -223,10 +242,16 @@ export default class Grid extends PIXI.Container {
      * @param y Y in screen space
      * @returns Coordinates in grid space
      */
-    screenToGrid = (x: number, y: number) => ({
-        x: (-this.x + x) / this.size,
-        y: (-this.y + y) / this.size,
-    });
+    screenToGrid = (x: number, y: number, floored = false) =>
+        floored
+            ? {
+                  x: Math.floor((-this.x + x) / this.size),
+                  y: Math.floor((-this.y + y) / this.size),
+              }
+            : {
+                  x: (-this.x + x) / this.size,
+                  y: (-this.y + y) / this.size,
+              };
 
     /**
      * From grid space to screen space (Top Left corner)
