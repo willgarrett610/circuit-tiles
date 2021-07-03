@@ -1,4 +1,4 @@
-import { Direction } from "../../utils/directions";
+import { Rotation } from "../../utils/directions";
 import * as PIXI from "pixi.js";
 
 export interface Connectable {
@@ -14,7 +14,7 @@ export abstract class Tile {
     label?: string = undefined;
     x = 0;
     y = 0;
-    direction = Direction.NORMAL;
+    direction = Rotation.NORMAL;
     container?: PIXI.Container;
     signalActive = false;
 

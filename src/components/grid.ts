@@ -12,6 +12,7 @@ import { clamp } from "../utils/math";
 import config from "../config";
 import Wire from "./tiles/wire-tile";
 import { Tile } from "./tiles/tile";
+import { Direction } from "../utils/directions";
 
 export default class Grid extends PIXI.Container {
     startingSize: number;
@@ -58,17 +59,14 @@ export default class Grid extends PIXI.Container {
         x: number,
         y: number,
         tile: { new (x: number, y: number): T }
-    ): boolean {
-        if (this.tiles[`${x},${y}`]) return false;
+    ): [placed: boolean, tile: Tile] {
+        if (this.tiles[`${x},${y}`]) return [false, this.tiles[`${x},${y}`]];
         let tileObj = new tile(x, y);
         this.tiles[`${x},${y}`] = tileObj;
-        console.log(this.tiles);
-
         const tileGraphics: PIXI.Container = tileObj.getContainer(this.size);
-        // const screenPoint = this.gridToScreen(tile.x, tile.y);
         this.addChild(tileGraphics);
 
-        return true;
+        return [true, tileObj];
     }
 
     scroll = (e: WheelEvent) => {
@@ -90,9 +88,7 @@ export default class Grid extends PIXI.Container {
         this.update();
     };
 
-    mouseDown = (e: PIXI.interaction.InteractionEvent) => {
-        // e.data.local;
-    };
+    mouseDown = (e: PIXI.interaction.InteractionEvent) => {};
 
     mouseUp = (e: PIXI.interaction.InteractionEvent) => {};
 
@@ -113,8 +109,22 @@ export default class Grid extends PIXI.Container {
                         this.screenToGrid(...this.mousePos, true)
                     )
                 );
-                for (let gridPoint of gridPoints) {
-                    this.addTile(...locationToTuple(gridPoint), Wire);
+
+                for (let i = 0; i < gridPoints.length; i++) {
+                    const gridPoint = gridPoints[i];
+
+                    const [placed, newTile] = this.addTile(
+                        ...locationToTuple(gridPoint),
+                        Wire
+                    );
+
+                    if (gridPoint.direction && newTile instanceof Wire) {
+                        // (newTile as Wire).connect[
+                        //     gridPoint.direction.toString().toLowerCase()
+                        // ] = true;
+                        // TODO: THIS RIGHT HERE
+                    }
+                    (newTile as Wire).connect;
                 }
                 // const gridPoint = locationToTuple(
                 //     this.screenToGrid(...this.mousePos, true)
@@ -284,15 +294,21 @@ export default class Grid extends PIXI.Container {
         const signX = Math.sign(dx);
         const signY = Math.sign(dy);
 
-        const point = { x: x0, y: y0 };
+        const point: { x: number; y: number; direction?: Direction } = {
+            x: x0,
+            y: y0,
+            direction: undefined,
+        };
         const points = [{ ...point }];
 
         for (let ix = 0, iy = 0; ix < nx || iy < ny; ) {
             if ((0.5 + ix) / nx < (0.5 + iy) / ny) {
                 point.x += signX;
+                point.direction = signX < 0 ? Direction.LEFT : Direction.RIGHT;
                 ix++;
             } else {
                 point.y += signY;
+                point.y = signX < 0 ? Direction.DOWN : Direction.UP;
                 iy++;
             }
             points.push({ ...point });

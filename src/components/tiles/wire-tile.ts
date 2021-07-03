@@ -1,5 +1,4 @@
-import { Direction } from "../../utils/directions";
-import { Connectable, SpriteTile, Tile } from "./tile";
+import { Connectable, Tile } from "./tile";
 import * as PIXI from "pixi.js";
 
 class Wire extends Tile implements Connectable {
