@@ -300,7 +300,7 @@ export default class Grid extends PIXI.Container {
         const points = [{ ...point }];
 
         for (let ix = 0, iy = 0; ix < nx || iy < ny; ) {
-            if ((0.5 + ix) / nx < (0.5 + iy) / ny) {
+            if ((1 + 2 * ix) * ny < (1 + 2 * iy) * nx) {
                 point.x += signX;
                 point.direction = signX < 0 ? Direction.LEFT : Direction.RIGHT;
                 ix++;
