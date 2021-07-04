@@ -280,9 +280,7 @@ export default class Grid extends PIXI.Container {
     }
 
     update = () => {
-        // this.removeChildren();
         this.renderGrid();
-        // this.generateChildren().forEach((child) => this.addChild(child));
         this.renderTiles();
     };
 
@@ -308,38 +306,16 @@ export default class Grid extends PIXI.Container {
                 ix++;
             } else {
                 point.y += signY;
-                point.y = signX < 0 ? Direction.DOWN : Direction.UP;
+                point.direction = signX < 0 ? Direction.DOWN : Direction.UP;
                 iy++;
             }
             points.push({ ...point });
         }
 
+        console.log(points);
+
         return points;
     };
-
-    /* 2.1. Orthogonal steps | https://www.redblobgames.com/grids/line-drawing.html
-        function walk_grid(p0, p1) {
-            let dx = p1.x-p0.x, dy = p1.y-p0.y;
-            let nx = Math.abs(dx), ny = Math.abs(dy);
-            let sign_x = dx > 0? 1 : -1, sign_y = dy > 0? 1 : -1;
-
-            let p = new Point(p0.x, p0.y);
-            let points = [new Point(p.x, p.y)];
-            for (let ix = 0, iy = 0; ix < nx || iy < ny;) {
-                if ((0.5+ix) / nx < (0.5+iy) / ny) {
-                    // next step is horizontal
-                    p.x += sign_x;
-                    ix++;
-                } else {
-                    // next step is vertical
-                    p.y += sign_y;
-                    iy++;
-                }
-                points.push(new Point(p.x, p.y));
-            }
-            return points;
-        }
-    */
 
     /**
      * From screen space to grid space
