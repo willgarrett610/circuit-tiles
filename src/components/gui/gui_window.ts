@@ -56,7 +56,6 @@ export default class GUIWindow extends PIXI.Container {
         btn.onClick = (e: any) => {
             console.log("test");
         };
-        console.log(btn);
         this.addChild(btn);
 
         // this.draw();

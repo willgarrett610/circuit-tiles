@@ -39,7 +39,6 @@ export default class Grid extends PIXI.Container {
         this.addChild(this.lineGraphics);
         this.addChild(this.hlTile);
 
-        // this.generateChildren().forEach((child) => this.addChild(child));
         this.renderGrid();
 
         onResize(this.update);
@@ -110,6 +109,7 @@ export default class Grid extends PIXI.Container {
                     )
                 );
 
+                let prevTile: Tile | undefined = undefined;
                 for (let i = 0; i < gridPoints.length; i++) {
                     const gridPoint = gridPoints[i];
 
@@ -119,16 +119,24 @@ export default class Grid extends PIXI.Container {
                     );
 
                     if (gridPoint.direction && newTile instanceof Wire) {
-                        // (newTile as Wire).connect[
-                        //     gridPoint.direction.toString().toLowerCase()
-                        // ] = true;
-                        // TODO: THIS RIGHT HERE
+                        if (prevTile && prevTile instanceof Wire)
+                            (prevTile.connect as any)[
+                                ["down", "up", "right", "left"][
+                                    gridPoint.direction.valueOf()
+                                ]
+                            ] = true;
+                        ((newTile as Wire).connect as any)[
+                            ["up", "down", "left", "right"][
+                                gridPoint.direction.valueOf()
+                            ]
+                        ] = true;
+
+                        // newTile.updateContainer();
+                        // newTile.getContainer(this.size);
                     }
-                    (newTile as Wire).connect;
+
+                    prevTile = newTile;
                 }
-                // const gridPoint = locationToTuple(
-                //     this.screenToGrid(...this.mousePos, true)
-                // );
             }
         }
 
@@ -228,7 +236,6 @@ export default class Grid extends PIXI.Container {
 
         this.lineGraphics.clear();
 
-        let output = [];
         for (
             let x = -Math.ceil(this.x / this.size);
             x <= tileXCount - Math.floor(this.x / this.size);
@@ -311,8 +318,6 @@ export default class Grid extends PIXI.Container {
             }
             points.push({ ...point });
         }
-
-        console.log(points);
 
         return points;
     };
