@@ -25,9 +25,7 @@ export abstract class Tile {
 
     abstract generateContainer(): PIXI.Container;
 
-    updateContainer() {
-        this.container = this.generateContainer();
-    }
+    abstract updateContainer?(): void;
 
     getContainer(size: number): PIXI.Container {
         if (!this.container) this.container = this.generateContainer();
@@ -64,4 +62,5 @@ export abstract class SpriteTile extends Tile {
     generateContainer() {
         return new PIXI.Sprite(this.texture);
     }
+
 }

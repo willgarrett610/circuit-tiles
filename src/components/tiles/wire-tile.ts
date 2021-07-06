@@ -9,28 +9,42 @@ class Wire extends Tile implements Connectable {
         right: false,
     };
 
+    graphics?: PIXI.Graphics;
+
     color = 0xd9514c;
 
-    generateContainer() {
-        const graphics = new PIXI.Graphics();
+    drawGraphics() {
+        if (!this.graphics) return;
+
+        this.graphics.clear();
 
         // have to do this to set size to draw in the center
-        graphics.beginFill(0, 0);
-        graphics.drawRect(0, 0, 120, 120);
-        graphics.endFill();
+        this.graphics.beginFill(0, 0);
+        this.graphics.drawRect(0, 0, 120, 120);
+        this.graphics.endFill();
 
-        graphics.beginFill(this.color);
+        this.graphics.beginFill(this.color);
         if (Object.entries(this.connect).some(([_, value]) => value))
-            graphics.drawRect(40, 40, 40, 40);
-        else graphics.drawRect(35, 35, 50, 50);
+            this.graphics.drawRect(40, 40, 40, 40);
+        else this.graphics.drawRect(35, 35, 50, 50);
 
-        if (this.connect.up) graphics.drawRect(40, 0, 40, 40);
-        if (this.connect.down) graphics.drawRect(40, 80, 40, 40);
-        if (this.connect.left) graphics.drawRect(0, 40, 40, 40);
-        if (this.connect.right) graphics.drawRect(80, 40, 40, 40);
-        graphics.endFill();
-        return graphics;
+        if (this.connect.up) this.graphics.drawRect(40, 0, 40, 40);
+        if (this.connect.down) this.graphics.drawRect(40, 80, 40, 40);
+        if (this.connect.left) this.graphics.drawRect(0, 40, 40, 40);
+        if (this.connect.right) this.graphics.drawRect(80, 40, 40, 40);
+        this.graphics.endFill();
     }
+
+    generateContainer() {
+        this.graphics = new PIXI.Graphics();
+        this.drawGraphics();
+        return this.graphics;
+    }
+
+    updateContainer() {
+        this.drawGraphics();
+    }
+
 }
 
 export default Wire;

@@ -118,19 +118,21 @@ export default class Grid extends PIXI.Container {
                         Wire
                     );
 
-                    if (gridPoint.direction && newTile instanceof Wire) {
+                    if (gridPoint.direction != undefined && newTile instanceof Wire) {
                         if (prevTile && prevTile instanceof Wire)
                             (prevTile.connect as any)[
-                                ["down", "up", "right", "left"][
+                                ["down", "right", "up", "left"][
                                     gridPoint.direction.valueOf()
                                 ]
                             ] = true;
                         ((newTile as Wire).connect as any)[
-                            ["up", "down", "left", "right"][
+                            ["up", "left", "down", "right"][
                                 gridPoint.direction.valueOf()
                             ]
                         ] = true;
 
+                        prevTile?.updateContainer?.();
+                        newTile?.updateContainer?.();
                         // newTile.updateContainer();
                         // newTile.getContainer(this.size);
                     }
@@ -306,14 +308,14 @@ export default class Grid extends PIXI.Container {
         };
         const points = [{ ...point }];
 
-        for (let ix = 0, iy = 0; ix < nx || iy < ny; ) {
+        for (let ix = 0, iy = 0; ix < nx || iy < ny;) {
             if ((1 + 2 * ix) * ny < (1 + 2 * iy) * nx) {
                 point.x += signX;
                 point.direction = signX < 0 ? Direction.LEFT : Direction.RIGHT;
                 ix++;
             } else {
                 point.y += signY;
-                point.direction = signX < 0 ? Direction.DOWN : Direction.UP;
+                point.direction = signY < 0 ? Direction.DOWN : Direction.UP;
                 iy++;
             }
             points.push({ ...point });
