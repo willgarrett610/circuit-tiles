@@ -34,6 +34,7 @@ export default class Grid extends PIXI.Container {
         this.mousePos = [0, 0];
 
         this.lineGraphics = new PIXI.Graphics();
+        this.lineGraphics.zIndex = 1000;
         this.hlTile = new PIXI.Graphics();
 
         this.addChild(this.lineGraphics);
@@ -44,6 +45,8 @@ export default class Grid extends PIXI.Container {
         onResize(this.update);
 
         this.interactive = true;
+        this.sortableChildren = true;
+        this.zIndex = 1000;
 
         onScroll(this, this.scroll);
 
@@ -118,7 +121,10 @@ export default class Grid extends PIXI.Container {
                         Wire
                     );
 
-                    if (gridPoint.direction != undefined && newTile instanceof Wire) {
+                    if (
+                        gridPoint.direction != undefined &&
+                        newTile instanceof Wire
+                    ) {
                         if (prevTile && prevTile instanceof Wire)
                             (prevTile.connect as any)[
                                 ["down", "right", "up", "left"][
@@ -146,7 +152,11 @@ export default class Grid extends PIXI.Container {
     };
 
     click = (event: PIXI.interaction.InteractionEvent) => {
-        if (event.data.button == 0 && !event.data.originalEvent.shiftKey && !pressedKeys["Space"]) {
+        if (
+            event.data.button == 0 &&
+            !event.data.originalEvent.shiftKey &&
+            !pressedKeys["Space"]
+        ) {
             const gridPoint = locationToTuple(
                 this.screenToGrid(...this.mousePos, true)
             );
@@ -248,10 +258,14 @@ export default class Grid extends PIXI.Container {
             this.lineGraphics.drawRect(
                 x * this.size,
                 -this.y,
-                config.lineWidth,
+                config.lineWidth *
+                    (x % Math.floor(clamp(200 / this.size, 3, 8)) === 0
+                        ? 2
+                        : 1),
                 height
             );
         }
+        console.log(this.size);
 
         for (
             let y = -Math.ceil(this.y / this.size);
@@ -264,7 +278,8 @@ export default class Grid extends PIXI.Container {
                 -this.x,
                 y * this.size,
                 width,
-                config.lineWidth
+                config.lineWidth *
+                    (y % Math.floor(clamp(200 / this.size, 3, 8)) === 0 ? 2 : 1)
             );
         }
 
@@ -308,7 +323,7 @@ export default class Grid extends PIXI.Container {
         };
         const points = [{ ...point }];
 
-        for (let ix = 0, iy = 0; ix < nx || iy < ny;) {
+        for (let ix = 0, iy = 0; ix < nx || iy < ny; ) {
             if ((1 + 2 * ix) * ny < (1 + 2 * iy) * nx) {
                 point.x += signX;
                 point.direction = signX < 0 ? Direction.LEFT : Direction.RIGHT;

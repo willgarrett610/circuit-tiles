@@ -29,6 +29,7 @@ export abstract class Tile {
 
     getContainer(size: number): PIXI.Container {
         if (!this.container) this.container = this.generateContainer();
+        this.container.zIndex = 100;
         this.container.width = size;
         this.container.height = size;
         this.container.pivot.x =
@@ -43,6 +44,7 @@ export abstract class Tile {
 
     update(size: number) {
         if (this.container) {
+            this.container.zIndex = 100;
             this.container.width = size;
             this.container.height = size;
             this.container.pivot.x =
@@ -62,11 +64,9 @@ export abstract class SpriteTile extends Tile {
     generateContainer() {
         return new PIXI.Sprite(this.texture);
     }
-
 }
 
 export abstract class GraphicsTile extends Tile {
-
     graphics?: PIXI.Graphics;
 
     abstract drawGraphics(): void;
@@ -80,5 +80,4 @@ export abstract class GraphicsTile extends Tile {
     updateContainer() {
         this.drawGraphics();
     }
-
 }
