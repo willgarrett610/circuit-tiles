@@ -10,7 +10,7 @@ import {
 } from "../utils";
 import { clamp } from "../utils/math";
 import config from "../config";
-import Wire from "./tiles/wire-tile";
+import Wire from "./tiles/wire_tile";
 import { Tile } from "./tiles/tile";
 import { Direction } from "../utils/directions";
 
@@ -146,7 +146,7 @@ export default class Grid extends PIXI.Container {
     };
 
     click = (event: PIXI.interaction.InteractionEvent) => {
-        if (event.data.button == 0 && !event.data.originalEvent.shiftKey) {
+        if (event.data.button == 0 && !event.data.originalEvent.shiftKey && !pressedKeys["Space"]) {
             const gridPoint = locationToTuple(
                 this.screenToGrid(...this.mousePos, true)
             );

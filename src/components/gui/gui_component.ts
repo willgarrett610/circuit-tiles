@@ -1,7 +1,16 @@
 import * as PIXI from "pixi.js";
-abstract class GUIComponent extends PIXI.Container {
+
+export enum GUIComponentState {
+    default,
+    hover,
+    pressed
+}
+
+export class GUIComponent extends PIXI.Container {
     backgroundColor: number;
-    graphics: PIXI.Graphics;
+    defaultContainer?: PIXI.Container;
+    hoverContainer?: PIXI.Container;
+    pressedContainer?: PIXI.Container;
     cWidth: number;
     cHeight: number;
     backgroundSprite: PIXI.Sprite;
@@ -9,8 +18,7 @@ abstract class GUIComponent extends PIXI.Container {
     onEndHover?(): void;
     onClick?(e: PIXI.interaction.InteractionEvent): void;
     onRightClick?(e: PIXI.interaction.InteractionEvent): void;
-    hovered: boolean = false;
-    active: boolean = false;
+    state: GUIComponentState = GUIComponentState.default;
 
     constructor(
         x: number,
@@ -38,8 +46,6 @@ abstract class GUIComponent extends PIXI.Container {
 
         this.addChild(this.backgroundSprite);
 
-        this.graphics = new PIXI.Graphics();
-
         this.on("click", (e: PIXI.interaction.InteractionEvent) => {
             e.stopPropagation();
             this.onClick?.(e);
@@ -52,16 +58,35 @@ abstract class GUIComponent extends PIXI.Container {
 
         this.on("mouseover", () => {
             this.onHover?.();
-            this.hovered = true;
+            this.setState(GUIComponentState.hover);
         });
         this.on("mouseout", () => {
             this.onEndHover?.();
-            this.hovered = false;
+            this.setState(GUIComponentState.default);
         });
 
-        this.on("mousedown", () => (this.active = true));
-        this.on("mouseup", () => (this.active = false));
-        this.on("mouseupoutside", () => (this.active = false));
+        this.on("mousedown", () => (this.setState(GUIComponentState.pressed)));
+        this.on("mouseup", () => (this.setState(GUIComponentState.hover)));
+        this.on("mouseupoutside", () => (this.setState(GUIComponentState.default)));
+    }
+
+    getContainer(state: GUIComponentState) {
+        switch (state) {
+            case GUIComponentState.default:
+                return this.defaultContainer;
+            case GUIComponentState.hover:
+                return this.hoverContainer;
+            case GUIComponentState.pressed:
+                return this.pressedContainer;
+        }
+    }
+
+    setState(state: GUIComponentState) {
+        let prevContainer = this.getContainer(this.state);
+        this.state = state;
+        let newContainer = this.getContainer(this.state);
+        if (prevContainer) this.removeChild(prevContainer);
+        if (newContainer) this.addChild(newContainer);
     }
 
     setBackgroundColor(backgroundColor: number = 0xffffff) {
@@ -75,6 +100,16 @@ abstract class GUIComponent extends PIXI.Container {
         this.addChild(this.backgroundSprite);
     }
 
-}
+    setDefaultContainer(container: PIXI.Container) {
+        this.defaultContainer = container;
+    }
 
-export default GUIComponent;
+    setHoverContainer(container: PIXI.Container) {
+        this.hoverContainer = container;
+    }
+
+    setPressedContainer(container: PIXI.Container) {
+        this.pressedContainer = container;
+    }
+
+};

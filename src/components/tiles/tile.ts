@@ -64,3 +64,21 @@ export abstract class SpriteTile extends Tile {
     }
 
 }
+
+export abstract class GraphicsTile extends Tile {
+
+    graphics?: PIXI.Graphics;
+
+    abstract drawGraphics(): void;
+
+    generateContainer() {
+        this.graphics = new PIXI.Graphics();
+        this.drawGraphics();
+        return this.graphics;
+    }
+
+    updateContainer() {
+        this.drawGraphics();
+    }
+
+}

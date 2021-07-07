@@ -1,7 +1,7 @@
-import { Connectable, Tile } from "./tile";
+import { Connectable, GraphicsTile } from "./tile";
 import * as PIXI from "pixi.js";
 
-class Wire extends Tile implements Connectable {
+class Wire extends GraphicsTile implements Connectable {
     connect = {
         up: false,
         down: false,
@@ -33,16 +33,6 @@ class Wire extends Tile implements Connectable {
         if (this.connect.left) this.graphics.drawRect(0, 40, 40, 40);
         if (this.connect.right) this.graphics.drawRect(80, 40, 40, 40);
         this.graphics.endFill();
-    }
-
-    generateContainer() {
-        this.graphics = new PIXI.Graphics();
-        this.drawGraphics();
-        return this.graphics;
-    }
-
-    updateContainer() {
-        this.drawGraphics();
     }
 
 }

@@ -44,12 +44,13 @@ const main = async () => {
     sprite.y = height() / 2 - sprite.height / 2;
     app.stage.addChild(sprite);
 
-    let guiTest = new GUIWindow(20, 20, 100, 500, 0xff0000);
+    let tileSelector = new GUIWindow(config.guiMargin, config.guiMargin, 150, dimensions()[1] - config.guiMargin * 2, 0xaaaaaa);
 
-    app.stage.addChild(guiTest);
+    app.stage.addChild(tileSelector);
 
     onResize(() => {
         app.renderer.resize(...dimensions());
+        tileSelector.setSize(150, dimensions()[1] - config.guiMargin * 2);
     });
 
     window.addEventListener("contextmenu", (e) => e.preventDefault());

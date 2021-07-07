@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 import Button from "./button";
-import GUIComponent from "./gui_component";
+import { GUIComponent } from "./gui_component";
 
 export default class GUIWindow extends PIXI.Container {
     components: GUIComponent[];
@@ -52,13 +52,14 @@ export default class GUIWindow extends PIXI.Container {
             }
         });
 
-        let btn = new Button(10, 10, 20, 20);
-        btn.onClick = (e: any) => {
-            console.log("test");
-        };
-        this.addChild(btn);
-
         // this.draw();
+    }
+
+    setSize(width: number, height: number) {
+        this.cWidth = width;
+        this.cHeight = height;
+        this.backgroundRect.width = width;
+        this.backgroundRect.height = height;
     }
 
     addChild(
