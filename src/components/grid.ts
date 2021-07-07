@@ -265,7 +265,6 @@ export default class Grid extends PIXI.Container {
                 height
             );
         }
-        console.log(this.size);
 
         for (
             let y = -Math.ceil(this.y / this.size);

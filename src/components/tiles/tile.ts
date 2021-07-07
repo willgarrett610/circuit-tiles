@@ -25,10 +25,15 @@ export abstract class Tile {
 
     abstract generateContainer(): PIXI.Container;
 
+    postGenerate?(): void;
+
     abstract updateContainer?(): void;
 
     getContainer(size: number): PIXI.Container {
-        if (!this.container) this.container = this.generateContainer();
+        if (!this.container) {
+            this.container = this.generateContainer();
+            this.postGenerate?.();
+        }
         this.container.zIndex = 100;
         this.container.width = size;
         this.container.height = size;

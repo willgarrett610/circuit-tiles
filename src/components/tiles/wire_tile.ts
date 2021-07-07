@@ -1,5 +1,4 @@
 import { Connectable, GraphicsTile } from "./tile";
-import * as PIXI from "pixi.js";
 
 class Wire extends GraphicsTile implements Connectable {
     connect = {
@@ -8,8 +7,6 @@ class Wire extends GraphicsTile implements Connectable {
         left: false,
         right: false,
     };
-
-    graphics?: PIXI.Graphics;
 
     color = 0xd9514c;
 
@@ -34,7 +31,6 @@ class Wire extends GraphicsTile implements Connectable {
         if (this.connect.right) this.graphics.drawRect(80, 40, 40, 40);
         this.graphics.endFill();
     }
-
 }
 
 export default Wire;
