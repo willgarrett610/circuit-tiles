@@ -13,6 +13,7 @@ import config from "../config";
 import Wire from "./tiles/wire_tile";
 import { Tile } from "./tiles/tile";
 import { Direction } from "../utils/directions";
+import Lever from "./tiles/lever_tile";
 
 export default class Grid extends PIXI.Container {
     startingSize: number;
@@ -71,6 +72,14 @@ export default class Grid extends PIXI.Container {
         return [true, tileObj];
     }
 
+    removeTile(x: number, y: number) {
+        const tile = this.tiles[`${x},${y}`];
+        if (!tile) return false;
+        this.removeChild(tile.getContainer(this.size));
+        delete this.tiles[`${x},${y}`];
+        return true;
+    }
+
     scroll = (e: WheelEvent) => {
         if (e.deltaY === 0) return;
 
@@ -102,6 +111,19 @@ export default class Grid extends PIXI.Container {
             if (e.shiftKey || pressedKeys["Space"]) {
                 this.x += e.movementX;
                 this.y += e.movementY;
+            } else if (pressedKeys["KeyX"]) {
+                const gridPoints = this.gridPointsBetween(
+                    ...locationToTuple(
+                        this.screenToGrid(...this.prevMousePos, true)
+                    ),
+                    ...locationToTuple(
+                        this.screenToGrid(...this.mousePos, true)
+                    )
+                );
+
+                for (let gridPoint of gridPoints) {
+                    this.removeTile(...locationToTuple(gridPoint));
+                }
             } else {
                 const gridPoints = this.gridPointsBetween(
                     ...locationToTuple(
