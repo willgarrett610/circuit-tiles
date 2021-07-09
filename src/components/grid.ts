@@ -121,9 +121,8 @@ export default class Grid extends PIXI.Container {
                     )
                 );
 
-                for (let gridPoint of gridPoints) {
+                for (let gridPoint of gridPoints)
                     this.removeTile(...locationToTuple(gridPoint));
-                }
             } else {
                 const gridPoints = this.gridPointsBetween(
                     ...locationToTuple(
@@ -161,8 +160,6 @@ export default class Grid extends PIXI.Container {
 
                         prevTile?.updateContainer?.();
                         newTile?.updateContainer?.();
-                        // newTile.updateContainer();
-                        // newTile.getContainer(this.size);
                     }
 
                     prevTile = newTile;

@@ -1,13 +1,17 @@
 {
+    "homepage": "https://github.com/willgarrett610/circuit-tiles#readme",
     "name": "circuit-tiles",
     "version": "1.0.0",
     "description": "Build circuits with tiled modules",
     "private": true,
     "scripts": {
         "build": "webpack",
+        "build-prod": "webpack --config webpack.prod.js",
         "watch": "webpack --watch",
         "start": "webpack-dev-server -d",
-        "format": "prettier --write ."
+        "format": "prettier --write .",
+        "predeploy": "rimraf dist && npm run build-prod",
+        "deploy": "gh-pages -b deploy -d dist"
     },
     "repository": {
         "type": "git",
@@ -18,11 +22,12 @@
     "bugs": {
         "url": "https://github.com/willgarrett610/circuit-tiles/issues"
     },
-    "homepage": "https://github.com/willgarrett610/circuit-tiles#readme",
     "devDependencies": {
         "copy-webpack-plugin": "5.1.1",
+        "gh-pages": "^3.2.3",
         "html-webpack-plugin": "4.0.4",
         "prettier": "^2.3.2",
+        "rimraf": "^2.7.1",
         "ts-loader": "6.2.2",
         "typescript": "^4.3.4",
         "webpack": "4.42.1",
