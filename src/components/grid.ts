@@ -180,7 +180,11 @@ export default class Grid extends PIXI.Container {
                 this.screenToGrid(...this.mousePos, true)
             );
 
-            this.addTile(...gridPoint, Wire);
+            if (pressedKeys["KeyX"]) {
+                this.removeTile(...gridPoint);
+            } else {
+                this.addTile(...gridPoint, Wire);
+            }
 
             this.update();
         }
