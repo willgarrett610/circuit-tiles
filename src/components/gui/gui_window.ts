@@ -1,12 +1,19 @@
 import * as PIXI from "pixi.js";
+import { onScroll } from "../../utils";
+import { clamp } from "../../utils/math";
 import { GUIComponent } from "./gui_component";
 
 export default class GUIWindow extends PIXI.Container {
     components: GUIComponent[];
+    container: PIXI.Container;
     backgroundColor: number;
     cWidth: number;
     cHeight: number;
     backgroundRect: PIXI.Sprite;
+    scrollableX = false;
+    scrollableY = false;
+    scrollMarginX = 0;
+    scrollMarginY = 0;
 
     constructor(
         x: number,
@@ -33,7 +40,18 @@ export default class GUIWindow extends PIXI.Container {
         this.backgroundRect.tint = backgroundColor;
         this.backgroundRect.interactive = true;
 
-        this.addChild(this.backgroundRect);
+        const mask = new PIXI.Graphics();
+        mask.beginFill(0xffffff);
+        mask.drawRect(0,0,width,height);
+        mask.endFill();
+
+        this.mask = mask;
+        super.addChild(mask);
+
+        super.addChild(this.backgroundRect);
+
+        this.container = new PIXI.Container();
+        super.addChild(this.container);
 
         this.on("click", (e: PIXI.interaction.InteractionEvent) => {
             e.stopPropagation();
@@ -51,6 +69,14 @@ export default class GUIWindow extends PIXI.Container {
             }
         });
 
+        onScroll(this, (e: WheelEvent) => {
+            if (e.shiftKey && this.scrollableX && this.container.width > this.cWidth) {
+
+            } else if (!e.shiftKey && this.scrollableY && this.container.height > this.cHeight) {
+                this.container.y = clamp(this.container.y - e.deltaY, this.cHeight - this.container.height - this.scrollMarginY, 0);
+            }
+        })
+
         // this.draw();
     }
 
@@ -59,6 +85,13 @@ export default class GUIWindow extends PIXI.Container {
         this.cHeight = height;
         this.backgroundRect.width = width;
         this.backgroundRect.height = height;
+
+        const mask: PIXI.Graphics = this.mask as PIXI.Graphics;
+
+        mask.clear();
+        mask.beginFill(0xffffff);
+        mask.drawRect(0,0,width,height);
+        mask.endFill();
     }
 
     addChild(
@@ -68,14 +101,14 @@ export default class GUIWindow extends PIXI.Container {
             if (child instanceof GUIComponent)
                 this.components.push(child as GUIComponent);
         }
-        return super.addChild(...children);
+        return this.container.addChild(...children);
     }
 
     addChildAt<T extends PIXI.DisplayObject>(child: T, index: number): T {
         if ((child as any).__proto__ instanceof GUIComponent) {
             this.components.push(child as any);
         }
-        return super.addChildAt(child, index);
+        return this.container.addChildAt(child, index);
     }
 
     removeChild<TChildren extends PIXI.DisplayObject[]>(
@@ -87,11 +120,11 @@ export default class GUIWindow extends PIXI.Container {
                 if (index > -1) this.components.splice(index, 1);
             }
         }
-        return super.removeChild(...child);
+        return this.container.removeChild(...child);
     }
 
     removeChildAt(index: number): PIXI.DisplayObject {
-        let child = super.removeChildAt(index);
+        let child = this.container.removeChildAt(index);
         if ((child as any).__proto__ instanceof GUIComponent) {
             const index = this.components.indexOf(child as any);
             if (index > -1) this.components.splice(index, 1);
@@ -103,7 +136,7 @@ export default class GUIWindow extends PIXI.Container {
         beginIndex?: number,
         endIndex?: number
     ): PIXI.DisplayObject[] {
-        let children = super.removeChildren(beginIndex, endIndex);
+        let children = this.container.removeChildren(beginIndex, endIndex);
         for (let child in children) {
             if ((child as any).__proto__ instanceof GUIComponent) {
                 const index = this.components.indexOf(child as any);

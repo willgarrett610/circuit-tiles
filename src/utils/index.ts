@@ -14,15 +14,33 @@ export function onResize(listener: (this: Window, ev: UIEvent) => any) {
     window.addEventListener("resize", listener);
 }
 
+export class CWheelEvent extends WheelEvent {
+
+    propagationStopped = false;
+    stopPropagationOld?(): void;
+
+    static fromWheelEvent(e: WheelEvent) {
+        const cE = e as CWheelEvent;
+        cE.stopPropagationOld = cE.stopPropagation;
+        cE.stopPropagation = () => {
+            cE.stopPropagationOld?.();
+            cE.propagationStopped = true;
+        }
+        cE.propagationStopped = false;
+        return cE;
+    }
+
+}
+
 export interface DisplayObjectScrollEvent {
     object: PIXI.DisplayObject;
-    listener: (ev: WheelEvent) => any;
+    listener: (ev: CWheelEvent) => any;
 }
 
 export const scrollListeners: Array<DisplayObjectScrollEvent> = [];
 export function onScroll(
     object: PIXI.DisplayObject,
-    listener: (ev: WheelEvent) => any
+    listener: (ev: CWheelEvent) => any
 ) {
     scrollListeners.push({ object, listener });
 }

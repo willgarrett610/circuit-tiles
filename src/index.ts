@@ -7,6 +7,8 @@ import {
     width,
     scrollListeners,
     DisplayObjectScrollEvent,
+    CWheelEvent,
+    onScroll,
 } from "./utils";
 import config from "./config";
 import GUIWindow from "./components/gui/gui_window";
@@ -54,6 +56,8 @@ const main = async () => {
     // Create tile selection gui
 
     let tileSelector = new GUIWindow(config.guiMargin, config.guiMargin, 150, dimensions()[1] - config.guiMargin * 2, 0xaaaaaa);
+    tileSelector.scrollableY = true;
+    tileSelector.scrollMarginY = config.tileSelector.margin * 2;
 
     var tileSize = (tileSelector.width - (config.tileSelector.margin * (config.tileSelector.tilesPerRow + 1))) / config.tileSelector.tilesPerRow;
 
@@ -123,14 +127,27 @@ const main = async () => {
     window.addEventListener("contextmenu", (e) => e.preventDefault());
 
     window.addEventListener("wheel", (e: WheelEvent) => {
+        let cE: CWheelEvent = CWheelEvent.fromWheelEvent(e);
+
         let hitObject = app.renderer.plugins.interaction.hitTest(
-            new PIXI.Point(e.pageX, e.pageY),
+            new PIXI.Point(cE.pageX, cE.pageY),
             app.stage
         );
+
         if (hitObject != null) {
-            scrollListeners.forEach((eventObj: DisplayObjectScrollEvent) => {
-                if (eventObj.object == hitObject) eventObj.listener(e);
-            });
+            let testObject = hitObject;
+            while (testObject != undefined) {
+                for (let i = 0; i < scrollListeners.length; i++) {
+                    let eventObj = scrollListeners[i];
+                    if (eventObj.object == testObject) {
+                        eventObj.listener(cE);
+                        break;
+                    }
+                }
+
+                if (cE.propagationStopped) break;
+                testObject = testObject.parent;
+            }
         }
     });
 
