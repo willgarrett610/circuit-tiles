@@ -85,8 +85,10 @@ export class GUIComponent extends PIXI.Container {
         let prevContainer = this.getContainer(this.state);
         this.state = state;
         let newContainer = this.getContainer(this.state);
-        if (prevContainer) this.removeChild(prevContainer);
-        if (newContainer) this.addChild(newContainer);
+        if (newContainer) {
+            if (prevContainer) this.removeChild(prevContainer);
+            if (newContainer) this.addChild(newContainer);
+        }
     }
 
     setBackgroundColor(backgroundColor: number = 0xffffff) {
@@ -102,6 +104,7 @@ export class GUIComponent extends PIXI.Container {
 
     setDefaultContainer(container: PIXI.Container) {
         this.defaultContainer = container;
+        this.addChild(container);
     }
 
     setHoverContainer(container: PIXI.Container) {

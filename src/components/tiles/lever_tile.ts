@@ -1,6 +1,6 @@
 import { GraphicsTile } from "./tile";
 
-class Lever extends GraphicsTile {
+export default class LeverTile extends GraphicsTile {
     onColor = 0xff0000;
     offColor = 0x222222;
 
@@ -35,5 +35,3 @@ class Lever extends GraphicsTile {
         this.graphics.endFill();
     }
 }
-
-export default Lever;

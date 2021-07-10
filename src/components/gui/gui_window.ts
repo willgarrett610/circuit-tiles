@@ -1,5 +1,4 @@
 import * as PIXI from "pixi.js";
-import Button from "./button";
 import { GUIComponent } from "./gui_component";
 
 export default class GUIWindow extends PIXI.Container {

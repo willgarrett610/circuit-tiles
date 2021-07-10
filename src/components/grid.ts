@@ -10,10 +10,11 @@ import {
 } from "../utils";
 import { clamp } from "../utils/math";
 import config from "../config";
-import Wire from "./tiles/wire_tile";
+import WireTile from "./tiles/wire_tile";
 import { Tile } from "./tiles/tile";
 import { Direction } from "../utils/directions";
-import Lever from "./tiles/lever_tile";
+import LeverTile from "./tiles/lever_tile";
+import getTileTypes from "./tiles/tile_types";
 
 export default class Grid extends PIXI.Container {
     startingSize: number;
@@ -26,6 +27,8 @@ export default class Grid extends PIXI.Container {
     lineGraphics: PIXI.Graphics;
     hlTile: PIXI.Graphics;
 
+    selectedTileType: number = -1;
+
     constructor(size: number) {
         super();
         this.startingSize = size;
@@ -37,6 +40,8 @@ export default class Grid extends PIXI.Container {
         this.lineGraphics = new PIXI.Graphics();
         this.lineGraphics.zIndex = 1000;
         this.hlTile = new PIXI.Graphics();
+        this.hlTile.zIndex = 200;
+        this.hlTile.alpha = 0.2;
 
         this.addChild(this.lineGraphics);
         this.addChild(this.hlTile);
@@ -139,20 +144,20 @@ export default class Grid extends PIXI.Container {
 
                     const [placed, newTile] = this.addTile(
                         ...locationToTuple(gridPoint),
-                        Wire
+                        getTileTypes()[this.selectedTileType]
                     );
 
                     if (
                         gridPoint.direction != undefined &&
-                        newTile instanceof Wire
+                        newTile instanceof WireTile
                     ) {
-                        if (prevTile && prevTile instanceof Wire)
+                        if (prevTile && prevTile instanceof WireTile)
                             (prevTile.connect as any)[
                                 ["down", "right", "up", "left"][
                                     gridPoint.direction.valueOf()
                                 ]
                             ] = true;
-                        ((newTile as Wire).connect as any)[
+                        ((newTile as WireTile).connect as any)[
                             ["up", "left", "down", "right"][
                                 gridPoint.direction.valueOf()
                             ]
@@ -183,7 +188,7 @@ export default class Grid extends PIXI.Container {
             if (pressedKeys["KeyX"]) {
                 this.removeTile(...gridPoint);
             } else {
-                this.addTile(...gridPoint, Wire);
+                this.addTile(...gridPoint, getTileTypes()[this.selectedTileType]);
             }
 
             this.update();

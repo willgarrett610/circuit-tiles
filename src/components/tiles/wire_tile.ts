@@ -1,6 +1,6 @@
 import { Connectable, GraphicsTile } from "./tile";
 
-class Wire extends GraphicsTile implements Connectable {
+export default class WireTile extends GraphicsTile implements Connectable {
     connect = {
         up: false,
         down: false,
@@ -32,5 +32,3 @@ class Wire extends GraphicsTile implements Connectable {
         this.graphics.endFill();
     }
 }
-
-export default Wire;
