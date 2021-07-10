@@ -23,7 +23,8 @@ export default class LeverTile extends GraphicsTile {
         this.graphics.clear();
 
         // have to do this to set size to draw in the center
-        this.graphics.beginFill(0, 0);
+        // also has small alpha so it has bigger hit box
+        this.graphics.beginFill(0, 0.01);
         this.graphics.drawRect(0, 0, 120, 120);
         this.graphics.endFill();
 

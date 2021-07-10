@@ -18,13 +18,6 @@ import ButtonGroup from "./components/gui/button_group";
 
 PIXI.utils.skipHello();
 
-const load = (app: PIXI.Application) =>
-    new Promise<void>((resolve) =>
-        app.loader
-            .add("doge", "assets/sprites/doge-icon.svg")
-            .load(() => resolve())
-    );
-
 const main = async () => {
     let app = new PIXI.Application();
 
@@ -36,54 +29,71 @@ const main = async () => {
     app.renderer.resize(window.innerWidth, window.innerHeight);
     document.body.appendChild(app.view);
 
-    await load(app);
-
     app.renderer.backgroundColor = config.backgroundColor;
 
     let grid = new Grid(100);
 
     app.stage.addChild(grid);
 
-    // Set sprite at origin for reference
-
-    let sprite = new PIXI.Sprite(app.loader.resources.doge.texture);
-    sprite.width = 20;
-    sprite.height = 20;
-    sprite.x = width() / 2 - sprite.width / 2;
-    sprite.y = height() / 2 - sprite.height / 2;
-    app.stage.addChild(sprite);
-
     // Create tile selection gui
 
-    let tileSelector = new GUIWindow(config.guiMargin, config.guiMargin, 150, dimensions()[1] - config.guiMargin * 2, 0xaaaaaa);
+    let tileSelector = new GUIWindow(
+        config.guiMargin,
+        config.guiMargin,
+        150,
+        dimensions()[1] - config.guiMargin * 2,
+        0xaaaaaa
+    );
     tileSelector.scrollableY = true;
     tileSelector.scrollMarginY = config.tileSelector.margin * 2;
 
-    var tileSize = (tileSelector.width - (config.tileSelector.margin * (config.tileSelector.tilesPerRow + 1))) / config.tileSelector.tilesPerRow;
+    var tileSize =
+        (tileSelector.width -
+            config.tileSelector.margin *
+                (config.tileSelector.tilesPerRow + 1)) /
+        config.tileSelector.tilesPerRow;
 
     // Setup graphics for selected tile
-    
+
     let selectedGraphics = new PIXI.Graphics();
 
     selectedGraphics.beginFill(0, 0);
-    selectedGraphics.lineStyle(config.tileSelector.selectedWidth, config.tileSelector.selectedColor);
-    selectedGraphics.drawRect(config.tileSelector.selectedWidth/2,config.tileSelector.selectedWidth/2,tileSize-config.tileSelector.selectedWidth,tileSize-config.tileSelector.selectedWidth);
+    selectedGraphics.lineStyle(
+        config.tileSelector.selectedWidth,
+        config.tileSelector.selectedColor
+    );
+    selectedGraphics.drawRect(
+        config.tileSelector.selectedWidth / 2,
+        config.tileSelector.selectedWidth / 2,
+        tileSize - config.tileSelector.selectedWidth,
+        tileSize - config.tileSelector.selectedWidth
+    );
     selectedGraphics.endFill();
 
     let tileBtnGroup = new ButtonGroup(selectedGraphics);
 
     tileBtnGroup.onSelectionChange = (i) => {
         grid.selectedTileType = i;
-    }
+    };
 
     for (var i = 0; i < getTileTypes().length; i++) {
         var y = Math.floor(i / config.tileSelector.tilesPerRow);
-        var x = i - (y * config.tileSelector.tilesPerRow);
+        var x = i - y * config.tileSelector.tilesPerRow;
 
-        y = config.tileSelector.margin + (config.tileSelector.margin + tileSize) * y;
-        x = config.tileSelector.margin + (config.tileSelector.margin + tileSize) * x;
+        y =
+            config.tileSelector.margin +
+            (config.tileSelector.margin + tileSize) * y;
+        x =
+            config.tileSelector.margin +
+            (config.tileSelector.margin + tileSize) * x;
 
-        var tileBtn = new GUIComponent(x, y, tileSize, tileSize, config.backgroundColor);
+        var tileBtn = new GUIComponent(
+            x,
+            y,
+            tileSize,
+            tileSize,
+            config.backgroundColor
+        );
 
         var tileType = getTileTypes()[i];
         var tile = new tileType(0, 0);
@@ -97,11 +107,16 @@ const main = async () => {
         var hoverGraphics = new PIXI.Graphics();
 
         hoverGraphics.beginFill(config.highlightTileColor);
-        hoverGraphics.drawRect(0, 0, hoverContainer.width, hoverContainer.height);
+        hoverGraphics.drawRect(
+            0,
+            0,
+            hoverContainer.width,
+            hoverContainer.height
+        );
         hoverGraphics.endFill();
 
-        hoverGraphics.scale.x = 1/hoverContainer.scale.x;
-        hoverGraphics.scale.y = 1/hoverContainer.scale.y;
+        hoverGraphics.scale.x = 1 / hoverContainer.scale.x;
+        hoverGraphics.scale.y = 1 / hoverContainer.scale.y;
 
         hoverGraphics.alpha = 0.2;
         hoverGraphics.zIndex = 200;
@@ -150,13 +165,6 @@ const main = async () => {
             }
         }
     });
-
-    function update(delta: number) {
-        sprite.x = grid.gridToScreen(0.5, 0.5).x;
-        sprite.y = grid.gridToScreen(0.5, 0.5).y;
-    }
-
-    app.ticker.add(update);
 };
 
 main();

@@ -13,13 +13,12 @@ import config from "../config";
 import WireTile from "./tiles/wire_tile";
 import { Tile } from "./tiles/tile";
 import { Direction } from "../utils/directions";
-import LeverTile from "./tiles/lever_tile";
 import getTileTypes from "./tiles/tile_types";
 
 export default class Grid extends PIXI.Container {
     startingSize: number;
     size: number;
-    tiles: { [key: string]: Tile };
+    tiles: { [key: string]: Tile | undefined };
 
     mousePos: [x: number, y: number];
     prevMousePos: [x: number, y: number];
@@ -63,14 +62,26 @@ export default class Grid extends PIXI.Container {
         onKeyDown(this.keyDown);
     }
 
+    getTile(x: number, y: number) {
+        return this.tiles[`${x},${y}`];
+    }
+
+    setTile(x: number, y: number, tile: Tile) {
+        this.tiles[`${x},${y}`] = tile;
+    }
+
+    deleteTile(x: number, y: number) {
+        delete this.tiles[`${x},${y}`];
+    }
+
     addTile<T extends Tile>(
         x: number,
         y: number,
         tile: { new (x: number, y: number): T }
-    ): [placed: boolean, tile: Tile] {
-        if (this.tiles[`${x},${y}`]) return [false, this.tiles[`${x},${y}`]];
+    ): [placed: boolean, tile: Tile | undefined] {
+        if (this.getTile(x, y)) return [false, this.getTile(x, y)];
         let tileObj = new tile(x, y);
-        this.tiles[`${x},${y}`] = tileObj;
+        this.setTile(x, y, tileObj);
         const tileGraphics: PIXI.Container = tileObj.getContainer(this.size);
         this.addChild(tileGraphics);
 
@@ -78,10 +89,26 @@ export default class Grid extends PIXI.Container {
     }
 
     removeTile(x: number, y: number) {
-        const tile = this.tiles[`${x},${y}`];
+        const tile = this.getTile(x, y);
         if (!tile) return false;
         this.removeChild(tile.getContainer(this.size));
-        delete this.tiles[`${x},${y}`];
+        this.deleteTile(x, y);
+        const removalSpots = [
+            { offset: [-1, 0], side: "right" },
+            { offset: [1, 0], side: "left" },
+            { offset: [0, -1], side: "down" },
+            { offset: [0, 1], side: "up" },
+        ];
+        for (let removalSpot of removalSpots) {
+            const adjacentTile: any = this.getTile(
+                x + removalSpot.offset[0],
+                y + removalSpot.offset[1]
+            );
+            if (adjacentTile && adjacentTile.connect !== undefined) {
+                adjacentTile.connect[removalSpot.side] = false;
+                adjacentTile.updateContainer();
+            }
+        }
         return true;
     }
 
@@ -188,7 +215,10 @@ export default class Grid extends PIXI.Container {
             if (pressedKeys["KeyX"]) {
                 this.removeTile(...gridPoint);
             } else {
-                this.addTile(...gridPoint, getTileTypes()[this.selectedTileType]);
+                this.addTile(
+                    ...gridPoint,
+                    getTileTypes()[this.selectedTileType]
+                );
             }
 
             this.update();
@@ -327,7 +357,7 @@ export default class Grid extends PIXI.Container {
 
     renderTiles() {
         for (let [_, tile] of Object.entries(this.tiles))
-            tile.update(this.size);
+            if (tile) tile.update(this.size);
     }
 
     update = () => {
