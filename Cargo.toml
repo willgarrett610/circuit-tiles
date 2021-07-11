@@ -1,0 +1,11 @@
+[package]
+name = "circuit-tiles"
+version = "0.1.0"
+authors = ["Will Garrett", "Justin Fernald"]
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wasm-bindgen = "0.2"

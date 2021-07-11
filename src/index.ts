@@ -16,6 +16,12 @@ import getTileTypes from "./components/tiles/tile_types";
 import { GUIComponent } from "./components/gui/gui_component";
 import ButtonGroup from "./components/gui/button_group";
 
+// const rust: any = import("../pkg");
+
+rust.then((m: any) => m.add(3, 3))
+    .then((x: any) => console.log(x))
+    .catch(console.error);
+
 PIXI.utils.skipHello();
 
 const main = async () => {

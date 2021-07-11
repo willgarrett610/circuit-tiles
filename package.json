@@ -23,6 +23,7 @@
         "url": "https://github.com/willgarrett610/circuit-tiles/issues"
     },
     "devDependencies": {
+        "@wasm-tool/wasm-pack-plugin": "^1.4.0",
         "copy-webpack-plugin": "5.1.1",
         "gh-pages": "^3.2.3",
         "html-webpack-plugin": "4.0.4",
