@@ -9,8 +9,9 @@ const config = {
         tilesPerRow: 2,
         margin: 10,
         selectedColor: 0x00cc00,
-        selectedWidth: 4
-    }
+        selectedWidth: 4,
+        textSize: 13,
+    },
 };
 
 export default config;

@@ -2,8 +2,10 @@
     "compilerOptions": {
         "outDir": "./dist",
         "target": "es5",
-        "module": "CommonJS",
-        "sourceMap": true,
-        "strict": true
-    }
+        "module": "esNext",
+        "lib": ["dom", "es2015"],
+        "strict": true,  
+        "esModuleInterop": true,
+        "moduleResolution": "node"
+      }
 }

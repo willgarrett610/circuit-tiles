@@ -1,6 +1,8 @@
 import { Connectable, GraphicsTile } from "./tile";
 
 export default class WireTile extends GraphicsTile implements Connectable {
+    label = "Wire";
+
     connect = {
         up: false,
         down: false,
@@ -12,13 +14,6 @@ export default class WireTile extends GraphicsTile implements Connectable {
 
     drawGraphics() {
         if (!this.graphics) return;
-
-        this.graphics.clear();
-
-        // have to do this to set size to draw in the center
-        this.graphics.beginFill(0, 0);
-        this.graphics.drawRect(0, 0, 120, 120);
-        this.graphics.endFill();
 
         this.graphics.beginFill(this.color);
         if (Object.entries(this.connect).some(([_, value]) => value))

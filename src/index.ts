@@ -16,11 +16,22 @@ import getTileTypes from "./components/tiles/tile_types";
 import { GUIComponent } from "./components/gui/gui_component";
 import ButtonGroup from "./components/gui/button_group";
 
-// const rust: any = import("../pkg");
+import init from "./lib";
 
-rust.then((m: any) => m.add(3, 3))
-    .then((x: any) => console.log(x))
-    .catch(console.error);
+var mod: typeof import("../pkg");
+
+async function loadMod() {
+    mod = await init();
+}
+
+loadMod();
+
+setTimeout(() => console.log(mod?.add(3, 3)), 5000);
+// setTimeout(() => console.log(mod), 5000);
+
+// import init, { m } from "../pkg/index_bg.wasm";
+
+// import ("lib.js");
 
 PIXI.utils.skipHello();
 
@@ -88,7 +99,8 @@ const main = async () => {
 
         y =
             config.tileSelector.margin +
-            (config.tileSelector.margin + tileSize) * y;
+            (config.tileSelector.margin * 2 + tileSize) * y +
+            config.tileSelector.textSize * y;
         x =
             config.tileSelector.margin +
             (config.tileSelector.margin + tileSize) * x;
@@ -103,6 +115,15 @@ const main = async () => {
 
         var tileType = getTileTypes()[i];
         var tile = new tileType(0, 0);
+
+        var text = new PIXI.Text(tile.label, {
+            fontFamily: "Arial",
+            fontSize: config.tileSelector.textSize,
+            fill: 0x000000,
+            fontWeight: "bold",
+        });
+        text.x = x + tileSize / 2 - text.width / 2;
+        text.y = y + tileSize + config.tileSelector.margin / 2;
 
         var defaultContainer = tile.getContainer(tileSize);
         defaultContainer.removeAllListeners();
@@ -134,6 +155,8 @@ const main = async () => {
         tileBtn.setHoverContainer(hoverContainer);
 
         tileSelector.addChild(tileBtn);
+
+        tileSelector.addChild(text);
 
         tileBtnGroup.addButton(tileBtn);
     }

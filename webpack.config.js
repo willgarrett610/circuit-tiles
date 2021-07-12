@@ -14,10 +14,14 @@ module.exports = {
                 use: "ts-loader",
                 exclude: /node_modules/,
             },
+            {
+              test: /\.wasm$/,
+              type: "webassembly/experimental"
+            }
         ],
     },
     resolve: {
-        extensions: [".ts", ".js"],
+        extensions: ['.tsx', '.ts', '.js', '.wasm'],
         alias: {
             "@": path.resolve(__dirname, "src/"),
         },

@@ -1,6 +1,8 @@
 import { GraphicsTile } from "./tile";
 
 export default class LeverTile extends GraphicsTile {
+    label = "Lever";
+
     onColor = 0xff0000;
     offColor = 0x222222;
 
@@ -19,14 +21,6 @@ export default class LeverTile extends GraphicsTile {
 
     drawGraphics() {
         if (!this.graphics) return;
-
-        this.graphics.clear();
-
-        // have to do this to set size to draw in the center
-        // also has small alpha so it has bigger hit box
-        this.graphics.beginFill(0, 0.01);
-        this.graphics.drawRect(0, 0, 120, 120);
-        this.graphics.endFill();
 
         this.graphics.beginFill(
             this.signalActive ? this.onColor : this.offColor

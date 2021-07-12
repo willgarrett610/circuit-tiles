@@ -1,4 +1,4 @@
-import { Rotation } from "../../utils/directions";
+import { Direction, Rotation } from "../../utils/directions";
 import * as PIXI from "pixi.js";
 
 export interface Connectable {
@@ -10,8 +10,13 @@ export interface Connectable {
     };
 }
 
+export interface IOTile {
+    inputs: Direction[];
+    outputs: Direction[];
+}
+
 export abstract class Tile {
-    label?: string = undefined;
+    abstract label: string;
     x = 0;
     y = 0;
     direction = Rotation.NORMAL;
@@ -76,13 +81,27 @@ export abstract class GraphicsTile extends Tile {
 
     abstract drawGraphics(): void;
 
+    clearGraphics() {
+        if (!this.graphics) return;
+
+        this.graphics.clear();
+
+        // have to do this to set size to draw in the center
+        // also has small alpha so it has bigger hit box
+        this.graphics.beginFill(0, 0.01);
+        this.graphics.drawRect(0, 0, 120, 120);
+        this.graphics.endFill();
+    }
+
     generateContainer() {
         this.graphics = new PIXI.Graphics();
+        this.clearGraphics();
         this.drawGraphics();
         return this.graphics;
     }
 
     updateContainer() {
+        this.clearGraphics();
         this.drawGraphics();
     }
 }
