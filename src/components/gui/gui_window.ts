@@ -20,7 +20,9 @@ export default class GUIWindow extends PIXI.Container {
         y: number,
         width: number,
         height: number,
-        backgroundColor: number = 0xffffff
+        backgroundColor: number = 0xffffff,
+        borderWidth: number = 0,
+        borderColor: number = 0x000000
     ) {
         super();
 
@@ -40,15 +42,29 @@ export default class GUIWindow extends PIXI.Container {
         this.backgroundRect.tint = backgroundColor;
         this.backgroundRect.interactive = true;
 
+        const border = new PIXI.Graphics();
+        border.beginFill(0, 0);
+        border.lineStyle(borderWidth, borderColor);
+        border.drawRect(
+            borderWidth / 2,
+            borderWidth / 2,
+            width - borderWidth,
+            height - borderWidth
+        );
+        border.endFill();
+        border.zIndex = 500;
+
         const mask = new PIXI.Graphics();
         mask.beginFill(0xffffff);
-        mask.drawRect(0,0,width,height);
+        mask.drawRect(0, 0, width, height);
         mask.endFill();
 
         this.mask = mask;
         super.addChild(mask);
 
         super.addChild(this.backgroundRect);
+
+        super.addChild(border);
 
         this.container = new PIXI.Container();
         super.addChild(this.container);
@@ -70,12 +86,23 @@ export default class GUIWindow extends PIXI.Container {
         });
 
         onScroll(this, (e: WheelEvent) => {
-            if (e.shiftKey && this.scrollableX && this.container.width > this.cWidth) {
-
-            } else if (!e.shiftKey && this.scrollableY && this.container.height > this.cHeight) {
-                this.container.y = clamp(this.container.y - e.deltaY, this.cHeight - this.container.height - this.scrollMarginY, 0);
+            if (
+                e.shiftKey &&
+                this.scrollableX &&
+                this.container.width > this.cWidth
+            ) {
+            } else if (
+                !e.shiftKey &&
+                this.scrollableY &&
+                this.container.height > this.cHeight
+            ) {
+                this.container.y = clamp(
+                    this.container.y - e.deltaY,
+                    this.cHeight - this.container.height - this.scrollMarginY,
+                    0
+                );
             }
-        })
+        });
 
         // this.draw();
     }
@@ -90,7 +117,7 @@ export default class GUIWindow extends PIXI.Container {
 
         mask.clear();
         mask.beginFill(0xffffff);
-        mask.drawRect(0,0,width,height);
+        mask.drawRect(0, 0, width, height);
         mask.endFill();
     }
 

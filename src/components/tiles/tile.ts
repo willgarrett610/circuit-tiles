@@ -1,5 +1,6 @@
 import { Direction, Rotation } from "../../utils/directions";
 import * as PIXI from "pixi.js";
+import config from "../../config";
 
 export interface Connectable {
     connect: {
@@ -88,7 +89,7 @@ export abstract class GraphicsTile extends Tile {
 
         // have to do this to set size to draw in the center
         // also has small alpha so it has bigger hit box
-        this.graphics.beginFill(0, 0.01);
+        this.graphics.beginFill(config.colors.tileBackground);
         this.graphics.drawRect(0, 0, 120, 120);
         this.graphics.endFill();
     }

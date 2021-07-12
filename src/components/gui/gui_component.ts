@@ -3,7 +3,7 @@ import * as PIXI from "pixi.js";
 export enum GUIComponentState {
     default,
     hover,
-    pressed
+    pressed,
 }
 
 export class GUIComponent extends PIXI.Container {
@@ -18,6 +18,7 @@ export class GUIComponent extends PIXI.Container {
     onEndHover?(): void;
     onClick?(e: PIXI.interaction.InteractionEvent): void;
     onRightClick?(e: PIXI.interaction.InteractionEvent): void;
+    onStateChange?(newState: GUIComponentState): void;
     state: GUIComponentState = GUIComponentState.default;
 
     constructor(
@@ -65,9 +66,11 @@ export class GUIComponent extends PIXI.Container {
             this.setState(GUIComponentState.default);
         });
 
-        this.on("mousedown", () => (this.setState(GUIComponentState.pressed)));
-        this.on("mouseup", () => (this.setState(GUIComponentState.hover)));
-        this.on("mouseupoutside", () => (this.setState(GUIComponentState.default)));
+        this.on("mousedown", () => this.setState(GUIComponentState.pressed));
+        this.on("mouseup", () => this.setState(GUIComponentState.hover));
+        this.on("mouseupoutside", () =>
+            this.setState(GUIComponentState.default)
+        );
     }
 
     getContainer(state: GUIComponentState) {
@@ -87,8 +90,9 @@ export class GUIComponent extends PIXI.Container {
         let newContainer = this.getContainer(this.state);
         if (newContainer) {
             if (prevContainer) this.removeChild(prevContainer);
-            if (newContainer) this.addChild(newContainer);
+            this.addChild(newContainer);
         }
+        this.onStateChange?.(state);
     }
 
     setBackgroundColor(backgroundColor: number = 0xffffff) {
@@ -104,15 +108,17 @@ export class GUIComponent extends PIXI.Container {
 
     setDefaultContainer(container: PIXI.Container) {
         this.defaultContainer = container;
+        this.defaultContainer.zIndex = 100;
         this.addChild(container);
     }
 
     setHoverContainer(container: PIXI.Container) {
         this.hoverContainer = container;
+        this.hoverContainer.zIndex = 100;
     }
 
     setPressedContainer(container: PIXI.Container) {
         this.pressedContainer = container;
+        this.pressedContainer.zIndex = 100;
     }
-
-};
+}

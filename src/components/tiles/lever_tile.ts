@@ -1,10 +1,11 @@
+import config from "../../config";
 import { GraphicsTile } from "./tile";
 
 export default class LeverTile extends GraphicsTile {
     label = "Lever";
 
-    onColor = 0xff0000;
-    offColor = 0x222222;
+    onColor = config.colors.activeTileColor;
+    offColor = config.colors.inactiveTileColor;
 
     constructor(x: number, y: number) {
         super(x, y);
@@ -25,8 +26,18 @@ export default class LeverTile extends GraphicsTile {
         this.graphics.beginFill(
             this.signalActive ? this.onColor : this.offColor
         );
-        this.graphics.drawRect(35, 35, 50, 50);
+        this.graphics.lineStyle(3, 0x000000);
+        this.graphics.drawRect(10, 10, 100, 100);
 
         this.graphics.endFill();
+
+        this.graphics.beginFill(0xffffff);
+        this.graphics.lineStyle(0);
+
+        if (this.signalActive) {
+            this.graphics.drawRect(8, 72, 104, 40);
+        } else {
+            this.graphics.drawRect(8, 8, 104, 40);
+        }
     }
 }

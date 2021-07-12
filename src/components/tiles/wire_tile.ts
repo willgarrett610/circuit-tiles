@@ -1,3 +1,4 @@
+import config from "../../config";
 import { Connectable, GraphicsTile } from "./tile";
 
 export default class WireTile extends GraphicsTile implements Connectable {
@@ -10,12 +11,10 @@ export default class WireTile extends GraphicsTile implements Connectable {
         right: false,
     };
 
-    color = 0xd9514c;
-
     drawGraphics() {
         if (!this.graphics) return;
 
-        this.graphics.beginFill(this.color);
+        this.graphics.beginFill(config.colors.inactiveTileColor);
         if (Object.entries(this.connect).some(([_, value]) => value))
             this.graphics.drawRect(40, 40, 40, 40);
         else this.graphics.drawRect(35, 35, 50, 50);

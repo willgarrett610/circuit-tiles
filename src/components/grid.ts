@@ -345,7 +345,7 @@ export default class Grid extends PIXI.Container {
         gridPos.y = Math.floor(gridPos.y) * this.size;
 
         this.hlTile.clear();
-        this.hlTile.beginFill(config.highlightTileColor);
+        this.hlTile.beginFill(config.colors.highlightTile);
         this.hlTile.lineStyle(0);
         this.hlTile.drawRect(
             gridPos.x + config.lineWidth / 2,

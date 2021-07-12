@@ -2,8 +2,8 @@ import config from "../../config";
 import { Direction, Rotation } from "../../utils/directions";
 import { GraphicsTile, IOTile } from "./tile";
 
-export default class NotTile extends GraphicsTile implements IOTile {
-    label: string = "NOT Gate";
+export default class DelayTile extends GraphicsTile implements IOTile {
+    label: string = "Delay";
 
     inputs: Direction[] = [Direction.DOWN];
     outputs: Direction[] = [Direction.UP];
@@ -22,10 +22,9 @@ export default class NotTile extends GraphicsTile implements IOTile {
         // this.graphics.endFill();
 
         this.graphics.beginFill(config.colors.inactiveTileColor);
+        this.graphics.lineStyle(5);
 
-        this.graphics.drawPolygon([10, 110, 60, 25, 110, 110]);
-
-        this.graphics.drawCircle(60, 20, 15);
+        this.graphics.drawRect(40, 15, 40, 90);
 
         this.graphics.endFill();
     }

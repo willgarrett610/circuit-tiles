@@ -46,23 +46,44 @@ const main = async () => {
     app.renderer.resize(window.innerWidth, window.innerHeight);
     document.body.appendChild(app.view);
 
-    app.renderer.backgroundColor = config.backgroundColor;
+    app.renderer.backgroundColor = config.colors.background;
 
     let grid = new Grid(100);
 
     app.stage.addChild(grid);
 
+    let menuBar = new GUIWindow(
+        0,
+        0,
+        dimensions()[0],
+        40,
+        config.colors.menuColor
+    );
+
     // Create tile selection gui
 
     let tileSelector = new GUIWindow(
-        config.guiMargin,
-        config.guiMargin,
+        0,
+        40,
         150,
-        dimensions()[1] - config.guiMargin * 2,
-        0xaaaaaa
+        dimensions()[1] - 40,
+        config.colors.menuColor,
+        4
     );
     tileSelector.scrollableY = true;
     tileSelector.scrollMarginY = config.tileSelector.margin * 2;
+
+    const headerText = new PIXI.Text("Tiles", {
+        fontFamily: "Arial",
+        fontSize: 24,
+        fill: 0x000000,
+        fontWeight: "bold",
+    });
+
+    headerText.x = 75 - headerText.width / 2;
+    headerText.y = 10;
+
+    tileSelector.addChild(headerText);
 
     var tileSize =
         (tileSelector.width -
@@ -77,7 +98,7 @@ const main = async () => {
     selectedGraphics.beginFill(0, 0);
     selectedGraphics.lineStyle(
         config.tileSelector.selectedWidth,
-        config.tileSelector.selectedColor
+        config.colors.selectedTileBtn
     );
     selectedGraphics.drawRect(
         config.tileSelector.selectedWidth / 2,
@@ -98,6 +119,7 @@ const main = async () => {
         var x = i - y * config.tileSelector.tilesPerRow;
 
         y =
+            40 +
             config.tileSelector.margin +
             (config.tileSelector.margin * 2 + tileSize) * y +
             config.tileSelector.textSize * y;
@@ -110,7 +132,7 @@ const main = async () => {
             y,
             tileSize,
             tileSize,
-            config.backgroundColor
+            config.colors.background
         );
 
         var tileType = getTileTypes()[i];
@@ -133,7 +155,7 @@ const main = async () => {
         hoverContainer.removeAllListeners();
         var hoverGraphics = new PIXI.Graphics();
 
-        hoverGraphics.beginFill(config.highlightTileColor);
+        hoverGraphics.beginFill(config.colors.highlightTile);
         hoverGraphics.drawRect(
             0,
             0,
@@ -163,9 +185,12 @@ const main = async () => {
 
     app.stage.addChild(tileSelector);
 
+    app.stage.addChild(menuBar);
+
     onResize(() => {
         app.renderer.resize(...dimensions());
         tileSelector.setSize(150, dimensions()[1] - config.guiMargin * 2);
+        menuBar.setSize(dimensions()[0], 40);
     });
 
     window.addEventListener("contextmenu", (e) => e.preventDefault());
