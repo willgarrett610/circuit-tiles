@@ -1,4 +1,6 @@
 import ButtonTile from "./button_tile";
+import ChipInputTile from "./chip_input_tile";
+import ChipOutputTile from "./chip_output_tile";
 import DelayTile from "./delay_tile";
 import DiodeTile from "./diode_tile";
 import LeverTile from "./lever_tile";
@@ -13,6 +15,8 @@ const tileTypes: any = [
     DiodeTile,
     DelayTile,
     ButtonTile,
+    ChipInputTile,
+    ChipOutputTile,
 ];
 
 function getTileTypes(): Array<{ new (x: number, y: number): Tile }> {

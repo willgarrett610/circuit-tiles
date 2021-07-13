@@ -7,13 +7,13 @@ import {
     onResize,
     onScroll,
     pressedKeys,
-} from "../utils";
-import { clamp } from "../utils/math";
-import config from "../config";
-import WireTile from "./tiles/wire_tile";
-import { Tile } from "./tiles/tile";
-import { Direction } from "../utils/directions";
-import getTileTypes from "./tiles/tile_types";
+} from "../../utils";
+import { clamp } from "../../utils/math";
+import config from "../../config";
+import WireTile from "../tiles/wire_tile";
+import { Tile } from "../tiles/tile";
+import { Direction } from "../../utils/directions";
+import getTileTypes from "../tiles/tile_types";
 
 export default class Grid extends PIXI.Container {
     startingSize: number;

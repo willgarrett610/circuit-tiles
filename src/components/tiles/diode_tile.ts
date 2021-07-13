@@ -21,7 +21,11 @@ export default class DiodeTile extends GraphicsTile implements IOTile {
 
         // this.graphics.endFill();
 
-        this.graphics.beginFill(config.colors.inactiveTileColor);
+        this.graphics.beginFill(
+            this.signalActive
+                ? config.colors.activeTileColor
+                : config.colors.inactiveTileColor
+        );
 
         this.graphics.drawPolygon([10, 110, 60, 15, 110, 110]);
 

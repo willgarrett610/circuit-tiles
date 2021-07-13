@@ -21,7 +21,11 @@ export default class NotTile extends GraphicsTile implements IOTile {
 
         // this.graphics.endFill();
 
-        this.graphics.beginFill(config.colors.inactiveTileColor);
+        this.graphics.beginFill(
+            this.signalActive
+                ? config.colors.activeTileColor
+                : config.colors.inactiveTileColor
+        );
 
         this.graphics.drawPolygon([10, 110, 60, 25, 110, 110]);
 

@@ -21,7 +21,11 @@ export default class DelayTile extends GraphicsTile implements IOTile {
 
         // this.graphics.endFill();
 
-        this.graphics.beginFill(config.colors.inactiveTileColor);
+        this.graphics.beginFill(
+            this.signalActive
+                ? config.colors.activeTileColor
+                : config.colors.inactiveTileColor
+        );
         this.graphics.lineStyle(5);
 
         this.graphics.drawRect(40, 15, 40, 90);

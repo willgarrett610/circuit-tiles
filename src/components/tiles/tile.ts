@@ -24,6 +24,8 @@ export abstract class Tile {
     container?: PIXI.Container;
     signalActive = false;
 
+    canUse = () => true;
+
     constructor(x: number, y: number) {
         this.x = x;
         this.y = y;

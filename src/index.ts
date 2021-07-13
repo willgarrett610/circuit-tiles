@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import Grid from "./components/grid";
+import Grid from "./components/grid/grid";
 import {
     dimensions,
     height,
@@ -17,6 +17,7 @@ import { GUIComponent } from "./components/gui/gui_component";
 import ButtonGroup from "./components/gui/button_group";
 
 import init from "./lib";
+import GridManager from "./components/grid/grid_manager";
 
 var mod: typeof import("../crate/pkg");
 
@@ -26,7 +27,7 @@ async function loadMod() {
 
 loadMod();
 
-setTimeout(() => console.log(mod?.add(3, 3)), 5000);
+// setTimeout(() => console.log(mod?.add(3, 3)), 5000);
 // setTimeout(() => console.log(mod), 5000);
 
 // import init, { m } from "../pkg/index_bg.wasm";
@@ -48,9 +49,13 @@ const main = async () => {
 
     app.renderer.backgroundColor = config.colors.background;
 
-    let grid = new Grid(100);
+    let gridManager = new GridManager();
 
-    app.stage.addChild(grid);
+    (window as any).gridManager = gridManager;
+
+    console.log(gridManager);
+
+    app.stage.addChild(gridManager);
 
     let menuBar = new GUIWindow(
         0,
@@ -111,7 +116,7 @@ const main = async () => {
     let tileBtnGroup = new ButtonGroup(selectedGraphics);
 
     tileBtnGroup.onSelectionChange = (i) => {
-        grid.selectedTileType = i;
+        gridManager.getGrid().selectedTileType = i;
     };
 
     for (var i = 0; i < getTileTypes().length; i++) {
@@ -136,9 +141,11 @@ const main = async () => {
         );
 
         var tileType = getTileTypes()[i];
-        var tile = new tileType(0, 0);
+        var tileOff = new tileType(0, 0);
+        var tileOn = new tileType(0, 0);
+        tileOn.signalActive = true;
 
-        var text = new PIXI.Text(tile.label, {
+        var text = new PIXI.Text(tileOff.label, {
             fontFamily: "Arial",
             fontSize: config.tileSelector.textSize,
             fill: 0x000000,
@@ -147,11 +154,10 @@ const main = async () => {
         text.x = x + tileSize / 2 - text.width / 2;
         text.y = y + tileSize + config.tileSelector.margin / 2;
 
-        var defaultContainer = tile.getContainer(tileSize);
+        var defaultContainer = tileOff.getContainer(tileSize);
         defaultContainer.removeAllListeners();
-        tile.container = undefined;
 
-        var hoverContainer = tile.getContainer(tileSize);
+        var hoverContainer = tileOn.getContainer(tileSize);
         hoverContainer.removeAllListeners();
         var hoverGraphics = new PIXI.Graphics();
 
