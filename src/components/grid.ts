@@ -314,7 +314,12 @@ export default class Grid extends PIXI.Container {
             this.lineGraphics.beginFill(config.lineColor);
             this.lineGraphics.lineStyle(0);
             this.lineGraphics.drawRect(
-                x * this.size,
+                x * this.size -
+                    (config.lineWidth *
+                        (x % Math.floor(clamp(200 / this.size, 3, 8)) === 0
+                            ? 2
+                            : 1)) /
+                        2,
                 -this.y,
                 config.lineWidth *
                     (x % Math.floor(clamp(200 / this.size, 3, 8)) === 0
@@ -333,7 +338,12 @@ export default class Grid extends PIXI.Container {
             this.lineGraphics.lineStyle(0);
             this.lineGraphics.drawRect(
                 -this.x,
-                y * this.size,
+                y * this.size -
+                    (config.lineWidth *
+                        (y % Math.floor(clamp(200 / this.size, 3, 8)) === 0
+                            ? 2
+                            : 1)) /
+                        2,
                 width,
                 config.lineWidth *
                     (y % Math.floor(clamp(200 / this.size, 3, 8)) === 0 ? 2 : 1)
