@@ -15,13 +15,13 @@ module.exports = {
                 exclude: /node_modules/,
             },
             {
-              test: /\.wasm$/,
-              type: "webassembly/experimental"
-            }
+                test: /\.wasm$/,
+                type: "webassembly/experimental",
+            },
         ],
     },
     resolve: {
-        extensions: ['.tsx', '.ts', '.js', '.wasm'],
+        extensions: [".tsx", ".ts", ".js", ".wasm"],
         alias: {
             "@": path.resolve(__dirname, "src/"),
         },
@@ -37,7 +37,7 @@ module.exports = {
         }),
         new CopyPlugin([{ from: "assets", to: "assets" }]),
         new WasmPackPlugin({
-            crateDirectory: __dirname,
+            crateDirectory: path.join(__dirname, "crate"),
         }),
     ],
     devServer: {

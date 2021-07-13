@@ -18,7 +18,7 @@ import ButtonGroup from "./components/gui/button_group";
 
 import init from "./lib";
 
-var mod: typeof import("../pkg");
+var mod: typeof import("../crate/pkg");
 
 async function loadMod() {
     mod = await init();

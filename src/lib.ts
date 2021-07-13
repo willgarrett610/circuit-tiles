@@ -10,6 +10,6 @@
 // }
 
 export default async function init() {
-    const mod = await import("../pkg");
+    const mod = await import("../crate/pkg");
     return mod;
 }
