@@ -14,7 +14,7 @@ import WireTile from "../tiles/wire_tile";
 import { Tile } from "../tiles/tile";
 import { Direction } from "../../utils/directions";
 import getTileTypes from "../tiles/tile_types";
-
+import "../../utils/compute-logic";
 export default class Grid extends PIXI.Container {
     startingSize: number;
     size: number;
