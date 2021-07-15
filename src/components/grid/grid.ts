@@ -14,29 +14,33 @@ import { Tile } from "../tiles/tile";
 import { Direction } from "../../utils/directions";
 import getTileTypes from "../tiles/tile_types";
 import "../../utils/compute-logic";
+import { GridAction, Interaction } from "../../utils/action";
 export default class Grid extends PIXI.Container {
     startingSize: number;
     size: number;
-    tiles: { [key: string]: Tile | undefined };
+    tiles: { [key: string]: Tile | undefined } = {};
 
-    history: Tile[][];
+    history: { action: GridAction; tile: Tile }[][] = [];
+    tempHistory: { action: GridAction; tile: Tile }[] = [];
 
-    mousePos: [x: number, y: number];
-    prevMousePos: [x: number, y: number];
+    mousePos: [x: number, y: number] = [0, 0];
+    prevMousePos: [x: number, y: number] = [0, 0];
 
     lineGraphics: PIXI.Graphics;
     hlTile: PIXI.Graphics;
 
     selectedTileType: number = -1;
 
+    interactive = true;
+    sortableChildren = true;
+    zIndex = 1000;
+
+    currentInteraction: Interaction = Interaction.NONE;
+
     constructor(size: number) {
         super();
         this.startingSize = size;
         this.size = size;
-        this.tiles = {};
-        this.history = [];
-        this.prevMousePos = [0, 0];
-        this.mousePos = [0, 0];
 
         this.lineGraphics = new PIXI.Graphics();
         this.lineGraphics.zIndex = 1000;
@@ -51,13 +55,10 @@ export default class Grid extends PIXI.Container {
 
         onResize(this.update);
 
-        this.interactive = true;
-        this.sortableChildren = true;
-        this.zIndex = 1000;
-
         onScroll(this, this.scroll);
 
         this.on("mousemove", this.mouseMove);
+        this.on("mouseup", this.mouseUp);
 
         onKeyDown(this.keyDown);
     }
@@ -86,7 +87,8 @@ export default class Grid extends PIXI.Container {
         const connectTiles = (
             newTile: Tile,
             prevTile: Tile | undefined,
-            direction: Direction | undefined
+            direction: Direction | undefined,
+            editedNewTile: boolean
         ) => {
             if (newTile !== undefined && direction !== undefined) {
                 if (prevTile !== undefined) {
@@ -96,7 +98,16 @@ export default class Grid extends PIXI.Container {
                     newTile.connections[Direction.toLower(direction)] =
                         prevTile;
                     prevTile.updateContainer?.();
+                    this.tempHistory.push({
+                        action: GridAction.ADD,
+                        tile: prevTile,
+                    });
                 }
+
+                this.tempHistory.push({
+                    action: editedNewTile ? GridAction.EDIT : GridAction.ADD,
+                    tile: newTile,
+                });
 
                 newTile.updateContainer?.();
             }
@@ -104,7 +115,7 @@ export default class Grid extends PIXI.Container {
 
         const tileAtLocation = this.getTile(x, y);
         if (tileAtLocation) {
-            connectTiles(tileAtLocation, prevTile, direction);
+            connectTiles(tileAtLocation, prevTile, direction, true);
             return tileAtLocation;
         }
 
@@ -113,7 +124,7 @@ export default class Grid extends PIXI.Container {
         const tileGraphics: PIXI.Container = tileObj.getContainer(this.size);
         this.addChild(tileGraphics);
 
-        connectTiles(tileObj, prevTile, direction);
+        connectTiles(tileObj, prevTile, direction, false);
 
         return tileObj;
     }
@@ -145,6 +156,19 @@ export default class Grid extends PIXI.Container {
         return true;
     }
 
+    currentHistory = () => {
+        return this.history[this.history.length - 1];
+    };
+
+    newHistory = () => {
+        this.history.push([]);
+    };
+
+    cleanHistory = () => {
+        if (this.history[this.history.length - 1].length === 0)
+            this.history.pop();
+    };
+
     scroll = (e: WheelEvent) => {
         if (e.deltaY === 0) return;
 
@@ -170,9 +194,13 @@ export default class Grid extends PIXI.Container {
         this.mousePos = [e.pageX, e.pageY];
         if (mouseDown.left) {
             if (e.shiftKey || pressedKeys["Space"]) {
+                this.currentInteraction = Interaction.NONE;
+
                 this.x += e.movementX;
                 this.y += e.movementY;
             } else if (pressedKeys["KeyX"]) {
+                this.currentInteraction = Interaction.REMOVING;
+
                 const gridPoints = this.gridPointsBetween(
                     ...locationToTuple(
                         this.screenToGrid(...this.prevMousePos, true)
@@ -185,6 +213,18 @@ export default class Grid extends PIXI.Container {
                 for (let gridPoint of gridPoints)
                     this.removeTile(...locationToTuple(gridPoint));
             } else {
+                if (this.currentInteraction !== Interaction.PLACING) {
+                    if (this.history.length > 0) {
+                        this.currentHistory().push(...this.tempHistory);
+                        this.cleanHistory();
+                    }
+                    this.newHistory();
+                    this.tempHistory = [];
+                    console.log(this.history);
+                }
+
+                this.currentInteraction = Interaction.PLACING;
+
                 const gridPoints = this.gridPointsBetween(
                     ...locationToTuple(
                         this.screenToGrid(...this.prevMousePos, true)
@@ -208,9 +248,23 @@ export default class Grid extends PIXI.Container {
                     prevTile = newTile;
                 }
             }
+            this.update();
         }
 
-        this.update();
+        this.updateHighlightTile();
+    };
+
+    mouseUp = () => {
+        this.currentInteraction = Interaction.NONE;
+    };
+
+    updateHighlightTile = () => {
+        let gridPos = this.screenToGrid(...this.mousePos, true, true);
+
+        this.hlTile.clear();
+        this.hlTile.beginFill(config.colors.highlightTile);
+        this.hlTile.lineStyle(0);
+        this.hlTile.drawRect(gridPos.x, gridPos.y, this.size, this.size);
     };
 
     click = (event: PIXI.interaction.InteractionEvent) => {
@@ -362,20 +416,6 @@ export default class Grid extends PIXI.Container {
                     (y % Math.floor(clamp(200 / this.size, 3, 8)) === 0 ? 2 : 1)
             );
         }
-
-        let gridPos = this.screenToGrid(...this.mousePos);
-        gridPos.x = Math.floor(gridPos.x) * this.size;
-        gridPos.y = Math.floor(gridPos.y) * this.size;
-
-        this.hlTile.clear();
-        this.hlTile.beginFill(config.colors.highlightTile);
-        this.hlTile.lineStyle(0);
-        this.hlTile.drawRect(
-            gridPos.x + config.lineWidth / 2,
-            gridPos.y + config.lineWidth / 2,
-            this.size,
-            this.size
-        );
     }
 
     renderTiles() {
@@ -386,6 +426,7 @@ export default class Grid extends PIXI.Container {
     update = () => {
         this.renderGrid();
         this.renderTiles();
+        this.updateHighlightTile();
     };
 
     gridPointsBetween = (x0: number, y0: number, x1: number, y1: number) => {
@@ -425,8 +466,18 @@ export default class Grid extends PIXI.Container {
      * @param y Y in screen space
      * @returns Coordinates in grid space
      */
-    screenToGrid = (x: number, y: number, floored = false) =>
-        floored
+    screenToGrid = (x: number, y: number, floored = false, upScale = false) =>
+        upScale
+            ? floored
+                ? {
+                      x: Math.floor((-this.x + x) / this.size) * this.size,
+                      y: Math.floor((-this.y + y) / this.size) * this.size,
+                  }
+                : {
+                      x: -this.x + x,
+                      y: -this.y + y,
+                  }
+            : floored
             ? {
                   x: Math.floor((-this.x + x) / this.size),
                   y: Math.floor((-this.y + y) / this.size),
@@ -442,8 +493,14 @@ export default class Grid extends PIXI.Container {
      * @param y Y in grid space
      * @returns Coordinates in screen space
      */
-    gridToScreen = (x: number, y: number) => ({
-        x: Math.floor(x) * this.size + this.x,
-        y: Math.floor(y) * this.size + this.y,
-    });
+    gridToScreen = (x: number, y: number, floored = true) =>
+        floored
+            ? {
+                  x: Math.floor(x) * this.size + this.x,
+                  y: Math.floor(y) * this.size + this.y,
+              }
+            : {
+                  x: x * this.size + this.x,
+                  y: y * this.size + this.y,
+              };
 }
