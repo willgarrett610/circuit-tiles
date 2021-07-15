@@ -10,7 +10,6 @@ import {
 } from "../../utils";
 import { clamp } from "../../utils/math";
 import config from "../../config";
-import WireTile from "../tiles/wire_tile";
 import { Tile } from "../tiles/tile";
 import { Direction } from "../../utils/directions";
 import getTileTypes from "../tiles/tile_types";
@@ -19,6 +18,8 @@ export default class Grid extends PIXI.Container {
     startingSize: number;
     size: number;
     tiles: { [key: string]: Tile | undefined };
+
+    history: Tile[][];
 
     mousePos: [x: number, y: number];
     prevMousePos: [x: number, y: number];
@@ -33,6 +34,7 @@ export default class Grid extends PIXI.Container {
         this.startingSize = size;
         this.size = size;
         this.tiles = {};
+        this.history = [];
         this.prevMousePos = [0, 0];
         this.mousePos = [0, 0];
 
@@ -55,8 +57,6 @@ export default class Grid extends PIXI.Container {
 
         onScroll(this, this.scroll);
 
-        this.on("mousedown", this.mouseDown);
-        this.on("mouseup", this.mouseUp);
         this.on("mousemove", this.mouseMove);
 
         onKeyDown(this.keyDown);
@@ -77,13 +77,29 @@ export default class Grid extends PIXI.Container {
     addTile<T extends Tile>(
         x: number,
         y: number,
-        tile: { new (x: number, y: number): T }
+        tile: {
+            new (x: number, y: number): T;
+        },
+        prevTile: Tile | undefined = undefined,
+        direction: Direction | undefined = undefined
     ): [placed: boolean, tile: Tile | undefined] {
         if (this.getTile(x, y)) return [false, this.getTile(x, y)];
         let tileObj = new tile(x, y);
         this.setTile(x, y, tileObj);
         const tileGraphics: PIXI.Container = tileObj.getContainer(this.size);
         this.addChild(tileGraphics);
+
+        if (tileObj !== undefined && direction !== undefined) {
+            if (prevTile !== undefined) {
+                prevTile.connections[
+                    Direction.toLower(Direction.getOpposite(direction))
+                ] = tileObj;
+                tileObj.connections[Direction.toLower(direction)] = prevTile;
+                prevTile.updateContainer?.();
+            }
+
+            tileObj.updateContainer?.();
+        }
 
         return [true, tileObj];
     }
@@ -100,13 +116,16 @@ export default class Grid extends PIXI.Container {
             { offset: [0, 1], side: "up" },
         ];
         for (let removalSpot of removalSpots) {
-            const adjacentTile: any = this.getTile(
+            const adjacentTile = this.getTile(
                 x + removalSpot.offset[0],
                 y + removalSpot.offset[1]
             );
-            if (adjacentTile && adjacentTile.connect !== undefined) {
-                adjacentTile.connect[removalSpot.side] = false;
-                adjacentTile.updateContainer();
+
+            if (adjacentTile !== undefined) {
+                adjacentTile.connections[
+                    removalSpot.side as "up" | "right" | "down" | "left"
+                ] = undefined;
+                adjacentTile.updateContainer?.();
             }
         }
         return true;
@@ -130,10 +149,6 @@ export default class Grid extends PIXI.Container {
 
         this.update();
     };
-
-    mouseDown = (e: PIXI.interaction.InteractionEvent) => {};
-
-    mouseUp = (e: PIXI.interaction.InteractionEvent) => {};
 
     mouseMove = (event: any) => {
         let e = event.data.originalEvent as PointerEvent;
@@ -169,30 +184,13 @@ export default class Grid extends PIXI.Container {
                 for (let i = 0; i < gridPoints.length; i++) {
                     const gridPoint = gridPoints[i];
 
-                    const [placed, newTile] = this.addTile(
-                        ...locationToTuple(gridPoint),
-                        getTileTypes()[this.selectedTileType]
-                    );
-
-                    if (
-                        gridPoint.direction != undefined &&
-                        newTile instanceof WireTile
-                    ) {
-                        if (prevTile && prevTile instanceof WireTile)
-                            (prevTile.connect as any)[
-                                ["down", "right", "up", "left"][
-                                    gridPoint.direction.valueOf()
-                                ]
-                            ] = true;
-                        ((newTile as WireTile).connect as any)[
-                            ["up", "left", "down", "right"][
-                                gridPoint.direction.valueOf()
-                            ]
-                        ] = true;
-
-                        prevTile?.updateContainer?.();
-                        newTile?.updateContainer?.();
-                    }
+                    const [_, newTile]: [boolean, Tile | undefined] =
+                        this.addTile(
+                            ...locationToTuple(gridPoint),
+                            getTileTypes()[this.selectedTileType],
+                            prevTile,
+                            gridPoint.direction
+                        );
 
                     prevTile = newTile;
                 }
@@ -226,7 +224,7 @@ export default class Grid extends PIXI.Container {
     };
 
     keyDown = (e: KeyboardEvent) => {
-        if (e.ctrlKey && !e.shiftKey) {
+        if (!e.ctrlKey && !e.shiftKey) {
             if (e.code === "Equal") {
                 e.preventDefault();
 
@@ -393,7 +391,7 @@ export default class Grid extends PIXI.Container {
         for (let ix = 0, iy = 0; ix < nx || iy < ny; ) {
             if ((1 + 2 * ix) * ny < (1 + 2 * iy) * nx) {
                 point.x += signX;
-                point.direction = signX < 0 ? Direction.LEFT : Direction.RIGHT;
+                point.direction = signX < 0 ? Direction.RIGHT : Direction.LEFT;
                 ix++;
             } else {
                 point.y += signY;

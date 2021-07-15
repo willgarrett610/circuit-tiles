@@ -2,21 +2,33 @@ import { Direction, Rotation } from "../../utils/directions";
 import * as PIXI from "pixi.js";
 import config from "../../config";
 
-export interface Connectable {
-    connect: {
-        up: boolean;
-        down: boolean;
-        left: boolean;
-        right: boolean;
-    };
-}
-
-export interface IOTile {
-    inputs: Direction[];
-    outputs: Direction[];
+export enum ConnectionType {
+    BOTH,
+    INPUT,
+    OUTPUT,
+    BLOCKED,
 }
 
 export abstract class Tile {
+    connections: {
+        up?: Tile;
+        down?: Tile;
+        left?: Tile;
+        right?: Tile;
+    } = {
+        up: undefined,
+        down: undefined,
+        left: undefined,
+        right: undefined,
+    };
+
+    connectionTemplate = {
+        up: ConnectionType.BOTH,
+        down: ConnectionType.BOTH,
+        left: ConnectionType.BOTH,
+        right: ConnectionType.BOTH,
+    };
+
     abstract label: string;
     x = 0;
     y = 0;

@@ -1,11 +1,18 @@
 import config from "../../config";
-import { GraphicsTile } from "./tile";
+import { ConnectionType, GraphicsTile } from "./tile";
 
 export default class LeverTile extends GraphicsTile {
     label = "Lever";
 
     onColor = config.colors.activeTileColor;
     offColor = config.colors.inactiveTileColor;
+
+    connectionTemplate = {
+        up: ConnectionType.OUTPUT,
+        down: ConnectionType.OUTPUT,
+        left: ConnectionType.OUTPUT,
+        right: ConnectionType.OUTPUT,
+    };
 
     constructor(x: number, y: number) {
         super(x, y);

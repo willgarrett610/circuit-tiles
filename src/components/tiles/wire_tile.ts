@@ -1,14 +1,14 @@
 import config from "../../config";
-import { Connectable, GraphicsTile } from "./tile";
+import { ConnectionType, GraphicsTile } from "./tile";
 
-export default class WireTile extends GraphicsTile implements Connectable {
+export default class WireTile extends GraphicsTile {
     label = "Wire";
 
-    connect = {
-        up: false,
-        down: false,
-        left: false,
-        right: false,
+    connectionTemplate = {
+        up: ConnectionType.BOTH,
+        down: ConnectionType.BOTH,
+        left: ConnectionType.BOTH,
+        right: ConnectionType.BOTH,
     };
 
     drawGraphics() {
@@ -19,14 +19,14 @@ export default class WireTile extends GraphicsTile implements Connectable {
                 ? config.colors.activeTileColor
                 : config.colors.inactiveTileColor
         );
-        if (Object.entries(this.connect).some(([_, value]) => value))
+        if (Object.entries(this.connections).some(([_, value]) => value))
             this.graphics.drawRect(40, 40, 40, 40);
-        else this.graphics.drawRect(35, 35, 50, 50);
+        else this.graphics.drawRect(30, 30, 60, 60);
 
-        if (this.connect.up) this.graphics.drawRect(40, 0, 40, 40);
-        if (this.connect.down) this.graphics.drawRect(40, 80, 40, 40);
-        if (this.connect.left) this.graphics.drawRect(0, 40, 40, 40);
-        if (this.connect.right) this.graphics.drawRect(80, 40, 40, 40);
+        if (this.connections.up) this.graphics.drawRect(40, 0, 40, 40);
+        if (this.connections.down) this.graphics.drawRect(40, 80, 40, 40);
+        if (this.connections.left) this.graphics.drawRect(0, 40, 40, 40);
+        if (this.connections.right) this.graphics.drawRect(80, 40, 40, 40);
         this.graphics.endFill();
     }
 }

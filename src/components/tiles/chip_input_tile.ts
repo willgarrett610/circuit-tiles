@@ -1,15 +1,15 @@
 import config from "../../config";
 import { Direction } from "../../utils/directions";
-import { GraphicsTile, IOTile } from "./tile";
+import { ConnectionType, GraphicsTile } from "./tile";
 
-export default class ChipInputTile extends GraphicsTile implements IOTile {
-    inputs: Direction[] = [
-        Direction.UP,
-        Direction.RIGHT,
-        Direction.DOWN,
-        Direction.LEFT,
-    ];
-    outputs: Direction[] = [];
+export default class ChipInputTile extends GraphicsTile {
+    connectionTemplate = {
+        up: ConnectionType.INPUT,
+        down: ConnectionType.INPUT,
+        left: ConnectionType.INPUT,
+        right: ConnectionType.INPUT,
+    };
+
     label: string = "Input Tile";
 
     drawGraphics(): void {

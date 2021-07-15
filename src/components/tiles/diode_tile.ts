@@ -1,12 +1,16 @@
 import config from "../../config";
 import { Direction, Rotation } from "../../utils/directions";
-import { GraphicsTile, IOTile } from "./tile";
+import { ConnectionType, GraphicsTile } from "./tile";
 
-export default class DiodeTile extends GraphicsTile implements IOTile {
+export default class DiodeTile extends GraphicsTile {
     label: string = "Diode";
 
-    inputs: Direction[] = [Direction.DOWN];
-    outputs: Direction[] = [Direction.UP];
+    connectionTemplate = {
+        up: ConnectionType.INPUT,
+        down: ConnectionType.OUTPUT,
+        left: ConnectionType.BLOCKED,
+        right: ConnectionType.BLOCKED,
+    };
 
     direction = Rotation.CLOCKWISE;
 
