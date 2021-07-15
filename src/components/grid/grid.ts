@@ -80,28 +80,42 @@ export default class Grid extends PIXI.Container {
         tile: {
             new (x: number, y: number): T;
         },
-        prevTile: Tile | undefined = undefined,
-        direction: Direction | undefined = undefined
-    ): [placed: boolean, tile: Tile | undefined] {
-        if (this.getTile(x, y)) return [false, this.getTile(x, y)];
-        let tileObj = new tile(x, y);
+        prevTile: Tile | undefined,
+        direction: Direction | undefined
+    ): Tile | undefined {
+        const connectTiles = (
+            newTile: Tile,
+            prevTile: Tile | undefined,
+            direction: Direction | undefined
+        ) => {
+            if (newTile !== undefined && direction !== undefined) {
+                if (prevTile !== undefined) {
+                    prevTile.connections[
+                        Direction.toLower(Direction.getOpposite(direction))
+                    ] = newTile;
+                    newTile.connections[Direction.toLower(direction)] =
+                        prevTile;
+                    prevTile.updateContainer?.();
+                }
+
+                newTile.updateContainer?.();
+            }
+        };
+
+        const tileAtLocation = this.getTile(x, y);
+        if (tileAtLocation) {
+            connectTiles(tileAtLocation, prevTile, direction);
+            return tileAtLocation;
+        }
+
+        const tileObj = new tile(x, y);
         this.setTile(x, y, tileObj);
         const tileGraphics: PIXI.Container = tileObj.getContainer(this.size);
         this.addChild(tileGraphics);
 
-        if (tileObj !== undefined && direction !== undefined) {
-            if (prevTile !== undefined) {
-                prevTile.connections[
-                    Direction.toLower(Direction.getOpposite(direction))
-                ] = tileObj;
-                tileObj.connections[Direction.toLower(direction)] = prevTile;
-                prevTile.updateContainer?.();
-            }
+        connectTiles(tileObj, prevTile, direction);
 
-            tileObj.updateContainer?.();
-        }
-
-        return [true, tileObj];
+        return tileObj;
     }
 
     removeTile(x: number, y: number) {
@@ -184,13 +198,12 @@ export default class Grid extends PIXI.Container {
                 for (let i = 0; i < gridPoints.length; i++) {
                     const gridPoint = gridPoints[i];
 
-                    const [_, newTile]: [boolean, Tile | undefined] =
-                        this.addTile(
-                            ...locationToTuple(gridPoint),
-                            getTileTypes()[this.selectedTileType],
-                            prevTile,
-                            gridPoint.direction
-                        );
+                    const newTile: Tile | undefined = this.addTile(
+                        ...locationToTuple(gridPoint),
+                        getTileTypes()[this.selectedTileType],
+                        prevTile,
+                        gridPoint.direction
+                    );
 
                     prevTile = newTile;
                 }
@@ -215,7 +228,9 @@ export default class Grid extends PIXI.Container {
             } else {
                 this.addTile(
                     ...gridPoint,
-                    getTileTypes()[this.selectedTileType]
+                    getTileTypes()[this.selectedTileType],
+                    undefined,
+                    undefined
                 );
             }
 
