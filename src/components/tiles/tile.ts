@@ -14,15 +14,15 @@ export abstract class Tile {
     copyProps = ["connections", "label", "x", "y", "direction", "signalActive"];
 
     connections: {
-        up?: Tile;
-        down?: Tile;
-        left?: Tile;
-        right?: Tile;
+        up: boolean;
+        down: boolean;
+        left: boolean;
+        right: boolean;
     } = {
-        up: undefined,
-        down: undefined,
-        left: undefined,
-        right: undefined,
+        up: false,
+        down: false,
+        left: false,
+        right: false,
     };
 
     connectionTemplate = {
@@ -84,6 +84,19 @@ export abstract class Tile {
             this.container.rotation = (this.direction.valueOf() * Math.PI) / 2;
         }
     }
+
+    clone() {
+        let output: Tile = new (this.type as any)(this.x, this.y);
+
+        return output;
+    }
+
+    // clone() {
+    //     const output = this.createClone();
+    //     output.connections = { ...this.connections };
+    // }
+
+    // abstract createClone(): Tile;
 }
 
 export abstract class SpriteTile extends Tile {

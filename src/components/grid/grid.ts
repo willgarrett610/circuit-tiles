@@ -23,14 +23,10 @@ export default class Grid extends PIXI.Container {
     history: {
         action: GridAction;
         tile: Tile;
-        oldPayload?: object;
-        newPayload?: object;
     }[][] = [[]];
     tempHistory: {
         action: GridAction;
         tile: Tile;
-        oldPayload?: object;
-        newPayload?: object;
     }[] = [];
 
     mousePos: [x: number, y: number] = [0, 0];
@@ -108,28 +104,28 @@ export default class Grid extends PIXI.Container {
                 const oppositeDirection = Direction.toLower(
                     Direction.getOpposite(direction)
                 );
-                if (prevTile.connections[oppositeDirection] !== newTile) {
-                    prevTile.connections[oppositeDirection] = newTile;
+                if (!prevTile.connections[oppositeDirection]) {
+                    prevTile.connections[oppositeDirection] = true;
                     this.tempHistory.push({
                         action: GridAction.EDIT,
-                        tile: prevTile,
+                        tile: prevTile.clone(),
                     });
                 }
                 const directDirection = Direction.toLower(direction);
-                if (newTile.connections[directDirection] !== prevTile) {
-                    newTile.connections[directDirection] = prevTile;
+                if (!newTile.connections[directDirection]) {
+                    newTile.connections[directDirection] = true;
                     this.tempHistory.push({
                         action: editedNewTile
                             ? GridAction.EDIT
                             : GridAction.ADD,
-                        tile: newTile,
+                        tile: newTile.clone(),
                     });
                 }
                 prevTile.updateContainer?.();
             } else if (!editedNewTile) {
                 this.tempHistory.push({
                     action: GridAction.ADD,
-                    tile: newTile,
+                    tile: newTile.clone(),
                 });
             }
 
@@ -175,9 +171,9 @@ export default class Grid extends PIXI.Container {
 
             if (
                 adjacentTile !== undefined &&
-                adjacentTile.connections[removalSpot.side] !== undefined
+                adjacentTile.connections[removalSpot.side]
             ) {
-                adjacentTile.connections[removalSpot.side] = undefined;
+                adjacentTile.connections[removalSpot.side] = false;
                 this.tempHistory.push({
                     action: GridAction.EDIT,
                     tile: adjacentTile,
@@ -194,6 +190,22 @@ export default class Grid extends PIXI.Container {
 
     newHistory = () => {
         this.history.push([]);
+    };
+
+    undo = () => {
+        this.finishInteraction();
+        if (this.history.length < 2) return;
+        const actions = this.history[this.history.length - 2];
+        for (let { action, tile } of actions) {
+            if (action === GridAction.ADD) {
+                const refTile = this.getTile(tile.x, tile.y);
+                if (refTile) this.removeChild(refTile.getContainer(this.size));
+                this.deleteTile(tile.x, tile.y);
+            }
+        }
+
+        this.history.splice(this.history.length - 2, 1);
+        // console.log("undo:", this.history[this.history.length - 2]);
     };
 
     cleanHistory = () => {
@@ -330,7 +342,22 @@ export default class Grid extends PIXI.Container {
         this.finishInteraction();
     };
 
+    keyActionCooldownTime = 250;
+    lastKeyActionTime = 0;
+
     keyDown = (e: KeyboardEvent) => {
+        const currTime = Date.now();
+        if (currTime - this.lastKeyActionTime < this.keyActionCooldownTime)
+            return;
+        if (e.ctrlKey && e.code === "KeyZ") {
+            e.preventDefault();
+            this.lastKeyActionTime = currTime;
+            if (e.shiftKey) {
+            } else {
+                this.undo();
+            }
+        }
+
         if (!e.ctrlKey && !e.shiftKey) {
             if (e.code === "Equal") {
                 e.preventDefault();
