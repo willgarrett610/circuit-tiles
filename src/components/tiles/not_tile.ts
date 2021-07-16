@@ -3,6 +3,7 @@ import { Direction, Rotation } from "../../utils/directions";
 import { ConnectionType, GraphicsTile } from "./tile";
 
 export default class NotTile extends GraphicsTile {
+    type = NotTile;
     label: string = "NOT Gate";
 
     connectionTemplate = {

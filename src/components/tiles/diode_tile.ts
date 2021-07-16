@@ -3,6 +3,7 @@ import { Direction, Rotation } from "../../utils/directions";
 import { ConnectionType, GraphicsTile } from "./tile";
 
 export default class DiodeTile extends GraphicsTile {
+    type = DiodeTile;
     label: string = "Diode";
 
     connectionTemplate = {

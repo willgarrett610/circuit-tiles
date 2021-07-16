@@ -1,7 +1,8 @@
 import config from "../../config";
-import { ConnectionType, GraphicsTile } from "./tile";
+import { ConnectionType, GraphicsTile, Tile } from "./tile";
 
 export default class WireTile extends GraphicsTile {
+    type = WireTile;
     label = "Wire";
 
     connectionTemplate = {

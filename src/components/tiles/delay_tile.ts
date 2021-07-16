@@ -3,6 +3,7 @@ import { Direction, Rotation } from "../../utils/directions";
 import { ConnectionType, GraphicsTile } from "./tile";
 
 export default class DelayTile extends GraphicsTile {
+    type = DelayTile;
     label: string = "Delay";
 
     connectionTemplate = {

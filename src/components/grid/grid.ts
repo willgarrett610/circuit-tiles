@@ -20,8 +20,18 @@ export default class Grid extends PIXI.Container {
     size: number;
     tiles: { [key: string]: Tile | undefined } = {};
 
-    history: { action: GridAction; tile: Tile }[][] = [];
-    tempHistory: { action: GridAction; tile: Tile }[] = [];
+    history: {
+        action: GridAction;
+        tile: Tile;
+        oldPayload?: object;
+        newPayload?: object;
+    }[][] = [[]];
+    tempHistory: {
+        action: GridAction;
+        tile: Tile;
+        oldPayload?: object;
+        newPayload?: object;
+    }[] = [];
 
     mousePos: [x: number, y: number] = [0, 0];
     prevMousePos: [x: number, y: number] = [0, 0];
@@ -58,7 +68,7 @@ export default class Grid extends PIXI.Container {
         onScroll(this, this.scroll);
 
         this.on("mousemove", this.mouseMove);
-        this.on("mouseup", this.mouseUp);
+        // this.on("mouseup", this.mouseUp);
 
         onKeyDown(this.keyDown);
     }
@@ -90,27 +100,40 @@ export default class Grid extends PIXI.Container {
             direction: Direction | undefined,
             editedNewTile: boolean
         ) => {
-            if (newTile !== undefined && direction !== undefined) {
-                if (prevTile !== undefined) {
-                    prevTile.connections[
-                        Direction.toLower(Direction.getOpposite(direction))
-                    ] = newTile;
-                    newTile.connections[Direction.toLower(direction)] =
-                        prevTile;
-                    prevTile.updateContainer?.();
+            if (
+                newTile !== undefined &&
+                prevTile !== undefined &&
+                direction !== undefined
+            ) {
+                const oppositeDirection = Direction.toLower(
+                    Direction.getOpposite(direction)
+                );
+                if (prevTile.connections[oppositeDirection] !== newTile) {
+                    prevTile.connections[oppositeDirection] = newTile;
                     this.tempHistory.push({
-                        action: GridAction.ADD,
+                        action: GridAction.EDIT,
                         tile: prevTile,
                     });
                 }
-
+                const directDirection = Direction.toLower(direction);
+                if (newTile.connections[directDirection] !== prevTile) {
+                    newTile.connections[directDirection] = prevTile;
+                    this.tempHistory.push({
+                        action: editedNewTile
+                            ? GridAction.EDIT
+                            : GridAction.ADD,
+                        tile: newTile,
+                    });
+                }
+                prevTile.updateContainer?.();
+            } else if (!editedNewTile) {
                 this.tempHistory.push({
-                    action: editedNewTile ? GridAction.EDIT : GridAction.ADD,
+                    action: GridAction.ADD,
                     tile: newTile,
                 });
-
-                newTile.updateContainer?.();
             }
+
+            newTile.updateContainer?.();
         };
 
         const tileAtLocation = this.getTile(x, y);
@@ -132,9 +155,13 @@ export default class Grid extends PIXI.Container {
     removeTile(x: number, y: number) {
         const tile = this.getTile(x, y);
         if (!tile) return false;
+        this.tempHistory.push({ action: GridAction.REMOVE, tile });
         this.removeChild(tile.getContainer(this.size));
         this.deleteTile(x, y);
-        const removalSpots = [
+        const removalSpots: {
+            offset: number[];
+            side: "up" | "right" | "down" | "left";
+        }[] = [
             { offset: [-1, 0], side: "right" },
             { offset: [1, 0], side: "left" },
             { offset: [0, -1], side: "down" },
@@ -146,10 +173,15 @@ export default class Grid extends PIXI.Container {
                 y + removalSpot.offset[1]
             );
 
-            if (adjacentTile !== undefined) {
-                adjacentTile.connections[
-                    removalSpot.side as "up" | "right" | "down" | "left"
-                ] = undefined;
+            if (
+                adjacentTile !== undefined &&
+                adjacentTile.connections[removalSpot.side] !== undefined
+            ) {
+                adjacentTile.connections[removalSpot.side] = undefined;
+                this.tempHistory.push({
+                    action: GridAction.EDIT,
+                    tile: adjacentTile,
+                });
                 adjacentTile.updateContainer?.();
             }
         }
@@ -194,8 +226,6 @@ export default class Grid extends PIXI.Container {
         this.mousePos = [e.pageX, e.pageY];
         if (mouseDown.left) {
             if (e.shiftKey || pressedKeys["Space"]) {
-                this.currentInteraction = Interaction.NONE;
-
                 this.x += e.movementX;
                 this.y += e.movementY;
             } else if (pressedKeys["KeyX"]) {
@@ -213,16 +243,6 @@ export default class Grid extends PIXI.Container {
                 for (let gridPoint of gridPoints)
                     this.removeTile(...locationToTuple(gridPoint));
             } else {
-                if (this.currentInteraction !== Interaction.PLACING) {
-                    if (this.history.length > 0) {
-                        this.currentHistory().push(...this.tempHistory);
-                        this.cleanHistory();
-                    }
-                    this.newHistory();
-                    this.tempHistory = [];
-                    console.log(this.history);
-                }
-
                 this.currentInteraction = Interaction.PLACING;
 
                 const gridPoints = this.gridPointsBetween(
@@ -254,8 +274,21 @@ export default class Grid extends PIXI.Container {
         this.updateHighlightTile();
     };
 
-    mouseUp = () => {
-        this.currentInteraction = Interaction.NONE;
+    // mouseUp = () => {
+    //     this.finishInteraction();
+    // };
+
+    finishInteraction = () => {
+        if (this.currentInteraction !== Interaction.NONE) {
+            this.currentInteraction = Interaction.NONE;
+            if (this.history.length > 0) {
+                this.currentHistory().push(...this.tempHistory);
+                this.cleanHistory();
+            }
+            console.log(this.history);
+            this.newHistory();
+            this.tempHistory = [];
+        }
     };
 
     updateHighlightTile = () => {
@@ -268,6 +301,7 @@ export default class Grid extends PIXI.Container {
     };
 
     click = (event: PIXI.interaction.InteractionEvent) => {
+        console.log("click");
         if (
             event.data.button == 0 &&
             !event.data.originalEvent.shiftKey &&
@@ -278,8 +312,10 @@ export default class Grid extends PIXI.Container {
             );
 
             if (pressedKeys["KeyX"]) {
+                this.currentInteraction = Interaction.REMOVING;
                 this.removeTile(...gridPoint);
             } else {
+                this.currentInteraction = Interaction.PLACING;
                 this.addTile(
                     ...gridPoint,
                     getTileTypes()[this.selectedTileType],
@@ -290,6 +326,8 @@ export default class Grid extends PIXI.Container {
 
             this.update();
         }
+
+        this.finishInteraction();
     };
 
     keyDown = (e: KeyboardEvent) => {

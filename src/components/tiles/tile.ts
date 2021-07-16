@@ -8,8 +8,11 @@ export enum ConnectionType {
     OUTPUT,
     BLOCKED,
 }
-
 export abstract class Tile {
+    abstract type: typeof Tile;
+
+    copyProps = ["connections", "label", "x", "y", "direction", "signalActive"];
+
     connections: {
         up?: Tile;
         down?: Tile;

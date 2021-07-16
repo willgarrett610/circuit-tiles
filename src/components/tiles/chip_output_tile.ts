@@ -3,6 +3,7 @@ import { Direction } from "../../utils/directions";
 import { ConnectionType, GraphicsTile } from "./tile";
 
 export default class ChipOutputTile extends GraphicsTile {
+    type = ChipOutputTile;
     connectionTemplate = {
         up: ConnectionType.OUTPUT,
         down: ConnectionType.OUTPUT,

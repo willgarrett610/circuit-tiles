@@ -2,6 +2,7 @@ import config from "../../config";
 import { ConnectionType, GraphicsTile } from "./tile";
 
 export default class ButtonTile extends GraphicsTile {
+    type = ButtonTile;
     label = "Button";
 
     onColor = config.colors.activeTileColor;
