@@ -7,6 +7,7 @@ import {
     onResize,
     onScroll,
     pressedKeys,
+    sleep,
 } from "../../utils";
 import { clamp } from "../../utils/math";
 import config from "../../config";
@@ -22,11 +23,13 @@ export default class Grid extends PIXI.Container {
 
     history: {
         action: GridAction;
-        tile: Tile;
+        tile: Tile | undefined;
+        location: { x: number; y: number };
     }[][] = [[]];
     tempHistory: {
         action: GridAction;
-        tile: Tile;
+        tile: Tile | undefined;
+        location: { x: number; y: number };
     }[] = [];
 
     mousePos: [x: number, y: number] = [0, 0];
@@ -105,27 +108,30 @@ export default class Grid extends PIXI.Container {
                     Direction.getOpposite(direction)
                 );
                 if (!prevTile.connections[oppositeDirection]) {
-                    prevTile.connections[oppositeDirection] = true;
                     this.tempHistory.push({
                         action: GridAction.EDIT,
                         tile: prevTile.clone(),
+                        location: { x: prevTile.x, y: prevTile.y },
                     });
+                    prevTile.connections[oppositeDirection] = true;
                 }
                 const directDirection = Direction.toLower(direction);
                 if (!newTile.connections[directDirection]) {
-                    newTile.connections[directDirection] = true;
                     this.tempHistory.push({
                         action: editedNewTile
                             ? GridAction.EDIT
                             : GridAction.ADD,
-                        tile: newTile.clone(),
+                        tile: editedNewTile ? newTile.clone() : undefined,
+                        location: { x: newTile.x, y: newTile.y },
                     });
+                    newTile.connections[directDirection] = true;
                 }
                 prevTile.updateContainer?.();
             } else if (!editedNewTile) {
                 this.tempHistory.push({
                     action: GridAction.ADD,
-                    tile: newTile.clone(),
+                    tile: undefined,
+                    location: { x: newTile.x, y: newTile.y },
                 });
             }
 
@@ -151,7 +157,11 @@ export default class Grid extends PIXI.Container {
     removeTile(x: number, y: number) {
         const tile = this.getTile(x, y);
         if (!tile) return false;
-        this.tempHistory.push({ action: GridAction.REMOVE, tile });
+        this.tempHistory.push({
+            action: GridAction.REMOVE,
+            tile: tile.clone(),
+            location: { x: tile.x, y: tile.y },
+        });
         this.removeChild(tile.getContainer(this.size));
         this.deleteTile(x, y);
         const removalSpots: {
@@ -173,11 +183,12 @@ export default class Grid extends PIXI.Container {
                 adjacentTile !== undefined &&
                 adjacentTile.connections[removalSpot.side]
             ) {
-                adjacentTile.connections[removalSpot.side] = false;
                 this.tempHistory.push({
                     action: GridAction.EDIT,
-                    tile: adjacentTile,
+                    tile: adjacentTile.clone(),
+                    location: { x: adjacentTile.x, y: adjacentTile.y },
                 });
+                adjacentTile.connections[removalSpot.side] = false;
                 adjacentTile.updateContainer?.();
             }
         }
@@ -192,20 +203,45 @@ export default class Grid extends PIXI.Container {
         this.history.push([]);
     };
 
-    undo = () => {
+    undo = async () => {
+        console.log("undoing");
         this.finishInteraction();
         if (this.history.length < 2) return;
         const actions = this.history[this.history.length - 2];
-        for (let { action, tile } of actions) {
-            if (action === GridAction.ADD) {
-                const refTile = this.getTile(tile.x, tile.y);
-                if (refTile) this.removeChild(refTile.getContainer(this.size));
-                this.deleteTile(tile.x, tile.y);
+        for (let { action, tile, location } of actions.sort(
+            (a, b) => b.action - a.action
+        )) {
+            await sleep(50);
+            const refTile = this.getTile(location.x, location.y);
+            console.log({ action });
+            switch (action) {
+                case GridAction.ADD: {
+                    console.log(refTile);
+                    if (refTile)
+                        this.removeChild(refTile.getContainer(this.size));
+                    this.deleteTile(location.x, location.y);
+                }
+                case GridAction.EDIT: {
+                    if (tile) {
+                        if (refTile)
+                            this.removeChild(refTile.getContainer(this.size));
+                        console.log(tile.connections);
+                        this.setTile(location.x, location.y, tile);
+                        const tileGraphics: PIXI.Container = tile.getContainer(
+                            this.size
+                        );
+                        this.addChild(tileGraphics);
+                    }
+                    this.getTile(location.x, location.y)?.updateContainer?.();
+                }
+                case GridAction.REMOVE: {
+                    // if (tile) this.setTile(location.x, location.y, tile);
+                    // this.getTile(location.x, location.y)?.updateContainer?.();
+                }
             }
         }
 
         this.history.splice(this.history.length - 2, 1);
-        // console.log("undo:", this.history[this.history.length - 2]);
     };
 
     cleanHistory = () => {

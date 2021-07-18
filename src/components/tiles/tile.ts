@@ -87,7 +87,7 @@ export abstract class Tile {
 
     clone() {
         let output: Tile = new (this.type as any)(this.x, this.y);
-
+        output.connections = { ...this.connections };
         return output;
     }
 

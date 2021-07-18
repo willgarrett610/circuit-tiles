@@ -14,8 +14,11 @@ export function onResize(listener: (this: Window, ev: UIEvent) => any) {
     window.addEventListener("resize", listener);
 }
 
-export class CWheelEvent extends WheelEvent {
+export function sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
+export class CWheelEvent extends WheelEvent {
     propagationStopped = false;
     stopPropagationOld?(): void;
 
@@ -25,11 +28,10 @@ export class CWheelEvent extends WheelEvent {
         cE.stopPropagation = () => {
             cE.stopPropagationOld?.();
             cE.propagationStopped = true;
-        }
+        };
         cE.propagationStopped = false;
         return cE;
     }
-
 }
 
 export interface DisplayObjectScrollEvent {

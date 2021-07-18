@@ -1,7 +1,7 @@
 export enum GridAction {
-    ADD,
-    REMOVE,
-    EDIT,
+    ADD = 0,
+    REMOVE = 1,
+    EDIT = 2,
 }
 
 export enum Interaction {
