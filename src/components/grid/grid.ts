@@ -208,10 +208,10 @@ export default class Grid extends PIXI.Container {
         this.finishInteraction();
         if (this.history.length < 2) return;
         const actions = this.history[this.history.length - 2];
-        for (let { action, tile, location } of actions.sort(
-            (a, b) => b.action - a.action
-        )) {
-            await sleep(50);
+        for (let { action, tile, location } of actions
+            .reverse()
+            .sort((a, b) => b.action - a.action)) {
+            // await sleep(50);
             const refTile = this.getTile(location.x, location.y);
             console.log({ action });
             switch (action) {

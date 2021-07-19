@@ -88,15 +88,15 @@ export abstract class Tile {
     clone() {
         let output: Tile = new (this.type as any)(this.x, this.y);
         output.connections = { ...this.connections };
+        output.direction = this.direction;
+        output.signalActive = this.signalActive;
+        output.label = this.label;
+        output.createClone?.();
+
         return output;
     }
 
-    // clone() {
-    //     const output = this.createClone();
-    //     output.connections = { ...this.connections };
-    // }
-
-    // abstract createClone(): Tile;
+    createClone?(): Tile;
 }
 
 export abstract class SpriteTile extends Tile {
