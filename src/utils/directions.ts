@@ -40,6 +40,17 @@ export namespace Direction {
                 return "left";
         }
     }
+
+    export function values() {
+        return [Direction.UP, Direction.RIGHT, Direction.DOWN, Direction.LEFT];
+    }
+
+    export function fromString(key: string) {
+        for (let dir of Direction.values()) {
+            if (Direction.toLower(dir) == key.toLowerCase()) return dir;
+        }
+        return null;
+    }
 }
 
 // export function oppositeDirection

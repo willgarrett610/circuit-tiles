@@ -12,7 +12,7 @@ const config = {
         activeInputColor: 0x6e22d4,
         inactiveInputColor: 0x1c0738,
     },
-    zoomCoeff: 0.011,
+    zoomCoeff: 1.15,
     lineColor: 0x222222,
     lineWidth: 2,
     guiMargin: 20,

@@ -11,7 +11,7 @@ import {
 } from "../../utils";
 import { clamp } from "../../utils/math";
 import config from "../../config";
-import { Tile } from "../tiles/tile";
+import { ConnectionType, Tile } from "../tiles/tile";
 import { Direction } from "../../utils/directions";
 import getTileTypes from "../tiles/tile_types";
 import "../../utils/compute-logic";
@@ -107,16 +107,35 @@ export default class Grid extends PIXI.Container {
                 const oppositeDirection = Direction.toLower(
                     Direction.getOpposite(direction)
                 );
-                if (!prevTile.connections[oppositeDirection]) {
+                const directDirection = Direction.toLower(direction);
+
+                const canConnect =
+                    newTile.getConnectionTemplate()[directDirection] !=
+                        ConnectionType.BLOCKED &&
+                    prevTile.getConnectionTemplate()[oppositeDirection] !=
+                        ConnectionType.BLOCKED;
+
+                console.log("prev conn temp", prevTile.getConnectionTemplate());
+                console.log("new conn temp", newTile.getConnectionTemplate());
+
+                if (
+                    !prevTile.getConnections()[oppositeDirection] &&
+                    canConnect
+                ) {
                     this.tempHistory.push({
                         action: GridAction.EDIT,
                         tile: prevTile.clone(),
                         location: { x: prevTile.x, y: prevTile.y },
                     });
-                    prevTile.connections[oppositeDirection] = true;
+
+                    prevTile.setConnection(oppositeDirection, true);
+
+                    // console.log(prevTile.getConnections());
                 }
-                const directDirection = Direction.toLower(direction);
-                if (!newTile.connections[directDirection]) {
+                if (
+                    !newTile.getConnections()[directDirection] &&
+                    (canConnect || !editedNewTile)
+                ) {
                     this.tempHistory.push({
                         action: editedNewTile
                             ? GridAction.EDIT
@@ -124,7 +143,11 @@ export default class Grid extends PIXI.Container {
                         tile: editedNewTile ? newTile.clone() : undefined,
                         location: { x: newTile.x, y: newTile.y },
                     });
-                    newTile.connections[directDirection] = true;
+
+                    if (canConnect)
+                        newTile.setConnection(directDirection, true);
+
+                    // console.log(newTile.getConnections());
                 }
                 prevTile.updateContainer?.();
             } else if (!editedNewTile) {
@@ -181,14 +204,14 @@ export default class Grid extends PIXI.Container {
 
             if (
                 adjacentTile !== undefined &&
-                adjacentTile.connections[removalSpot.side]
+                adjacentTile.getConnections()[removalSpot.side]
             ) {
                 this.tempHistory.push({
                     action: GridAction.EDIT,
                     tile: adjacentTile.clone(),
                     location: { x: adjacentTile.x, y: adjacentTile.y },
                 });
-                adjacentTile.connections[removalSpot.side] = false;
+                adjacentTile.setConnection(removalSpot.side, false);
                 adjacentTile.updateContainer?.();
             }
         }
@@ -225,7 +248,7 @@ export default class Grid extends PIXI.Container {
                     if (tile) {
                         if (refTile)
                             this.removeChild(refTile.getContainer(this.size));
-                        console.log(tile.connections);
+                        console.log(tile.getConnections());
                         this.setTile(location.x, location.y, tile);
                         const tileGraphics: PIXI.Container = tile.getContainer(
                             this.size
@@ -250,9 +273,11 @@ export default class Grid extends PIXI.Container {
     };
 
     scroll = (e: WheelEvent) => {
-        if (e.deltaY === 0) return;
+        if ((e as any).wheelDeltaY === 0) return;
 
-        let mult = 1 / (config.zoomCoeff * e.deltaY);
+        let delta = (e as any).wheelDeltaY > 1 ? 1 : -1;
+
+        let mult = config.zoomCoeff * delta;
         if (mult < 0) mult = -1 / mult;
 
         let prevPos = this.screenToGrid(e.pageX, e.pageY);

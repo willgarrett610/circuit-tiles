@@ -13,23 +13,23 @@ export abstract class Tile {
 
     copyProps = ["connections", "label", "x", "y", "direction", "signalActive"];
 
-    connections: {
+    protected connections: {
         up: boolean;
+        right: boolean;
         down: boolean;
         left: boolean;
-        right: boolean;
     } = {
         up: false,
+        right: false,
         down: false,
         left: false,
-        right: false,
     };
 
-    connectionTemplate = {
+    protected connectionTemplate = {
         up: ConnectionType.BOTH,
+        right: ConnectionType.BOTH,
         down: ConnectionType.BOTH,
         left: ConnectionType.BOTH,
-        right: ConnectionType.BOTH,
     };
 
     abstract label: string;
@@ -38,6 +38,47 @@ export abstract class Tile {
     direction = Rotation.NORMAL;
     container?: PIXI.Container;
     signalActive = false;
+
+    private getRotatedKey(dir: Direction) {
+        return Direction.toLower(
+            Direction.values()[
+                (dir.valueOf() - this.direction.valueOf() + 4) % 4
+            ]
+        );
+    }
+
+    private rotateConnections<T>(connections: {
+        up: T;
+        right: T;
+        down: T;
+        left: T;
+    }) {
+        let rotatedConnections: any = {};
+        for (let dir of Direction.values()) {
+            rotatedConnections[Direction.toLower(dir)] =
+                connections[this.getRotatedKey(dir)];
+        }
+        return rotatedConnections as {
+            up: T;
+            right: T;
+            down: T;
+            left: T;
+        };
+    }
+
+    getConnections() {
+        return this.rotateConnections(this.connections);
+    }
+
+    getConnectionTemplate() {
+        return this.rotateConnections(this.connectionTemplate);
+    }
+
+    setConnection(dir: string, val: boolean) {
+        let enumDir = Direction.fromString(dir);
+        if (enumDir == null) return;
+        this.connections[this.getRotatedKey(enumDir)] = val;
+    }
 
     canUse = () => true;
 
