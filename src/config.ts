@@ -22,6 +22,8 @@ const config = {
         selectedWidth: 4,
         textSize: 13,
     },
+    menubarSize: 40,
+    selectorWidth: 150,
 };
 
 export default config;

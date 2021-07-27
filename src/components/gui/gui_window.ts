@@ -14,6 +14,9 @@ export default class GUIWindow extends PIXI.Container {
     scrollableY = false;
     scrollMarginX = 0;
     scrollMarginY = 0;
+    borderWidth = 0;
+    borderColor = 0x000000;
+    private border: PIXI.Graphics;
 
     constructor(
         x: number,
@@ -25,6 +28,8 @@ export default class GUIWindow extends PIXI.Container {
         borderColor: number = 0x000000
     ) {
         super();
+
+        this.sortableChildren = true;
 
         this.x = x;
         this.y = y;
@@ -41,6 +46,9 @@ export default class GUIWindow extends PIXI.Container {
         this.backgroundRect.height = height;
         this.backgroundRect.tint = backgroundColor;
         this.backgroundRect.interactive = true;
+
+        this.borderWidth = borderWidth;
+        this.borderColor = borderColor;
 
         const border = new PIXI.Graphics();
         border.beginFill(0, 0);
@@ -64,6 +72,7 @@ export default class GUIWindow extends PIXI.Container {
 
         super.addChild(this.backgroundRect);
 
+        this.border = border;
         super.addChild(border);
 
         this.container = new PIXI.Container();
@@ -119,6 +128,19 @@ export default class GUIWindow extends PIXI.Container {
         mask.beginFill(0xffffff);
         mask.drawRect(0, 0, width, height);
         mask.endFill();
+
+        const border = this.border;
+        border.clear();
+        border.beginFill(0, 0);
+        border.lineStyle(this.borderWidth, this.borderColor);
+        border.drawRect(
+            this.borderWidth / 2,
+            this.borderWidth / 2,
+            width - this.borderWidth,
+            height - this.borderWidth
+        );
+        border.endFill();
+        border.zIndex = 1000;
     }
 
     addChild(

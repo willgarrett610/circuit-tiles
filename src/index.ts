@@ -36,42 +36,30 @@ loadMod();
 
 PIXI.utils.skipHello();
 
-const main = async () => {
-    let app = new PIXI.Application();
+const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
+    let selectorHeights = (dimensions()[1] - config.menubarSize) / 2;
 
-    // Set up DOM settings for full screen
-
-    document.body.style.margin = "0";
-    app.renderer.view.style.position = "absolute";
-    app.renderer.view.style.display = "block";
-    app.renderer.resize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(app.view);
-
-    app.renderer.backgroundColor = config.colors.background;
-
-    let gridManager = new GridManager();
-
-    (window as any).gridManager = gridManager;
-
-    console.log(gridManager);
-
-    app.stage.addChild(gridManager);
+    /*
+    MENU BAR
+    */
 
     let menuBar = new GUIWindow(
         0,
         0,
         dimensions()[0],
-        40,
+        config.menubarSize,
         config.colors.menuColor
     );
 
-    // Create tile selection gui
+    /*
+    TILE SELECTION
+    */
 
     let tileSelector = new GUIWindow(
         0,
-        40,
-        150,
-        dimensions()[1] - 40,
+        config.menubarSize,
+        config.selectorWidth,
+        selectorHeights,
         config.colors.menuColor,
         4
     );
@@ -84,7 +72,6 @@ const main = async () => {
         fill: 0x000000,
         fontWeight: "bold",
     });
-
     headerText.x = 75 - headerText.width / 2;
     headerText.y = 10;
 
@@ -124,7 +111,7 @@ const main = async () => {
         var x = i - y * config.tileSelector.tilesPerRow;
 
         y =
-            40 +
+            config.menubarSize +
             config.tileSelector.margin +
             (config.tileSelector.margin * 2 + tileSize) * y +
             config.tileSelector.textSize * y;
@@ -155,9 +142,11 @@ const main = async () => {
         text.y = y + tileSize + config.tileSelector.margin / 2;
 
         var defaultContainer = tileOff.getContainer(tileSize);
+        defaultContainer.zIndex = 100;
         defaultContainer.removeAllListeners();
 
         var hoverContainer = tileOn.getContainer(tileSize);
+        hoverContainer.zIndex = 100;
         hoverContainer.removeAllListeners();
         var hoverGraphics = new PIXI.Graphics();
 
@@ -189,15 +178,91 @@ const main = async () => {
         tileBtnGroup.addButton(tileBtn);
     }
 
+    /*
+    CHIP SELECTION
+    */
+
+    const chipSelector = new GUIWindow(
+        0,
+        config.menubarSize + selectorHeights,
+        config.selectorWidth,
+        selectorHeights,
+        config.colors.menuColor,
+        4,
+        0x000000
+    );
+    chipSelector.scrollableY = true;
+    chipSelector.scrollMarginY = config.tileSelector.margin * 2;
+
+    const chipHeaderText = new PIXI.Text("Tiles", {
+        fontFamily: "Arial",
+        fontSize: 24,
+        fill: 0x000000,
+        fontWeight: "bold",
+    });
+    chipHeaderText.x = 75 - chipHeaderText.width / 2;
+    chipHeaderText.y = 10;
+
+    chipSelector.addChild(chipHeaderText);
+
+    var y = Math.floor(i / config.tileSelector.tilesPerRow);
+    var x = i - y * config.tileSelector.tilesPerRow;
+
+    y =
+        config.menubarSize +
+        config.tileSelector.margin +
+        (config.tileSelector.margin * 2 + tileSize) * y +
+        config.tileSelector.textSize * y;
+    x =
+        config.tileSelector.margin +
+        (config.tileSelector.margin + tileSize) * x;
+
+    const newChipBtn = new GUIComponent(
+        x,
+        y,
+        tileSize,
+        tileSize,
+        config.colors.background
+    );
+
+    app.stage.addChild(chipSelector);
+
     app.stage.addChild(tileSelector);
 
     app.stage.addChild(menuBar);
 
     onResize(() => {
+        let selectorHeights = (dimensions()[1] - config.menubarSize) / 2;
         app.renderer.resize(...dimensions());
-        tileSelector.setSize(150, dimensions()[1] - config.guiMargin * 2);
-        menuBar.setSize(dimensions()[0], 40);
+        tileSelector.setSize(config.selectorWidth, selectorHeights);
+        chipSelector.setSize(config.selectorWidth, selectorHeights);
+        chipSelector.y = config.menubarSize + selectorHeights;
+        menuBar.setSize(dimensions()[0], config.menubarSize);
     });
+};
+
+const main = async () => {
+    let app = new PIXI.Application();
+
+    // Set up DOM settings for full screen
+
+    document.body.style.margin = "0";
+    app.renderer.view.style.position = "absolute";
+    app.renderer.view.style.display = "block";
+    app.renderer.resize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(app.view);
+
+    app.renderer.backgroundColor = config.colors.background;
+
+    let gridManager = new GridManager();
+
+    (window as any).gridManager = gridManager;
+
+    console.log(gridManager);
+
+    app.stage.addChild(gridManager);
+
+    initGUI(app, gridManager);
 
     window.addEventListener("contextmenu", (e) => e.preventDefault());
 
