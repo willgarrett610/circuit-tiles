@@ -18,6 +18,9 @@ import ButtonGroup from "./components/gui/button_group";
 
 import init from "./lib";
 import GridManager from "./components/grid/grid_manager";
+import { LabeledButton, LabelType } from "./components/gui/labeled_button";
+import LineWrapper from "./components/gui/line_wrap_layout";
+import LineWrapLayout from "./components/gui/line_wrap_layout";
 
 var mod: typeof import("../crate/pkg");
 
@@ -83,6 +86,16 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
                 (config.tileSelector.tilesPerRow + 1)) /
         config.tileSelector.tilesPerRow;
 
+    var tileBtnLayout = new LineWrapLayout(
+        tileSize,
+        1,
+        config.tileSelector.margin,
+        0,
+        40
+    );
+
+    tileSelector.setLayout(tileBtnLayout);
+
     // Setup graphics for selected tile
 
     let selectedGraphics = new PIXI.Graphics();
@@ -119,27 +132,25 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
             config.tileSelector.margin +
             (config.tileSelector.margin + tileSize) * x;
 
-        var tileBtn = new GUIComponent(
-            x,
-            y,
-            tileSize,
-            tileSize,
-            config.colors.background
-        );
-
         var tileType = getTileTypes()[i];
         var tileOff = new tileType(0, 0);
         var tileOn = new tileType(0, 0);
         tileOn.signalActive = true;
 
-        var text = new PIXI.Text(tileOff.label, {
-            fontFamily: "Arial",
-            fontSize: config.tileSelector.textSize,
-            fill: 0x000000,
-            fontWeight: "bold",
-        });
-        text.x = x + tileSize / 2 - text.width / 2;
-        text.y = y + tileSize + config.tileSelector.margin / 2;
+        var tileBtn = new LabeledButton(
+            0,
+            0,
+            tileSize,
+            tileSize,
+            LabelType.BELOW,
+            tileOff.label,
+            config.tileSelector.textSize,
+            0x000000,
+            config.colors.background
+        );
+
+        if (tileBtnLayout.compHeight == 1)
+            tileBtnLayout.compHeight = tileBtn.height;
 
         var defaultContainer = tileOff.getContainer(tileSize);
         defaultContainer.zIndex = 100;
@@ -172,8 +183,6 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
         tileBtn.setHoverContainer(hoverContainer);
 
         tileSelector.addChild(tileBtn);
-
-        tileSelector.addChild(text);
 
         tileBtnGroup.addButton(tileBtn);
     }

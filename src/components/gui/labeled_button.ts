@@ -1,3 +1,4 @@
+import * as PIXI from "pixi.js";
 import config from "../../config";
 import { GUIComponent } from "./gui_component";
 
@@ -20,7 +21,7 @@ export class LabeledButton extends GUIComponent {
         fontSize: number,
         color: number = 0x000000,
         backgroundColor: number = 0xffffff,
-        margin: number = 5
+        margin: number = 7
     ) {
         super(x, y, width, height, backgroundColor);
 
@@ -30,7 +31,7 @@ export class LabeledButton extends GUIComponent {
             fill: color,
             fontWeight: "bold",
         });
-        this.textObj.x = x + width / 2 - this.textObj.width / 2;
+        this.textObj.x = width / 2 - this.textObj.width / 2;
 
         switch (labelType) {
             case LabelType.ABOVE:
@@ -40,8 +41,10 @@ export class LabeledButton extends GUIComponent {
                 this.textObj.y = y + margin;
                 break;
             case LabelType.BELOW:
-                this.textObj.y = y + height + margin;
+                this.textObj.y = height + margin;
                 break;
         }
+
+        this.addChild(this.textObj);
     }
 }

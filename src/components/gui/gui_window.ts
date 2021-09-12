@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 import { onScroll } from "../../utils";
 import { clamp } from "../../utils/math";
 import { GUIComponent } from "./gui_component";
+import Layout from "./layout";
 
 export default class GUIWindow extends PIXI.Container {
     components: GUIComponent[];
@@ -17,6 +18,7 @@ export default class GUIWindow extends PIXI.Container {
     borderWidth = 0;
     borderColor = 0x000000;
     private border: PIXI.Graphics;
+    layout?: Layout;
 
     constructor(
         x: number,
@@ -143,19 +145,44 @@ export default class GUIWindow extends PIXI.Container {
         border.zIndex = 1000;
     }
 
+    setLayout(layout: Layout) {
+        this.layout = layout;
+        this.updateLayout();
+    }
+
+    updateLayout() {
+        if (this.layout != undefined) {
+            for (let i = 0; i < this.components.length; i++) {
+                let comp = this.components[i];
+                let posSize = this.layout.getElementPosSize(
+                    i,
+                    this.width,
+                    this.height
+                );
+                comp.x = posSize[0];
+                comp.y = posSize[1];
+                comp.width = posSize[2];
+                comp.height = posSize[3];
+            }
+        }
+    }
+
     addChild(
         ...children: (PIXI.DisplayObject | GUIComponent)[]
     ): PIXI.DisplayObject | GUIComponent {
         for (let child of children) {
-            if (child instanceof GUIComponent)
+            if (child instanceof GUIComponent) {
                 this.components.push(child as GUIComponent);
+                this.updateLayout();
+            }
         }
         return this.container.addChild(...children);
     }
 
     addChildAt<T extends PIXI.DisplayObject>(child: T, index: number): T {
         if ((child as any).__proto__ instanceof GUIComponent) {
-            this.components.push(child as any);
+            this.components.splice(index, 0, child as any);
+            this.updateLayout();
         }
         return this.container.addChildAt(child, index);
     }
@@ -167,6 +194,7 @@ export default class GUIWindow extends PIXI.Container {
             if ((c as any).__proto__ instanceof GUIComponent) {
                 const index = this.components.indexOf(c as any);
                 if (index > -1) this.components.splice(index, 1);
+                this.updateLayout();
             }
         }
         return this.container.removeChild(...child);
@@ -176,7 +204,10 @@ export default class GUIWindow extends PIXI.Container {
         let child = this.container.removeChildAt(index);
         if ((child as any).__proto__ instanceof GUIComponent) {
             const index = this.components.indexOf(child as any);
-            if (index > -1) this.components.splice(index, 1);
+            if (index > -1) {
+                this.components.splice(index, 1);
+                this.updateLayout();
+            }
         }
         return child;
     }
@@ -189,7 +220,10 @@ export default class GUIWindow extends PIXI.Container {
         for (let child in children) {
             if ((child as any).__proto__ instanceof GUIComponent) {
                 const index = this.components.indexOf(child as any);
-                if (index > -1) this.components.splice(index, 1);
+                if (index > -1) {
+                    this.components.splice(index, 1);
+                    this.updateLayout();
+                }
             }
         }
         return children;
