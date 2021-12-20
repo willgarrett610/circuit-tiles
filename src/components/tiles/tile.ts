@@ -53,8 +53,8 @@ export abstract class Tile {
         down: T;
         left: T;
     }) {
-        let rotatedConnections: any = {};
-        for (let dir of Direction.values()) {
+        const rotatedConnections: any = {};
+        for (const dir of Direction.values()) {
             rotatedConnections[Direction.toLower(dir)] =
                 connections[this.getRotatedKey(dir)];
         }
@@ -75,7 +75,7 @@ export abstract class Tile {
     }
 
     setConnection(dir: string, val: boolean) {
-        let enumDir = Direction.fromString(dir);
+        const enumDir = Direction.fromString(dir);
         if (enumDir == null) return;
         this.connections[this.getRotatedKey(enumDir)] = val;
     }
@@ -127,7 +127,7 @@ export abstract class Tile {
     }
 
     clone() {
-        let output: Tile = new (this.type as any)(this.x, this.y);
+        const output: Tile = new (this.type as any)(this.x, this.y);
         output.connections = { ...this.connections };
         output.direction = this.direction;
         output.signalActive = this.signalActive;

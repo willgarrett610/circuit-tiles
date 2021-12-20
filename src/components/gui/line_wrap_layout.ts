@@ -27,12 +27,12 @@ export default class LineWrapLayout implements Layout {
         height: number
     ): [x: number, y: number, w: number, h: number] {
         // Number of components per row
-        let n = Math.floor(
+        const n = Math.floor(
             (width - this.margin) / (this.margin + this.compWidth)
         );
-        let y: number =
+        const y: number =
             this.margin + (this.compHeight + this.margin) * (i % n) + this.yOff;
-        let x: number =
+        const x: number =
             this.margin +
             (this.compWidth + this.margin) * Math.floor(i / n) +
             this.xOff;

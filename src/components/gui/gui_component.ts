@@ -107,9 +107,9 @@ export class GUIComponent extends PIXI.Container {
     }
 
     setState(state: GUIComponentState) {
-        let prevContainer = this.getContainer(this.state);
+        const prevContainer = this.getContainer(this.state);
         this.state = state;
-        let newContainer = this.getContainer(this.state);
+        const newContainer = this.getContainer(this.state);
         if (newContainer) {
             if (prevContainer) this.removeChild(prevContainer);
             this.addChild(newContainer);

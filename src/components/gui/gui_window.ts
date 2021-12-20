@@ -85,7 +85,7 @@ export default class GUIWindow extends PIXI.Container {
         });
 
         this.on("mousemove", (e: PIXI.interaction.InteractionEvent) => {
-            let point = e.data.global;
+            const point = e.data.global;
             if (
                 point.x >= this.x &&
                 point.x < this.x + this.cWidth &&
@@ -153,8 +153,8 @@ export default class GUIWindow extends PIXI.Container {
     updateLayout() {
         if (this.layout != undefined) {
             for (let i = 0; i < this.components.length; i++) {
-                let comp = this.components[i];
-                let posSize = this.layout.getElementPosSize(
+                const comp = this.components[i];
+                const posSize = this.layout.getElementPosSize(
                     i,
                     this.width,
                     this.height
@@ -170,7 +170,7 @@ export default class GUIWindow extends PIXI.Container {
     addChild(
         ...children: (PIXI.DisplayObject | GUIComponent)[]
     ): PIXI.DisplayObject | GUIComponent {
-        for (let child of children) {
+        for (const child of children) {
             if (child instanceof GUIComponent) {
                 this.components.push(child as GUIComponent);
                 this.updateLayout();
@@ -190,7 +190,7 @@ export default class GUIWindow extends PIXI.Container {
     removeChild<TChildren extends PIXI.DisplayObject[]>(
         ...child: TChildren
     ): TChildren[0] {
-        for (let c in child) {
+        for (const c in child) {
             if ((c as any).__proto__ instanceof GUIComponent) {
                 const index = this.components.indexOf(c as any);
                 if (index > -1) this.components.splice(index, 1);
@@ -201,7 +201,7 @@ export default class GUIWindow extends PIXI.Container {
     }
 
     removeChildAt(index: number): PIXI.DisplayObject {
-        let child = this.container.removeChildAt(index);
+        const child = this.container.removeChildAt(index);
         if ((child as any).__proto__ instanceof GUIComponent) {
             const index = this.components.indexOf(child as any);
             if (index > -1) {
@@ -216,8 +216,8 @@ export default class GUIWindow extends PIXI.Container {
         beginIndex?: number,
         endIndex?: number
     ): PIXI.DisplayObject[] {
-        let children = this.container.removeChildren(beginIndex, endIndex);
-        for (let child in children) {
+        const children = this.container.removeChildren(beginIndex, endIndex);
+        for (const child in children) {
             if ((child as any).__proto__ instanceof GUIComponent) {
                 const index = this.components.indexOf(child as any);
                 if (index > -1) {
