@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable no-undef */
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin");
+const ESLintPlugin = require("eslint-webpack-plugin");
 
 module.exports = {
     mode: "development",
@@ -32,13 +35,16 @@ module.exports = {
         devtoolModuleFilenameTemplate: "../../[resource-path]",
     },
     plugins: [
+        new ESLintPlugin({
+            fix: false,
+        }),
         new HtmlWebpackPlugin({
             template: "src/index.html",
         }),
         new CopyPlugin([{ from: "assets", to: "assets" }]),
         new WasmPackPlugin({
             crateDirectory: path.join(__dirname, "crate"),
-        }),
+        })
     ],
     devServer: {
         contentBase: path.join(__dirname, "dist"),

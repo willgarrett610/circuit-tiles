@@ -22,7 +22,7 @@ import { LabeledButton, LabelType } from "./components/gui/labeled_button";
 import LineWrapper from "./components/gui/line_wrap_layout";
 import LineWrapLayout from "./components/gui/line_wrap_layout";
 
-var mod: typeof import("../crate/pkg");
+let mod: typeof import("../crate/pkg");
 
 async function loadMod() {
     mod = await init();
@@ -40,13 +40,13 @@ loadMod();
 PIXI.utils.skipHello();
 
 const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
-    let selectorHeights = (dimensions()[1] - config.menubarSize) / 2;
+    const selectorHeights = (dimensions()[1] - config.menubarSize) / 2;
 
     /*
     MENU BAR
     */
 
-    let menuBar = new GUIWindow(
+    const menuBar = new GUIWindow(
         0,
         0,
         dimensions()[0],
@@ -58,7 +58,7 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
     TILE SELECTION
     */
 
-    let tileSelector = new GUIWindow(
+    const tileSelector = new GUIWindow(
         0,
         config.menubarSize,
         config.selectorWidth,
@@ -80,13 +80,13 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
 
     tileSelector.addChild(headerText);
 
-    var tileSize =
+    const tileSize =
         (tileSelector.width -
             config.tileSelector.margin *
                 (config.tileSelector.tilesPerRow + 1)) /
         config.tileSelector.tilesPerRow;
 
-    var tileBtnLayout = new LineWrapLayout(
+    const tileBtnLayout = new LineWrapLayout(
         tileSize,
         1,
         config.tileSelector.margin,
@@ -98,7 +98,7 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
 
     // Setup graphics for selected tile
 
-    let selectedGraphics = new PIXI.Graphics();
+    const selectedGraphics = new PIXI.Graphics();
 
     selectedGraphics.beginFill(0, 0);
     selectedGraphics.lineStyle(
@@ -113,15 +113,15 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
     );
     selectedGraphics.endFill();
 
-    let tileBtnGroup = new ButtonGroup(selectedGraphics);
+    const tileBtnGroup = new ButtonGroup(selectedGraphics);
 
     tileBtnGroup.onSelectionChange = (i) => {
         gridManager.getGrid().selectedTileType = i;
     };
-
-    for (var i = 0; i < getTileTypes().length; i++) {
-        var y = Math.floor(i / config.tileSelector.tilesPerRow);
-        var x = i - y * config.tileSelector.tilesPerRow;
+    let i = 0;
+    for (; i < getTileTypes().length; i++) {
+        let y = Math.floor(i / config.tileSelector.tilesPerRow);
+        let x = i - y * config.tileSelector.tilesPerRow;
 
         y =
             config.menubarSize +
@@ -132,12 +132,12 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
             config.tileSelector.margin +
             (config.tileSelector.margin + tileSize) * x;
 
-        var tileType = getTileTypes()[i];
-        var tileOff = new tileType(0, 0);
-        var tileOn = new tileType(0, 0);
+        const tileType = getTileTypes()[i];
+        const tileOff = new tileType(0, 0);
+        const tileOn = new tileType(0, 0);
         tileOn.signalActive = true;
 
-        var tileBtn = new LabeledButton(
+        const tileBtn = new LabeledButton(
             0,
             0,
             tileSize,
@@ -152,14 +152,14 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
         if (tileBtnLayout.compHeight == 1)
             tileBtnLayout.compHeight = tileBtn.height;
 
-        var defaultContainer = tileOff.getContainer(tileSize);
+        const defaultContainer = tileOff.getContainer(tileSize);
         defaultContainer.zIndex = 100;
         defaultContainer.removeAllListeners();
 
-        var hoverContainer = tileOn.getContainer(tileSize);
+        const hoverContainer = tileOn.getContainer(tileSize);
         hoverContainer.zIndex = 100;
         hoverContainer.removeAllListeners();
-        var hoverGraphics = new PIXI.Graphics();
+        const hoverGraphics = new PIXI.Graphics();
 
         hoverGraphics.beginFill(config.colors.highlightTile);
         hoverGraphics.drawRect(
@@ -214,8 +214,8 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
 
     chipSelector.addChild(chipHeaderText);
 
-    var y = Math.floor(i / config.tileSelector.tilesPerRow);
-    var x = i - y * config.tileSelector.tilesPerRow;
+    let y = Math.floor(i / config.tileSelector.tilesPerRow);
+    let x = i - y * config.tileSelector.tilesPerRow;
 
     y =
         config.menubarSize +
@@ -241,7 +241,7 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
     app.stage.addChild(menuBar);
 
     onResize(() => {
-        let selectorHeights = (dimensions()[1] - config.menubarSize) / 2;
+        const selectorHeights = (dimensions()[1] - config.menubarSize) / 2;
         app.renderer.resize(...dimensions());
         tileSelector.setSize(config.selectorWidth, selectorHeights);
         chipSelector.setSize(config.selectorWidth, selectorHeights);
@@ -251,7 +251,7 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
 };
 
 const main = async () => {
-    let app = new PIXI.Application();
+    const app = new PIXI.Application();
 
     // Set up DOM settings for full screen
 
@@ -263,7 +263,7 @@ const main = async () => {
 
     app.renderer.backgroundColor = config.colors.background;
 
-    let gridManager = new GridManager();
+    const gridManager = new GridManager();
 
     (window as any).gridManager = gridManager;
 
@@ -276,9 +276,9 @@ const main = async () => {
     window.addEventListener("contextmenu", (e) => e.preventDefault());
 
     window.addEventListener("wheel", (e: WheelEvent) => {
-        let cE: CWheelEvent = CWheelEvent.fromWheelEvent(e);
+        const cE: CWheelEvent = CWheelEvent.fromWheelEvent(e);
 
-        let hitObject = app.renderer.plugins.interaction.hitTest(
+        const hitObject = app.renderer.plugins.interaction.hitTest(
             new PIXI.Point(cE.pageX, cE.pageY),
             app.stage
         );
@@ -287,7 +287,7 @@ const main = async () => {
             let testObject = hitObject;
             while (testObject != undefined) {
                 for (let i = 0; i < scrollListeners.length; i++) {
-                    let eventObj = scrollListeners[i];
+                    const eventObj = scrollListeners[i];
                     if (eventObj.object == testObject) {
                         eventObj.listener(cE);
                         break;

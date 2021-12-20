@@ -46,7 +46,7 @@ export namespace Direction {
     }
 
     export function fromString(key: string) {
-        for (let dir of Direction.values()) {
+        for (const dir of Direction.values()) {
             if (Direction.toLower(dir) == key.toLowerCase()) return dir;
         }
         return null;

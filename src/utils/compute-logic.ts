@@ -1,4 +1,4 @@
-var mod: typeof import("../../crate/pkg");
+let mod: typeof import("../../crate/pkg");
 import init from "../lib";
 
 async function load() {
