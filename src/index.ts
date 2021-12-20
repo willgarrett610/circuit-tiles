@@ -24,6 +24,12 @@ import LineWrapLayout from "./components/gui/line_wrap_layout";
 
 PIXI.utils.skipHello();
 
+/**
+ * Setups up application GUI
+ *
+ * @param app PIXI application
+ * @param gridManager Grid Manager
+ */
 const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
     const selectorHeights = (dimensions()[1] - config.menubarSize) / 2;
 
@@ -235,6 +241,9 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
     });
 };
 
+/**
+ * Setups up the application
+ */
 const main = async () => {
     const app = new PIXI.Application();
 
@@ -243,6 +252,8 @@ const main = async () => {
     document.body.style.margin = "0";
     app.renderer.view.style.position = "absolute";
     app.renderer.view.style.display = "block";
+    app.renderer.view.style.height = "100%";
+    app.renderer.view.style.width = "100%";
     app.renderer.resize(window.innerWidth, window.innerHeight);
     document.body.appendChild(app.view);
 

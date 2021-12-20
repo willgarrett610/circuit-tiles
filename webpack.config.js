@@ -36,7 +36,7 @@ module.exports = {
     },
     plugins: [
         new ESLintPlugin({
-            fix: false,
+            extensions: [".ts", ".js"],
         }),
         new HtmlWebpackPlugin({
             template: "src/index.html",

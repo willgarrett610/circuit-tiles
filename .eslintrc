@@ -15,18 +15,24 @@
         "@typescript-eslint/no-inferrable-types": "off",
         "@typescript-eslint/no-namespace": "off",
         "prefer-const": "warn",
-        // "require-jsdoc": [
-        //     1,
-        //     {
-        //         "require": {
-        //             "FunctionDeclaration": true,
-        //             "MethodDefinition": true,
-        //             "ClassDeclaration": false
-        //         }
-        //     }
-        // ],
-        "jsdoc/require-param-type": "off",
-        "jsdoc/require-param-description": "off",
-        "jsdoc/require-returns-type": "off"
+        "require-jsdoc": [
+            1,
+            {
+                "require": {
+                    "FunctionDeclaration": true,
+                    "MethodDefinition": true,
+                    "ClassDeclaration": true
+                }
+            }
+        ],
+        "jsdoc/require-returns-type": 0,
+        "jsdoc/require-returns-description": 0,
+        "jsdoc/require-param-type": 0,
+        "jsdoc/require-param-description": 0
+    },
+    "settings": {
+        "jsdoc": {
+            "mode": "typescript"
+        }
     }
 }
