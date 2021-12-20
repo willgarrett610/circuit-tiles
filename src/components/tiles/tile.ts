@@ -8,6 +8,7 @@ export enum ConnectionType {
     OUTPUT,
     BLOCKED,
 }
+
 export abstract class Tile {
     abstract type: typeof Tile;
 
@@ -53,6 +54,7 @@ export abstract class Tile {
         down: T;
         left: T;
     }) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const rotatedConnections: any = {};
         for (const dir of Direction.values()) {
             rotatedConnections[Direction.toLower(dir)] =
@@ -127,6 +129,7 @@ export abstract class Tile {
     }
 
     clone() {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const output: Tile = new (this.type as any)(this.x, this.y);
         output.connections = { ...this.connections };
         output.direction = this.direction;

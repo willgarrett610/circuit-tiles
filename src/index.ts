@@ -22,21 +22,6 @@ import { LabeledButton, LabelType } from "./components/gui/labeled_button";
 import LineWrapper from "./components/gui/line_wrap_layout";
 import LineWrapLayout from "./components/gui/line_wrap_layout";
 
-let mod: typeof import("../crate/pkg");
-
-async function loadMod() {
-    mod = await init();
-}
-
-loadMod();
-
-// setTimeout(() => console.log(mod?.add(3, 3)), 5000);
-// setTimeout(() => console.log(mod), 5000);
-
-// import init, { m } from "../pkg/index_bg.wasm";
-
-// import ("lib.js");
-
 PIXI.utils.skipHello();
 
 const initGUI = (app: PIXI.Application, gridManager: GridManager) => {

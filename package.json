@@ -30,6 +30,7 @@
         "copy-webpack-plugin": "5.1.1",
         "eslint": "^8.5.0",
         "eslint-config-prettier": "^8.3.0",
+        "eslint-plugin-jsdoc": "^37.4.0",
         "eslint-plugin-prettier": "^4.0.0",
         "eslint-webpack-plugin": "^2.6.0",
         "gh-pages": "^3.2.3",
