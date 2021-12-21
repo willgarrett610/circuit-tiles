@@ -7,6 +7,7 @@ import {
     onResize,
     onScroll,
     pressedKeys,
+    sleep,
 } from "../../utils";
 import { clamp } from "../../utils/math";
 import config from "../../config";
@@ -266,10 +267,7 @@ export default class Grid extends PIXI.Container {
         this.finishInteraction();
         if (this.history.length < 2) return;
         const actions = this.history[this.history.length - 2];
-        for (const { action, tile, location } of actions
-            .reverse()
-            .sort((a, b) => b.action - a.action)) {
-            // await sleep(50);
+        for (const { action, tile, location } of actions.reverse()) {
             const refTile = this.getTile(location.x, location.y);
             switch (action) {
                 case GridAction.ADD: {
@@ -294,9 +292,15 @@ export default class Grid extends PIXI.Container {
                     break;
                 }
                 case GridAction.REMOVE: {
-                    if (tile) this.setTile(location.x, location.y, tile);
-                    this.getTile(location.x, location.y)?.updateContainer?.();
+                    if (tile) {
+                        this.setTile(location.x, location.y, tile);
+                        const tileGraphics: PIXI.Container = tile.getContainer(
+                            this.size
+                        );
+                        this.addChild(tileGraphics);
+                    }
 
+                    this.getTile(location.x, location.y)?.updateContainer?.();
                     break;
                 }
             }
