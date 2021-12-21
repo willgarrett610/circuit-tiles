@@ -1,15 +1,5 @@
 import * as PIXI from "pixi.js";
-import Grid from "./components/grid/grid";
-import {
-    dimensions,
-    height,
-    onResize,
-    width,
-    scrollListeners,
-    DisplayObjectScrollEvent,
-    CWheelEvent,
-    onScroll,
-} from "./utils";
+import { dimensions, onResize, scrollListeners, CWheelEvent } from "./utils";
 import config from "./config";
 import GUIWindow from "./components/gui/gui_window";
 import getTileTypes from "./components/tiles/tile_types";
@@ -19,7 +9,6 @@ import ButtonGroup from "./components/gui/button_group";
 import init from "./lib";
 import GridManager from "./components/grid/grid_manager";
 import { LabeledButton, LabelType } from "./components/gui/labeled_button";
-import LineWrapper from "./components/gui/line_wrap_layout";
 import LineWrapLayout from "./components/gui/line_wrap_layout";
 
 var mod: typeof import("../crate/pkg");
@@ -38,6 +27,154 @@ loadMod();
 // import ("lib.js");
 
 PIXI.utils.skipHello();
+
+class BtnGeneratorData {
+    name: string;
+    defaultContainer: PIXI.Container;
+    hoverContainer: PIXI.Container;
+
+    constructor(
+        name: string,
+        defaultContainer: PIXI.Container,
+        hoverContainer: PIXI.Container
+    ) {
+        this.name = name;
+        this.defaultContainer = defaultContainer;
+        this.hoverContainer = hoverContainer;
+    }
+}
+
+const createSelectorMenu = (
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    title: string,
+    btnGenerator: (i: number, tileSize: number) => BtnGeneratorData | null,
+    onSelectionChange: (i: number) => void
+) => {
+    // Create window for selector
+    let selector = new GUIWindow(
+        x,
+        y,
+        width,
+        height,
+        config.colors.menuColor,
+        4
+    );
+    selector.scrollableY = true;
+    selector.scrollMarginY = config.tileSelector.margin * 2;
+
+    // Add header text to selector window
+    const headerText = new PIXI.Text(title, {
+        fontFamily: "Arial",
+        fontSize: 24,
+        fill: 0x000000,
+        fontWeight: "bold",
+    });
+    headerText.x = 75 - headerText.width / 2;
+    headerText.y = 10;
+
+    selector.addChild(headerText);
+
+    // Generate tile size so the number of btns to fit in a column with margin added is config.tileSelector.tilePerColum
+    var tileSize =
+        (selector.width -
+            config.tileSelector.margin *
+                (config.tileSelector.tilePerColumn + 1)) /
+        config.tileSelector.tilePerColumn;
+
+    // Add line wrapping layout
+    var btnLayout = new LineWrapLayout(
+        tileSize,
+        1,
+        config.tileSelector.margin,
+        0,
+        40
+    );
+
+    selector.setLayout(btnLayout);
+
+    // Setup graphics for border around tile when selected
+
+    let selectedGraphics = new PIXI.Graphics();
+
+    selectedGraphics.beginFill(0, 0);
+    selectedGraphics.lineStyle(
+        config.tileSelector.selectedWidth,
+        config.colors.selectedTileBtn
+    );
+    selectedGraphics.drawRect(
+        config.tileSelector.selectedWidth / 2,
+        config.tileSelector.selectedWidth / 2,
+        tileSize - config.tileSelector.selectedWidth,
+        tileSize - config.tileSelector.selectedWidth
+    );
+    selectedGraphics.endFill();
+
+    // Create a button group so only one button can be selected at any given time
+    let btnGroup = new ButtonGroup(selectedGraphics);
+
+    // Update state when selection is changed
+    btnGroup.onSelectionChange = (i) => {
+        onSelectionChange(i);
+    };
+
+    var btnData: BtnGeneratorData | null = null;
+    var i = 0;
+
+    while ((btnData = btnGenerator(i, tileSize)) != null) {
+        var tileBtn = new LabeledButton(
+            0,
+            0,
+            tileSize,
+            tileSize,
+            LabelType.BELOW,
+            btnData.name,
+            config.tileSelector.textSize,
+            0x000000,
+            config.colors.background
+        );
+
+        if (btnLayout.compHeight == 1) btnLayout.compHeight = tileBtn.height;
+
+        btnData.defaultContainer.zIndex = 100;
+        btnData.defaultContainer.removeAllListeners();
+
+        btnData.hoverContainer.zIndex = 100;
+        btnData.hoverContainer.removeAllListeners();
+        var hoverGraphics = new PIXI.Graphics();
+
+        hoverGraphics.beginFill(config.colors.highlightTile);
+        hoverGraphics.drawRect(
+            0,
+            0,
+            btnData.hoverContainer.width,
+            btnData.hoverContainer.height
+        );
+        hoverGraphics.endFill();
+
+        hoverGraphics.scale.x = 1 / btnData.hoverContainer.scale.x;
+        hoverGraphics.scale.y = 1 / btnData.hoverContainer.scale.y;
+
+        hoverGraphics.alpha = 0.2;
+        hoverGraphics.zIndex = 200;
+
+        btnData.hoverContainer.addChild(hoverGraphics);
+
+        tileBtn.setDefaultContainer(btnData.defaultContainer);
+
+        tileBtn.setHoverContainer(btnData.hoverContainer);
+
+        selector.addChild(tileBtn);
+
+        btnGroup.addButton(tileBtn);
+
+        i++;
+    }
+
+    return selector;
+};
 
 const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
     let selectorHeights = (dimensions()[1] - config.menubarSize) / 2;
@@ -58,180 +195,60 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
     TILE SELECTION
     */
 
-    let tileSelector = new GUIWindow(
+    const tileSelector = createSelectorMenu(
         0,
         config.menubarSize,
         config.selectorWidth,
         selectorHeights,
-        config.colors.menuColor,
-        4
+        "Tiles",
+        (i, tileSize) => {
+            if (i >= getTileTypes().length) return null;
+
+            var tileType = getTileTypes()[i];
+            var tileOff = new tileType(0, 0);
+            var tileOn = new tileType(0, 0);
+            tileOn.signalActive = true;
+
+            var defaultContainer = tileOff.getContainer(tileSize);
+            var hoverContainer = tileOn.getContainer(tileSize);
+
+            return new BtnGeneratorData(
+                tileOff.label,
+                defaultContainer,
+                hoverContainer
+            );
+        },
+        (i) => (gridManager.getGrid().selectedTileType = i)
     );
-    tileSelector.scrollableY = true;
-    tileSelector.scrollMarginY = config.tileSelector.margin * 2;
-
-    const headerText = new PIXI.Text("Tiles", {
-        fontFamily: "Arial",
-        fontSize: 24,
-        fill: 0x000000,
-        fontWeight: "bold",
-    });
-    headerText.x = 75 - headerText.width / 2;
-    headerText.y = 10;
-
-    tileSelector.addChild(headerText);
-
-    var tileSize =
-        (tileSelector.width -
-            config.tileSelector.margin *
-                (config.tileSelector.tilesPerRow + 1)) /
-        config.tileSelector.tilesPerRow;
-
-    var tileBtnLayout = new LineWrapLayout(
-        tileSize,
-        1,
-        config.tileSelector.margin,
-        0,
-        40
-    );
-
-    tileSelector.setLayout(tileBtnLayout);
-
-    // Setup graphics for selected tile
-
-    let selectedGraphics = new PIXI.Graphics();
-
-    selectedGraphics.beginFill(0, 0);
-    selectedGraphics.lineStyle(
-        config.tileSelector.selectedWidth,
-        config.colors.selectedTileBtn
-    );
-    selectedGraphics.drawRect(
-        config.tileSelector.selectedWidth / 2,
-        config.tileSelector.selectedWidth / 2,
-        tileSize - config.tileSelector.selectedWidth,
-        tileSize - config.tileSelector.selectedWidth
-    );
-    selectedGraphics.endFill();
-
-    let tileBtnGroup = new ButtonGroup(selectedGraphics);
-
-    tileBtnGroup.onSelectionChange = (i) => {
-        gridManager.getGrid().selectedTileType = i;
-    };
-
-    for (var i = 0; i < getTileTypes().length; i++) {
-        var y = Math.floor(i / config.tileSelector.tilesPerRow);
-        var x = i - y * config.tileSelector.tilesPerRow;
-
-        y =
-            config.menubarSize +
-            config.tileSelector.margin +
-            (config.tileSelector.margin * 2 + tileSize) * y +
-            config.tileSelector.textSize * y;
-        x =
-            config.tileSelector.margin +
-            (config.tileSelector.margin + tileSize) * x;
-
-        var tileType = getTileTypes()[i];
-        var tileOff = new tileType(0, 0);
-        var tileOn = new tileType(0, 0);
-        tileOn.signalActive = true;
-
-        var tileBtn = new LabeledButton(
-            0,
-            0,
-            tileSize,
-            tileSize,
-            LabelType.BELOW,
-            tileOff.label,
-            config.tileSelector.textSize,
-            0x000000,
-            config.colors.background
-        );
-
-        if (tileBtnLayout.compHeight == 1)
-            tileBtnLayout.compHeight = tileBtn.height;
-
-        var defaultContainer = tileOff.getContainer(tileSize);
-        defaultContainer.zIndex = 100;
-        defaultContainer.removeAllListeners();
-
-        var hoverContainer = tileOn.getContainer(tileSize);
-        hoverContainer.zIndex = 100;
-        hoverContainer.removeAllListeners();
-        var hoverGraphics = new PIXI.Graphics();
-
-        hoverGraphics.beginFill(config.colors.highlightTile);
-        hoverGraphics.drawRect(
-            0,
-            0,
-            hoverContainer.width,
-            hoverContainer.height
-        );
-        hoverGraphics.endFill();
-
-        hoverGraphics.scale.x = 1 / hoverContainer.scale.x;
-        hoverGraphics.scale.y = 1 / hoverContainer.scale.y;
-
-        hoverGraphics.alpha = 0.2;
-        hoverGraphics.zIndex = 200;
-
-        hoverContainer.addChild(hoverGraphics);
-
-        tileBtn.setDefaultContainer(defaultContainer);
-
-        tileBtn.setHoverContainer(hoverContainer);
-
-        tileSelector.addChild(tileBtn);
-
-        tileBtnGroup.addButton(tileBtn);
-    }
 
     /*
     CHIP SELECTION
     */
 
-    const chipSelector = new GUIWindow(
+    const chipSelector = createSelectorMenu(
         0,
         config.menubarSize + selectorHeights,
         config.selectorWidth,
         selectorHeights,
-        config.colors.menuColor,
-        4,
-        0x000000
-    );
-    chipSelector.scrollableY = true;
-    chipSelector.scrollMarginY = config.tileSelector.margin * 2;
+        "Chips",
+        (i, tileSize) => {
+            if (i > getTileTypes().length) return null;
 
-    const chipHeaderText = new PIXI.Text("Tiles", {
-        fontFamily: "Arial",
-        fontSize: 24,
-        fill: 0x000000,
-        fontWeight: "bold",
-    });
-    chipHeaderText.x = 75 - chipHeaderText.width / 2;
-    chipHeaderText.y = 10;
+            var tileType = getTileTypes()[i];
+            var tileOff = new tileType(0, 0);
+            var tileOn = new tileType(0, 0);
+            tileOn.signalActive = true;
 
-    chipSelector.addChild(chipHeaderText);
+            var defaultContainer = tileOff.getContainer(tileSize);
+            var hoverContainer = tileOn.getContainer(tileSize);
 
-    var y = Math.floor(i / config.tileSelector.tilesPerRow);
-    var x = i - y * config.tileSelector.tilesPerRow;
-
-    y =
-        config.menubarSize +
-        config.tileSelector.margin +
-        (config.tileSelector.margin * 2 + tileSize) * y +
-        config.tileSelector.textSize * y;
-    x =
-        config.tileSelector.margin +
-        (config.tileSelector.margin + tileSize) * x;
-
-    const newChipBtn = new GUIComponent(
-        x,
-        y,
-        tileSize,
-        tileSize,
-        config.colors.background
+            return new BtnGeneratorData(
+                tileOff.label,
+                defaultContainer,
+                hoverContainer
+            );
+        },
+        (i) => (gridManager.getGrid().selectedTileType = i)
     );
 
     app.stage.addChild(chipSelector);

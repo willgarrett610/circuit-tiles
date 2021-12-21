@@ -17,7 +17,7 @@ const config = {
     lineWidth: 2,
     guiMargin: 20,
     tileSelector: {
-        tilesPerRow: 2,
+        tilePerColumn: 2,
         margin: 10,
         selectedWidth: 4,
         textSize: 13,
