@@ -151,9 +151,6 @@ export default class Grid extends PIXI.Container {
                     prevTile.getConnectionTemplate()[oppositeDirection] !=
                         ConnectionType.BLOCKED;
 
-                console.log("prev conn temp", prevTile.getConnectionTemplate());
-                console.log("new conn temp", newTile.getConnectionTemplate());
-
                 if (
                     !prevTile.getConnections()[oppositeDirection] &&
                     canConnect
@@ -165,8 +162,6 @@ export default class Grid extends PIXI.Container {
                     });
 
                     prevTile.setConnection(oppositeDirection, true);
-
-                    // console.log(prevTile.getConnections());
                 }
                 if (
                     !newTile.getConnections()[directDirection] &&
@@ -182,8 +177,6 @@ export default class Grid extends PIXI.Container {
 
                     if (canConnect)
                         newTile.setConnection(directDirection, true);
-
-                    // console.log(newTile.getConnections());
                 }
                 prevTile.updateContainer?.();
             } else if (!editedNewTile) {
@@ -270,7 +263,6 @@ export default class Grid extends PIXI.Container {
     };
 
     undo = async () => {
-        console.log("undoing");
         this.finishInteraction();
         if (this.history.length < 2) return;
         const actions = this.history[this.history.length - 2];
@@ -279,10 +271,8 @@ export default class Grid extends PIXI.Container {
             .sort((a, b) => b.action - a.action)) {
             // await sleep(50);
             const refTile = this.getTile(location.x, location.y);
-            console.log({ action });
             switch (action) {
                 case GridAction.ADD: {
-                    console.log(refTile);
                     if (refTile)
                         this.removeChild(refTile.getContainer(this.size));
                     this.deleteTile(location.x, location.y);
@@ -293,7 +283,6 @@ export default class Grid extends PIXI.Container {
                     if (tile) {
                         if (refTile)
                             this.removeChild(refTile.getContainer(this.size));
-                        console.log(tile.getConnections());
                         this.setTile(location.x, location.y, tile);
                         const tileGraphics: PIXI.Container = tile.getContainer(
                             this.size
@@ -305,8 +294,8 @@ export default class Grid extends PIXI.Container {
                     break;
                 }
                 case GridAction.REMOVE: {
-                    // if (tile) this.setTile(location.x, location.y, tile);
-                    // this.getTile(location.x, location.y)?.updateContainer?.();
+                    if (tile) this.setTile(location.x, location.y, tile);
+                    this.getTile(location.x, location.y)?.updateContainer?.();
 
                     break;
                 }
@@ -314,6 +303,11 @@ export default class Grid extends PIXI.Container {
         }
 
         this.history.splice(this.history.length - 2, 1);
+    };
+
+    redo = async () => {
+        console.log("redoing");
+        this.finishInteraction();
     };
 
     cleanHistory = () => {
@@ -410,7 +404,6 @@ export default class Grid extends PIXI.Container {
                 this.currentHistory().push(...this.tempHistory);
                 this.cleanHistory();
             }
-            console.log(this.history);
             this.newHistory();
             this.tempHistory = [];
         }
@@ -426,7 +419,6 @@ export default class Grid extends PIXI.Container {
     };
 
     click = (event: PIXI.interaction.InteractionEvent) => {
-        console.log("click");
         if (
             event.data.button == 0 &&
             !event.data.originalEvent.shiftKey &&
@@ -466,6 +458,7 @@ export default class Grid extends PIXI.Container {
             e.preventDefault();
             this.lastKeyActionTime = currTime;
             if (e.shiftKey) {
+                this.redo();
             } else {
                 this.undo();
             }

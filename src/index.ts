@@ -3,7 +3,6 @@ import { dimensions, onResize, scrollListeners, CWheelEvent } from "./utils";
 import config from "./config";
 import GUIWindow from "./components/gui/gui_window";
 import getTileTypes from "./components/tiles/tile_types";
-import { GUIComponent } from "./components/gui/gui_component";
 import ButtonGroup from "./components/gui/button_group";
 
 import GridManager from "./components/grid/grid_manager";
@@ -12,11 +11,19 @@ import LineWrapLayout from "./components/gui/line_wrap_layout";
 
 PIXI.utils.skipHello();
 
+/** btn generator data */
 class BtnGeneratorData {
     name: string;
     defaultContainer: PIXI.Container;
     hoverContainer: PIXI.Container;
 
+    /**
+     * construct btn generator data
+     *
+     * @param name
+     * @param defaultContainer
+     * @param hoverContainer
+     */
     constructor(
         name: string,
         defaultContainer: PIXI.Container,
@@ -187,7 +194,6 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
     MENU BAR
     */
 
-    console.log("test");
     const menuBar = new GUIWindow(
         0,
         0,
@@ -233,34 +239,34 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
     CHIP SELECTION
     */
 
-    // const chipSelector = createSelectorMenu(
-    //     0,
-    //     config.menubarSize + selectorHeights,
-    //     config.selectorWidth,
-    //     selectorHeights,
-    //     "Chips",
-    //     (i, tileSize) => {
-    //         if (i >= getTileTypes().length) return null;
+    const chipSelector = createSelectorMenu(
+        0,
+        config.menubarSize + selectorHeights,
+        config.selectorWidth,
+        selectorHeights,
+        "Chips",
+        (i, tileSize) => {
+            if (i >= getTileTypes().length) return null;
 
-    //         const tileType = getTileTypes()[i];
-    //         console.log(tileType);
-    //         const tileOff = new tileType(0, 0);
-    //         const tileOn = new tileType(0, 0);
-    //         tileOn.signalActive = true;
+            const tileType = getTileTypes()[i];
+            console.log(tileType);
+            const tileOff = new tileType(0, 0);
+            const tileOn = new tileType(0, 0);
+            tileOn.signalActive = true;
 
-    //         const defaultContainer = tileOff.getContainer(tileSize);
-    //         const hoverContainer = tileOn.getContainer(tileSize);
+            const defaultContainer = tileOff.getContainer(tileSize);
+            const hoverContainer = tileOn.getContainer(tileSize);
 
-    //         return new BtnGeneratorData(
-    //             tileOff.label,
-    //             defaultContainer,
-    //             hoverContainer
-    //         );
-    //     },
-    //     (i) => (gridManager.getGrid().selectedTileType = i)
-    // );
+            return new BtnGeneratorData(
+                tileOff.label,
+                defaultContainer,
+                hoverContainer
+            );
+        },
+        (i) => (gridManager.getGrid().selectedTileType = i)
+    );
 
-    // app.stage.addChild(chipSelector);
+    app.stage.addChild(chipSelector);
 
     app.stage.addChild(tileSelector);
 
@@ -270,8 +276,8 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
         const selectorHeights = (dimensions()[1] - config.menubarSize) / 2;
         app.renderer.resize(...dimensions());
         tileSelector.setSize(config.selectorWidth, selectorHeights);
-        // chipSelector.setSize(config.selectorWidth, selectorHeights);
-        // chipSelector.y = config.menubarSize + selectorHeights;
+        chipSelector.setSize(config.selectorWidth, selectorHeights);
+        chipSelector.y = config.menubarSize + selectorHeights;
         menuBar.setSize(dimensions()[0], config.menubarSize);
     });
 };
@@ -298,8 +304,6 @@ const main = async () => {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).gridManager = gridManager;
-
-    console.log(gridManager);
 
     app.stage.addChild(gridManager);
 

@@ -115,6 +115,7 @@ export default class GUIWindow extends PIXI.Container {
                 this.scrollableX &&
                 this.container.width > this.cWidth
             ) {
+                return;
             } else if (
                 !e.shiftKey &&
                 this.scrollableY &&
