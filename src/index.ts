@@ -249,7 +249,7 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
             if (i >= getTileTypes().length) return null;
 
             const tileType = getTileTypes()[i];
-            console.log(tileType);
+            // console.log(tileType);
             const tileOff = new tileType(0, 0);
             const tileOn = new tileType(0, 0);
             tileOn.signalActive = true;
