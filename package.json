@@ -11,7 +11,9 @@
         "start": "webpack-dev-server -d",
         "format": "prettier --write .",
         "predeploy": "rimraf dist && npm run build-prod",
-        "deploy": "gh-pages -b deploy -d dist"
+        "deploy": "gh-pages -b deploy -d dist",
+        "lint": "eslint .",
+        "lint-fix": "eslint --fix ."
     },
     "repository": {
         "type": "git",
@@ -23,13 +25,22 @@
         "url": "https://github.com/willgarrett610/circuit-tiles/issues"
     },
     "devDependencies": {
+        "@typescript-eslint/eslint-plugin": "^5.7.0",
+        "@typescript-eslint/parser": "^5.8.0",
         "@wasm-tool/wasm-pack-plugin": "^1.5.0",
         "copy-webpack-plugin": "5.1.1",
+        "eslint": "^8.5.0",
+        "eslint-config-prettier": "^8.3.0",
+        "eslint-plugin-jsdoc": "^37.4.0",
+        "eslint-plugin-prettier": "^4.0.0",
+        "eslint-webpack-plugin": "^2.6.0",
         "gh-pages": "^3.2.3",
         "html-webpack-plugin": "4.0.4",
         "prettier": "^2.3.2",
         "rimraf": "^2.7.1",
         "ts-loader": "6.2.2",
+        "typedoc": "^0.22.10",
+        "typedoc-plugin-markdown": "^3.11.8",
         "typescript": "^4.3.4",
         "webpack": "^4.42.1",
         "webpack-cli": "^3.3.11",

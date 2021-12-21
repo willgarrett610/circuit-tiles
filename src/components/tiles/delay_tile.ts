@@ -1,7 +1,8 @@
 import config from "../../config";
-import { Direction, Rotation } from "../../utils/directions";
+import { Rotation } from "../../utils/directions";
 import { ConnectionType, GraphicsTile } from "./tile";
 
+/** delay tile */
 export default class DelayTile extends GraphicsTile {
     type = DelayTile;
     label: string = "Delay";
@@ -15,6 +16,7 @@ export default class DelayTile extends GraphicsTile {
 
     direction = Rotation.CLOCKWISE;
 
+    /** draw graphics */
     drawGraphics(): void {
         if (!this.graphics) return;
 

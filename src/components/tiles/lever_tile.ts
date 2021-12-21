@@ -1,6 +1,7 @@
 import config from "../../config";
 import { ConnectionType, GraphicsTile } from "./tile";
 
+/** lever tile */
 export default class LeverTile extends GraphicsTile {
     type = LeverTile;
     label = "Lever";
@@ -15,19 +16,27 @@ export default class LeverTile extends GraphicsTile {
         right: ConnectionType.OUTPUT,
     };
 
+    /**
+     * constructs a new lever tile
+     *
+     * @param x x location
+     * @param y y location
+     */
     constructor(x: number, y: number) {
         super(x, y);
     }
 
+    /** post generate */
     postGenerate() {
         if (!this.container) return;
         this.container.interactive = true;
-        this.container.on("click", (e: any) => {
+        this.container.on("click", () => {
             this.signalActive = !this.signalActive;
             this.updateContainer();
         });
     }
 
+    /** draws graphics */
     drawGraphics() {
         if (!this.graphics) return;
 

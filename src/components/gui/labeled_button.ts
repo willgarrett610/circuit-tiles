@@ -8,9 +8,24 @@ export enum LabelType {
     INSIDE,
 }
 
+/** labeled button */
 export class LabeledButton extends GUIComponent {
     textObj: PIXI.Text;
 
+    /**
+     * construct labeled button
+     *
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @param labelType
+     * @param text
+     * @param fontSize
+     * @param color
+     * @param backgroundColor
+     * @param margin
+     */
     constructor(
         x: number,
         y: number,

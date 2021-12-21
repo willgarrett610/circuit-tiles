@@ -1,12 +1,16 @@
 import * as PIXI from "pixi.js";
 import Grid from "./grid";
 
+/** grid manager */
 export default class GridManager extends PIXI.Container {
     mainGrid: Grid;
     chipGrid: Grid;
 
     inChipGrid = false;
 
+    /**
+     * constructs grid manager
+     */
     constructor() {
         super();
         this.mainGrid = new Grid(100);
@@ -14,6 +18,11 @@ export default class GridManager extends PIXI.Container {
         this.addChild(this.mainGrid);
     }
 
+    /**
+     * sets if in chip grid state
+     *
+     * @param val chip grid state
+     */
     setInChipGrid(val: boolean) {
         this.inChipGrid = val;
         this.removeChildren();
@@ -24,6 +33,11 @@ export default class GridManager extends PIXI.Container {
         }
     }
 
+    /**
+     * get grid state
+     *
+     * @returns chip grid state
+     */
     getGrid() {
         return this.inChipGrid ? this.chipGrid : this.mainGrid;
     }

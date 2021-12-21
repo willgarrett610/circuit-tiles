@@ -8,6 +8,8 @@ export enum ConnectionType {
     OUTPUT,
     BLOCKED,
 }
+
+/** Tile */
 export abstract class Tile {
     abstract type: typeof Tile;
 
@@ -39,6 +41,12 @@ export abstract class Tile {
     container?: PIXI.Container;
     signalActive = false;
 
+    /**
+     * Get rotation from direction
+     *
+     * @param dir Direction
+     * @returns rotation
+     */
     private getRotatedKey(dir: Direction) {
         return Direction.toLower(
             Direction.values()[
@@ -47,14 +55,25 @@ export abstract class Tile {
         );
     }
 
+    /**
+     * Rotates passed connections
+     *
+     * @param connections setup connections
+     * @param connections.up up connection
+     * @param connections.right right connection
+     * @param connections.down down connection
+     * @param connections.left left connection
+     * @returns new rotated connections
+     */
     private rotateConnections<T>(connections: {
         up: T;
         right: T;
         down: T;
         left: T;
     }) {
-        let rotatedConnections: any = {};
-        for (let dir of Direction.values()) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const rotatedConnections: any = {};
+        for (const dir of Direction.values()) {
             rotatedConnections[Direction.toLower(dir)] =
                 connections[this.getRotatedKey(dir)];
         }
@@ -66,22 +85,44 @@ export abstract class Tile {
         };
     }
 
+    /**
+     * get connections
+     *
+     * @returns connections
+     */
     getConnections() {
         return this.rotateConnections(this.connections);
     }
 
+    /**
+     * get connection template
+     *
+     * @returns connection template
+     */
     getConnectionTemplate() {
         return this.rotateConnections(this.connectionTemplate);
     }
 
+    /**
+     * sets up connection for tile
+     *
+     * @param dir direction of connection
+     * @param val value of connection state
+     */
     setConnection(dir: string, val: boolean) {
-        let enumDir = Direction.fromString(dir);
+        const enumDir = Direction.fromString(dir);
         if (enumDir == null) return;
         this.connections[this.getRotatedKey(enumDir)] = val;
     }
 
     canUse = () => true;
 
+    /**
+     * constructs tile
+     *
+     * @param x x position
+     * @param y y position
+     */
     constructor(x: number, y: number) {
         this.x = x;
         this.y = y;
@@ -93,6 +134,12 @@ export abstract class Tile {
 
     abstract updateContainer?(): void;
 
+    /**
+     * gets container
+     *
+     * @param size size of the tile
+     * @returns container
+     */
     getContainer(size: number): PIXI.Container {
         if (!this.container) {
             this.container = this.generateContainer();
@@ -111,6 +158,11 @@ export abstract class Tile {
         return this.container;
     }
 
+    /**
+     * updates container
+     *
+     * @param size size of the tile
+     */
     update(size: number) {
         if (this.container) {
             this.container.zIndex = 100;
@@ -126,8 +178,14 @@ export abstract class Tile {
         }
     }
 
+    /**
+     * clones tile
+     *
+     * @returns cloned tile
+     */
     clone() {
-        let output: Tile = new (this.type as any)(this.x, this.y);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const output: Tile = new (this.type as any)(this.x, this.y);
         output.connections = { ...this.connections };
         output.direction = this.direction;
         output.signalActive = this.signalActive;
@@ -140,19 +198,27 @@ export abstract class Tile {
     createClone?(): Tile;
 }
 
+/** sprite tile */
 export abstract class SpriteTile extends Tile {
     abstract texture: PIXI.Texture;
 
+    /**
+     * generates container
+     *
+     * @returns container
+     */
     generateContainer() {
         return new PIXI.Sprite(this.texture);
     }
 }
 
+/** graphics tile */
 export abstract class GraphicsTile extends Tile {
     graphics?: PIXI.Graphics;
 
     abstract drawGraphics(): void;
 
+    /** clears graphics */
     clearGraphics() {
         if (!this.graphics) return;
 
@@ -165,6 +231,11 @@ export abstract class GraphicsTile extends Tile {
         this.graphics.endFill();
     }
 
+    /**
+     * generate container
+     *
+     * @returns container
+     */
     generateContainer() {
         this.graphics = new PIXI.Graphics();
         this.clearGraphics();
@@ -172,6 +243,7 @@ export abstract class GraphicsTile extends Tile {
         return this.graphics;
     }
 
+    /** update container */
     updateContainer() {
         this.clearGraphics();
         this.drawGraphics();

@@ -1,7 +1,7 @@
 import config from "../../config";
-import { Direction } from "../../utils/directions";
 import { ConnectionType, GraphicsTile } from "./tile";
 
+/** chip input tile */
 export default class ChipInputTile extends GraphicsTile {
     type = ChipInputTile;
     connectionTemplate = {
@@ -11,8 +11,9 @@ export default class ChipInputTile extends GraphicsTile {
         right: ConnectionType.INPUT,
     };
 
-    label: string = "Input Tile";
+    label: string = "Input";
 
+    /** draw graphics */
     drawGraphics(): void {
         if (!this.graphics) return;
 

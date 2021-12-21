@@ -1,0 +1,46 @@
+{
+    "parser": "@typescript-eslint/parser",
+    "plugins": ["@typescript-eslint", "prettier", "jsdoc"],
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:jsdoc/recommended",
+        "prettier"
+    ],
+    "rules": {
+        "quotes": ["warn", "double"],
+        "no-empty": ["warn"],
+        // "no-unused-vars": "warn",
+        "@typescript-eslint/no-inferrable-types": "off",
+        "@typescript-eslint/no-namespace": "off",
+        "prefer-const": "warn",
+        "@typescript-eslint/no-unused-vars": [
+            "warn",
+            {
+                "argsIgnorePattern": "^_",
+                "varsIgnorePattern": "^_",
+                "caughtErrorsIgnorePattern": "^_"
+            }
+        ],
+        "require-jsdoc": [
+            1,
+            {
+                "require": {
+                    "FunctionDeclaration": true,
+                    "MethodDefinition": true,
+                    "ClassDeclaration": true
+                }
+            }
+        ],
+        "jsdoc/require-returns-type": 0,
+        "jsdoc/require-returns-description": 0,
+        "jsdoc/require-param-type": 0,
+        "jsdoc/require-param-description": 0
+    },
+    "settings": {
+        "jsdoc": {
+            "mode": "typescript"
+        }
+    }
+}

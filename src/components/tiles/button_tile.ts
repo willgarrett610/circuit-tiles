@@ -1,6 +1,7 @@
 import config from "../../config";
 import { ConnectionType, GraphicsTile } from "./tile";
 
+/** Button Tile */
 export default class ButtonTile extends GraphicsTile {
     type = ButtonTile;
     label = "Button";
@@ -15,18 +16,27 @@ export default class ButtonTile extends GraphicsTile {
         right: ConnectionType.OUTPUT,
     };
 
+    /**
+     * construct button tile
+     *
+     * @param x
+     * @param y
+     */
     constructor(x: number, y: number) {
         super(x, y);
     }
 
+    /** handle post generation */
     postGenerate() {
         if (!this.container) return;
         this.container.interactive = true;
-        this.container.on("mousedown", (e: any) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        this.container.on("mousedown", (_: any) => {
             this.signalActive = true;
             this.updateContainer();
         });
-        const release = (e: any) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const release = (_: any) => {
             this.signalActive = false;
             this.updateContainer();
         };
@@ -34,6 +44,7 @@ export default class ButtonTile extends GraphicsTile {
         this.container.on("mouseupoutside", release);
     }
 
+    /** draws graphics */
     drawGraphics() {
         if (!this.graphics) return;
 

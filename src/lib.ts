@@ -9,6 +9,11 @@
 //     // mod.add(3, 3).then((x: any) => console.log(x));
 // }
 
+/**
+ * init wasm
+ *
+ * @returns wasm module
+ */
 export default async function init() {
     const mod = await import("../crate/pkg");
     return mod;
