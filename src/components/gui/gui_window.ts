@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as PIXI from "pixi.js";
 import { onScroll } from "../../utils";
 import { clamp } from "../../utils/math";
 import { GUIComponent } from "./gui_component";
 import Layout from "./layout";
 
+/** gui window */
 export default class GUIWindow extends PIXI.Container {
     components: GUIComponent[];
     container: PIXI.Container;
@@ -20,6 +22,17 @@ export default class GUIWindow extends PIXI.Container {
     private border: PIXI.Graphics;
     layout?: Layout;
 
+    /**
+     * construct gui window
+     *
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @param backgroundColor
+     * @param borderWidth
+     * @param borderColor
+     */
     constructor(
         x: number,
         y: number,
@@ -118,6 +131,12 @@ export default class GUIWindow extends PIXI.Container {
         // this.draw();
     }
 
+    /**
+     * set size of gui window
+     *
+     * @param width pixel width
+     * @param height pixel height
+     */
     setSize(width: number, height: number) {
         this.cWidth = width;
         this.cHeight = height;
@@ -145,11 +164,19 @@ export default class GUIWindow extends PIXI.Container {
         border.zIndex = 1000;
     }
 
+    /**
+     * set layout
+     *
+     * @param layout
+     */
     setLayout(layout: Layout) {
         this.layout = layout;
         this.updateLayout();
     }
 
+    /**
+     * update layout
+     */
     updateLayout() {
         if (this.layout != undefined) {
             for (let i = 0; i < this.components.length; i++) {
@@ -167,6 +194,12 @@ export default class GUIWindow extends PIXI.Container {
         }
     }
 
+    /**
+     * add children to gui window
+     *
+     * @param children
+     * @returns
+     */
     addChild(
         ...children: (PIXI.DisplayObject | GUIComponent)[]
     ): PIXI.DisplayObject | GUIComponent {
@@ -179,6 +212,13 @@ export default class GUIWindow extends PIXI.Container {
         return this.container.addChild(...children);
     }
 
+    /**
+     * add children to gui window at index
+     *
+     * @param child
+     * @param index
+     * @returns
+     */
     addChildAt<T extends PIXI.DisplayObject>(child: T, index: number): T {
         if ((child as any).__proto__ instanceof GUIComponent) {
             this.components.splice(index, 0, child as any);
@@ -187,6 +227,12 @@ export default class GUIWindow extends PIXI.Container {
         return this.container.addChildAt(child, index);
     }
 
+    /**
+     * remove children from gui window
+     *
+     * @param child
+     * @returns
+     */
     removeChild<TChildren extends PIXI.DisplayObject[]>(
         ...child: TChildren
     ): TChildren[0] {
@@ -200,6 +246,12 @@ export default class GUIWindow extends PIXI.Container {
         return this.container.removeChild(...child);
     }
 
+    /**
+     * remove children from gui window at index
+     *
+     * @param index
+     * @returns
+     */
     removeChildAt(index: number): PIXI.DisplayObject {
         const child = this.container.removeChildAt(index);
         if ((child as any).__proto__ instanceof GUIComponent) {
@@ -212,6 +264,13 @@ export default class GUIWindow extends PIXI.Container {
         return child;
     }
 
+    /**
+     * remove all children from gui window at indexes
+     *
+     * @param beginIndex
+     * @param endIndex
+     * @returns
+     */
     removeChildren(
         beginIndex?: number,
         endIndex?: number

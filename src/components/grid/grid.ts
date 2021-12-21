@@ -7,7 +7,6 @@ import {
     onResize,
     onScroll,
     pressedKeys,
-    sleep,
 } from "../../utils";
 import { clamp } from "../../utils/math";
 import config from "../../config";
@@ -16,6 +15,8 @@ import { Direction } from "../../utils/directions";
 import getTileTypes from "../tiles/tile_types";
 import "../../utils/compute-logic";
 import { GridAction, Interaction } from "../../utils/action";
+
+/** Grid class */
 export default class Grid extends PIXI.Container {
     startingSize: number;
     size: number;
@@ -46,6 +47,11 @@ export default class Grid extends PIXI.Container {
 
     currentInteraction: Interaction = Interaction.NONE;
 
+    /**
+     * Constructs grid
+     *
+     * @param size pixel size of grid tile
+     */
     constructor(size: number) {
         super();
         this.startingSize = size;
@@ -72,18 +78,48 @@ export default class Grid extends PIXI.Container {
         onKeyDown(this.keyDown);
     }
 
+    /**
+     * get tile at location
+     *
+     * @param x x coordinate
+     * @param y y coordinate
+     * @returns tile at location
+     */
     getTile(x: number, y: number) {
         return this.tiles[`${x},${y}`];
     }
 
+    /**
+     * set tile at location
+     *
+     * @param x x coordinate
+     * @param y y coordinate
+     * @param tile
+     */
     setTile(x: number, y: number, tile: Tile) {
         this.tiles[`${x},${y}`] = tile;
     }
 
+    /**
+     * remove tile at coordinate
+     *
+     * @param x x coordinate
+     * @param y y coordinate
+     */
     deleteTile(x: number, y: number) {
         delete this.tiles[`${x},${y}`];
     }
 
+    /**
+     * add tile to grid
+     *
+     * @param x x location of tile
+     * @param y y location of tile
+     * @param tile tile to add
+     * @param prevTile last tile added
+     * @param direction direction of placement
+     * @returns tile if add was successful, undefined otherwise
+     */
     addTile<T extends Tile>(
         x: number,
         y: number,
@@ -177,6 +213,13 @@ export default class Grid extends PIXI.Container {
         return tileObj;
     }
 
+    /**
+     * Removes tile at location
+     *
+     * @param x x coordinate
+     * @param y y coordinate
+     * @returns success of deletion
+     */
     removeTile(x: number, y: number) {
         const tile = this.getTile(x, y);
         if (!tile) return false;
@@ -279,8 +322,10 @@ export default class Grid extends PIXI.Container {
     };
 
     scroll = (e: WheelEvent) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if ((e as any).wheelDeltaY === 0) return;
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const delta = (e as any).wheelDeltaY > 1 ? 1 : -1;
 
         let mult = config.zoomCoeff * delta;
@@ -299,6 +344,7 @@ export default class Grid extends PIXI.Container {
         this.update();
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mouseMove = (event: any) => {
         const e = event.data.originalEvent as PointerEvent;
         this.prevMousePos = [...this.mousePos];
@@ -506,6 +552,7 @@ export default class Grid extends PIXI.Container {
         }
     };
 
+    /** renders out grid */
     renderGrid() {
         const width = dimensions()[0];
         const height = dimensions()[1];
@@ -559,6 +606,7 @@ export default class Grid extends PIXI.Container {
         }
     }
 
+    /** renders all the tiles */
     renderTiles() {
         for (const [_, tile] of Object.entries(this.tiles))
             if (tile) tile.update(this.size);
@@ -603,8 +651,11 @@ export default class Grid extends PIXI.Container {
 
     /**
      * From screen space to grid space
+     *
      * @param x X in screen space
      * @param y Y in screen space
+     * @param floored if input should be floored
+     * @param upScale if value should be up scaled
      * @returns Coordinates in grid space
      */
     screenToGrid = (x: number, y: number, floored = false, upScale = false) =>
@@ -630,8 +681,10 @@ export default class Grid extends PIXI.Container {
 
     /**
      * From grid space to screen space (Top Left corner)
+     *
      * @param x X in grid space
      * @param y Y in grid space
+     * @param floored whether to floor the coordinates
      * @returns Coordinates in screen space
      */
     gridToScreen = (x: number, y: number, floored = true) =>

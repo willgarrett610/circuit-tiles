@@ -1,6 +1,9 @@
 let mod: typeof import("../../crate/pkg");
 import init from "../lib";
 
+/**
+ * load up computation logic
+ */
 async function load() {
     mod = await init();
     console.log(

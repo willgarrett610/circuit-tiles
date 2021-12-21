@@ -7,6 +7,7 @@ export enum GUIComponentState {
     disabled,
 }
 
+/** gui component */
 export class GUIComponent extends PIXI.Container {
     backgroundColor: number;
     defaultContainer?: PIXI.Container;
@@ -23,6 +24,15 @@ export class GUIComponent extends PIXI.Container {
     onStateChange?(newState: GUIComponentState): void;
     state: GUIComponentState = GUIComponentState.default;
 
+    /**
+     * construct gui components
+     *
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @param backgroundColor
+     */
     constructor(
         x: number,
         y: number,
@@ -93,6 +103,12 @@ export class GUIComponent extends PIXI.Container {
         });
     }
 
+    /**
+     * get container by state
+     *
+     * @param state
+     * @returns
+     */
     getContainer(state: GUIComponentState) {
         switch (state) {
             case GUIComponentState.default:
@@ -106,6 +122,11 @@ export class GUIComponent extends PIXI.Container {
         }
     }
 
+    /**
+     * set state for gui component
+     *
+     * @param state new state
+     */
     setState(state: GUIComponentState) {
         const prevContainer = this.getContainer(this.state);
         this.state = state;
@@ -117,33 +138,63 @@ export class GUIComponent extends PIXI.Container {
         this.onStateChange?.(state);
     }
 
+    /**
+     * set background color
+     *
+     * @param backgroundColor
+     */
     setBackgroundColor(backgroundColor: number = 0xffffff) {
         this.backgroundColor = backgroundColor;
         this.backgroundSprite.tint = backgroundColor;
     }
 
+    /**
+     * set background sprite
+     *
+     * @param backgroundSprite
+     */
     setBackgroundSprite(backgroundSprite: PIXI.Sprite) {
         this.removeChild(this.backgroundSprite);
         this.backgroundSprite = backgroundSprite;
         this.addChild(this.backgroundSprite);
     }
 
+    /**
+     * set default container
+     *
+     * @param container
+     */
     setDefaultContainer(container: PIXI.Container) {
         this.defaultContainer = container;
         this.defaultContainer.zIndex = 100;
         this.addChild(container);
     }
 
+    /**
+     * set hover container
+     *
+     * @param container
+     */
     setHoverContainer(container: PIXI.Container) {
         this.hoverContainer = container;
         this.hoverContainer.zIndex = 100;
     }
 
+    /**
+     * set pressed container
+     *
+     * @param container
+     */
     setPressedContainer(container: PIXI.Container) {
         this.pressedContainer = container;
         this.pressedContainer.zIndex = 100;
     }
 
+    /**
+     * set disabled container
+     *
+     * @param container
+     */
     setDisabledContainer(container: PIXI.Container) {
         this.disabledContainer = container;
     }

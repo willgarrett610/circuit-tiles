@@ -1,7 +1,8 @@
 import config from "../../config";
-import { Direction, Rotation } from "../../utils/directions";
+import { Rotation } from "../../utils/directions";
 import { ConnectionType, GraphicsTile } from "./tile";
 
+/** not tile */
 export default class NotTile extends GraphicsTile {
     type = NotTile;
     label: string = "NOT Gate";
@@ -15,6 +16,9 @@ export default class NotTile extends GraphicsTile {
 
     direction = Rotation.CLOCKWISE;
 
+    /**
+     * draws graphics
+     */
     drawGraphics(): void {
         if (!this.graphics) return;
 

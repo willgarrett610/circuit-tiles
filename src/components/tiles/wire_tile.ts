@@ -1,6 +1,9 @@
 import config from "../../config";
-import { ConnectionType, GraphicsTile, Tile } from "./tile";
+import { ConnectionType, GraphicsTile } from "./tile";
 
+/**
+ * Wire Tile
+ */
 export default class WireTile extends GraphicsTile {
     type = WireTile;
     label = "Wire";
@@ -12,6 +15,9 @@ export default class WireTile extends GraphicsTile {
         right: ConnectionType.BOTH,
     };
 
+    /**
+     * draws graphics for wire tile
+     */
     drawGraphics() {
         if (!this.graphics) return;
 

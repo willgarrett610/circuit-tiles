@@ -8,7 +8,7 @@ import NotTile from "./not_tile";
 import { Tile } from "./tile";
 import WireTile from "./wire_tile";
 
-const tileTypes: any = [
+const tileTypes = [
     WireTile,
     LeverTile,
     NotTile,
@@ -19,6 +19,11 @@ const tileTypes: any = [
     ChipOutputTile,
 ];
 
+/**
+ * Get tile types
+ *
+ * @returns list of tile types
+ */
 function getTileTypes(): Array<{ new (x: number, y: number): Tile }> {
     return tileTypes;
 }

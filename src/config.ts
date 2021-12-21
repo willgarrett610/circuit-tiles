@@ -1,3 +1,6 @@
+/**
+ * configuration for the application
+ */
 const config = {
     colors: {
         background: 0x333333,

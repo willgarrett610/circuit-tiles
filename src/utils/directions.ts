@@ -1,3 +1,6 @@
+/**
+ * Rotation Enum
+ */
 export enum Rotation {
     NORMAL = 0,
     CLOCKWISE = 1,
@@ -5,6 +8,9 @@ export enum Rotation {
     COUNTER_CLOCKWISE = 3,
 }
 
+/**
+ * Direction Enum
+ */
 export enum Direction {
     UP = 0,
     RIGHT = 1,
@@ -13,6 +19,12 @@ export enum Direction {
 }
 
 export namespace Direction {
+    /**
+     * Gets the opposite direction of the given direction
+     *
+     * @param direction input direction
+     * @returns opposite direction of input direction
+     */
     export function getOpposite(direction: Direction) {
         switch (direction) {
             case Direction.UP:
@@ -26,6 +38,12 @@ export namespace Direction {
         }
     }
 
+    /**
+     * Direction to lower
+     *
+     * @param direction direction to lower case
+     * @returns provides direction in lower case
+     */
     export function toLower(
         direction: Direction
     ): "up" | "right" | "down" | "left" {
@@ -41,10 +59,21 @@ export namespace Direction {
         }
     }
 
+    /**
+     * Gets direction values
+     *
+     * @returns Direction values
+     */
     export function values() {
         return [Direction.UP, Direction.RIGHT, Direction.DOWN, Direction.LEFT];
     }
 
+    /**
+     * get direction from string
+     *
+     * @param key direction as string
+     * @returns Direction
+     */
     export function fromString(key: string) {
         for (const dir of Direction.values()) {
             if (Direction.toLower(dir) == key.toLowerCase()) return dir;

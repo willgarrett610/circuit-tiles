@@ -1,7 +1,8 @@
 import config from "../../config";
-import { Direction, Rotation } from "../../utils/directions";
+import { Rotation } from "../../utils/directions";
 import { ConnectionType, GraphicsTile } from "./tile";
 
+/** diode tile */
 export default class DiodeTile extends GraphicsTile {
     type = DiodeTile;
     label: string = "Diode";
@@ -15,6 +16,7 @@ export default class DiodeTile extends GraphicsTile {
 
     direction = Rotation.CLOCKWISE;
 
+    /** draw graphics */
     drawGraphics(): void {
         if (!this.graphics) return;
 

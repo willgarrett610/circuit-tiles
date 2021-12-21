@@ -1,25 +1,13 @@
 import * as PIXI from "pixi.js";
-import Grid from "./components/grid/grid";
-import {
-    dimensions,
-    height,
-    onResize,
-    width,
-    scrollListeners,
-    DisplayObjectScrollEvent,
-    CWheelEvent,
-    onScroll,
-} from "./utils";
+import { dimensions, onResize, scrollListeners, CWheelEvent } from "./utils";
 import config from "./config";
 import GUIWindow from "./components/gui/gui_window";
 import getTileTypes from "./components/tiles/tile_types";
 import { GUIComponent } from "./components/gui/gui_component";
 import ButtonGroup from "./components/gui/button_group";
 
-import init from "./lib";
 import GridManager from "./components/grid/grid_manager";
 import { LabeledButton, LabelType } from "./components/gui/labeled_button";
-import LineWrapper from "./components/gui/line_wrap_layout";
 import LineWrapLayout from "./components/gui/line_wrap_layout";
 
 PIXI.utils.skipHello();
@@ -261,6 +249,7 @@ const main = async () => {
 
     const gridManager = new GridManager();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).gridManager = gridManager;
 
     console.log(gridManager);

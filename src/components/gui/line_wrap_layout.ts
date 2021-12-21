@@ -1,5 +1,6 @@
 import Layout from "./layout";
 
+/** line wrap layout */
 export default class LineWrapLayout implements Layout {
     compWidth: number;
     compHeight: number;
@@ -7,6 +8,15 @@ export default class LineWrapLayout implements Layout {
     xOff: number;
     yOff: number;
 
+    /**
+     * construct line wrap layout
+     *
+     * @param compWidth
+     * @param compHeight
+     * @param margin
+     * @param xOff
+     * @param yOff
+     */
     constructor(
         compWidth: number,
         compHeight: number,
@@ -21,10 +31,18 @@ export default class LineWrapLayout implements Layout {
         this.yOff = yOff;
     }
 
+    /**
+     * get element position size
+     *
+     * @param i
+     * @param width
+     * @param _ for height
+     * @returns
+     */
     getElementPosSize(
         i: number,
         width: number,
-        height: number
+        _: number
     ): [x: number, y: number, w: number, h: number] {
         // Number of components per row
         const n = Math.floor(
