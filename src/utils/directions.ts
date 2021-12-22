@@ -8,6 +8,14 @@ export enum Rotation {
     COUNTER_CLOCKWISE = 3,
 }
 
+export const rotateClockWise = (input: Rotation): Rotation => {
+    return (input + 1) % 4;
+};
+
+export const rotateCounterClockWise = (input: Rotation): Rotation => {
+    return (input + 3) % 4;
+};
+
 /**
  * Direction Enum
  */

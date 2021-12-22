@@ -10,7 +10,7 @@ import {
 import { clamp } from "../../utils/math";
 import config from "../../config";
 import { ConnectionType, Tile } from "../tiles/tile";
-import { Direction } from "../../utils/directions";
+import { Direction, rotateClockWise } from "../../utils/directions";
 import getTileTypes from "../tiles/tile_types";
 import "../../utils/compute_logic";
 import { GridAction, Interaction } from "../../utils/action";
@@ -501,6 +501,22 @@ export default class Grid extends PIXI.Container {
             if (state.editMode == EditMode.ERASER) {
                 this.currentInteraction = Interaction.REMOVING;
                 this.removeTile(...gridPoint);
+            } else if (state.editMode == EditMode.CURSOR) {
+                // rotate tile around
+
+                const tile = this.getTile(...gridPoint);
+
+                if (tile && tile.rotatable) {
+                    this.tempHistory.push({
+                        action: GridAction.EDIT,
+                        prevTile: tile.clone(),
+                        postTile: undefined,
+                        location: { x: tile.x, y: tile.y },
+                    });
+                    tile.direction = rotateClockWise(tile.direction);
+                    this.tempHistory[this.tempHistory.length - 1].postTile =
+                        tile.clone();
+                }
             } else {
                 // TODO Tile and Chip modes
                 this.currentInteraction = Interaction.PLACING;

@@ -15,6 +15,7 @@ export default class DelayTile extends GraphicsTile {
     };
 
     direction = Rotation.CLOCKWISE;
+    rotatable = true;
 
     /** draw graphics */
     drawGraphics(): void {
@@ -34,9 +35,11 @@ export default class DelayTile extends GraphicsTile {
                 : config.colors.inactiveTileColor
         );
         this.graphics.lineStyle(5);
-
         this.graphics.drawRect(40, 15, 40, 90);
+        this.graphics.endFill();
 
+        this.graphics.beginFill(0x000000);
+        this.graphics.drawPolygon([50, 80, 60, 40, 70, 80]);
         this.graphics.endFill();
     }
 }

@@ -15,6 +15,7 @@ export default class NotTile extends GraphicsTile {
     };
 
     direction = Rotation.CLOCKWISE;
+    rotatable = true;
 
     /**
      * draws graphics
