@@ -276,7 +276,11 @@ export default class Grid extends PIXI.Container {
         this.finishInteraction();
         if (this.history.length < 2) return;
         const actions = this.history[this.history.length - 2];
-        for (const { action, prevTile: tile, location } of actions.reverse()) {
+        this.undoHistory.push(actions);
+
+        for (const { action, prevTile: tile, location } of [
+            ...actions,
+        ].reverse()) {
             const refTile = this.getTile(location.x, location.y);
             switch (action) {
                 case GridAction.ADD: {
@@ -315,22 +319,20 @@ export default class Grid extends PIXI.Container {
             }
         }
 
-        this.undoHistory.push(actions);
-
         this.history.splice(this.history.length - 2, 1);
     };
 
     redo = async () => {
         this.finishInteraction();
-        if (this.undoHistory.length === 0) {
-            console.log("nothing to redo");
-            return;
-        }
+        if (this.undoHistory.length === 0) return;
 
         const actions = this.undoHistory.pop();
         if (!actions) return;
-        for (const { action, postTile, location } of actions.reverse()) {
-            console.log(action);
+
+        this.currentHistory().push(...actions);
+        this.newHistory();
+
+        for (const { action, postTile, location } of actions) {
             const refTile = this.getTile(location.x, location.y);
             switch (action) {
                 case GridAction.REMOVE: {
