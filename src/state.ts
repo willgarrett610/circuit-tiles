@@ -5,6 +5,7 @@ const state: {
     [key: string]: any;
 } = {
     editMode: EditMode.TILE,
+    chips: [],
 };
 
 interface StateCallback {
