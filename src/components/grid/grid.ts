@@ -473,8 +473,18 @@ export default class Grid extends PIXI.Container {
                 pressedKeys["Space"] ||
                 state.editMode === EditMode.PAN
             ) {
-                this.x += e.movementX;
-                this.y += e.movementY;
+                const prevGridPos = this.screenToGrid(
+                    ...this.prevMousePos,
+                    false,
+                    true
+                );
+                const newGridPos = this.screenToGrid(
+                    ...this.mousePos,
+                    false,
+                    true
+                );
+                this.x += newGridPos.x - prevGridPos.x;
+                this.y += newGridPos.y - prevGridPos.y;
             } else if (state.editMode === EditMode.ERASER) {
                 this.currentInteraction = Interaction.REMOVING;
 
@@ -489,6 +499,8 @@ export default class Grid extends PIXI.Container {
 
                 for (const gridPoint of gridPoints)
                     this.removeTile(...locationToTuple(gridPoint));
+            } else if (state.editMode === EditMode.CURSOR) {
+                // do nothing
             } else {
                 // TODO Tile and Chip modes
                 this.currentInteraction = Interaction.PLACING;
