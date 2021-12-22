@@ -10,9 +10,8 @@ import config from "../../config";
 
 import GridManager from "../grid/grid_manager";
 import { GUIComponent, GUIComponentState } from "./component/gui_component";
-import { getSprite, loadSprites } from "../sprites/sprite_loader";
-import { EditMode } from "../../utils/edit_mode";
-import state from "../../state";
+import { getSprite } from "../sprites/sprite_loader";
+import state, { subscribe } from "../../state";
 
 /** btn generator data */
 class BtnGeneratorData {
@@ -282,6 +281,10 @@ const createToolSelector = (onSelectionChange: (i: number) => void) => {
 
     btnGroup.setSelected(state.editMode);
 
+    subscribe(["editMode"], (e) => {
+        btnGroup.setSelected(e.value);
+    });
+
     return selector;
 };
 
@@ -398,11 +401,11 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
     app.stage.addChild(menuBar);
 
     onResize(() => {
-        const selectorHeights = (dimensions()[1] - config.menubarSize) / 2;
+        const selectorHeights = dimensions()[1] - config.menubarSize;
         app.renderer.resize(...dimensions());
         tileSelector.setSize(config.selectorWidth, selectorHeights);
         chipSelector.setSize(config.selectorWidth, selectorHeights);
-        chipSelector.y = config.menubarSize + selectorHeights;
+        chipSelector.y = config.menubarSize;
         menuBar.setSize(dimensions()[0], config.menubarSize);
         toolSelector.setSize(
             toolSelector.width,

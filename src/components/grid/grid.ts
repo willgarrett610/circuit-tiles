@@ -1,9 +1,11 @@
 import * as PIXI from "pixi.js";
 import {
     dimensions,
+    height,
     locationToTuple,
     mouseDown,
     pressedKeys,
+    width,
 } from "../../utils";
 import { clamp } from "../../utils/math";
 import config from "../../config";
@@ -12,6 +14,8 @@ import { Direction } from "../../utils/directions";
 import getTileTypes from "../tiles/tile_types";
 import "../../utils/compute_logic";
 import { GridAction, Interaction } from "../../utils/action";
+import state, { setState } from "../../state";
+import { EditMode } from "../../utils/edit_mode";
 /** Grid class */
 export default class Grid extends PIXI.Container {
     startingSize: number;
@@ -374,6 +378,23 @@ export default class Grid extends PIXI.Container {
             this.history.pop();
     };
 
+    zoom = (x: number, y: number, delta: number) => {
+        let mult = config.zoomCoeff * delta;
+        if (mult < 0) mult = -1 / mult;
+
+        const prevPos = this.screenToGrid(x, y);
+
+        this.size = Math.round(mult * this.size);
+        this.size = clamp(this.size, 10, 350);
+
+        const newPos = this.screenToGrid(x, y);
+
+        this.x += (newPos.x - prevPos.x) * this.size;
+        this.y += (newPos.y - prevPos.y) * this.size;
+
+        this.update();
+    };
+
     scroll = (e: WheelEvent) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if ((e as any).wheelDeltaY === 0) return;
@@ -381,20 +402,7 @@ export default class Grid extends PIXI.Container {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const delta = (e as any).wheelDeltaY > 1 ? 1 : -1;
 
-        let mult = config.zoomCoeff * delta;
-        if (mult < 0) mult = -1 / mult;
-
-        const prevPos = this.screenToGrid(e.pageX, e.pageY);
-
-        this.size = Math.round(mult * this.size);
-        this.size = clamp(this.size, 20, 350);
-
-        const newPos = this.screenToGrid(e.pageX, e.pageY);
-
-        this.x += (newPos.x - prevPos.x) * this.size;
-        this.y += (newPos.y - prevPos.y) * this.size;
-
-        this.update();
+        this.zoom(e.pageX, e.pageY, delta);
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -406,7 +414,7 @@ export default class Grid extends PIXI.Container {
             if (e.shiftKey || pressedKeys["Space"]) {
                 this.x += e.movementX;
                 this.y += e.movementY;
-            } else if (pressedKeys["KeyX"]) {
+            } else if (state.editMode == EditMode.ERASER) {
                 this.currentInteraction = Interaction.REMOVING;
 
                 const gridPoints = this.gridPointsBetween(
@@ -421,6 +429,7 @@ export default class Grid extends PIXI.Container {
                 for (const gridPoint of gridPoints)
                     this.removeTile(...locationToTuple(gridPoint));
             } else {
+                // TODO Tile and Chip modes
                 this.currentInteraction = Interaction.PLACING;
 
                 const gridPoints = this.gridPointsBetween(
@@ -484,10 +493,11 @@ export default class Grid extends PIXI.Container {
                 this.screenToGrid(...this.mousePos, true)
             );
 
-            if (pressedKeys["KeyX"]) {
+            if (state.editMode == EditMode.ERASER) {
                 this.currentInteraction = Interaction.REMOVING;
                 this.removeTile(...gridPoint);
             } else {
+                // TODO Tile and Chip modes
                 this.currentInteraction = Interaction.PLACING;
                 this.addTile(
                     ...gridPoint,
@@ -521,55 +531,21 @@ export default class Grid extends PIXI.Container {
             e.stopPropagation();
         }
 
+        if (e.code === "KeyX") {
+            setState("editMode", EditMode.ERASER);
+        }
+
         if (!e.ctrlKey && !e.shiftKey) {
             if (e.code === "Equal") {
                 e.preventDefault();
 
-                let mult = 1 / (config.zoomCoeff * -100);
-                if (mult < 0) mult = -1 / mult;
-
-                const prevPos = this.screenToGrid(
-                    this.width / 2,
-                    this.height / 2
-                );
-
-                this.size = Math.round(mult * this.size);
-                this.size = clamp(this.size, 20, 350);
-
-                const newPos = this.screenToGrid(
-                    this.width / 2,
-                    this.height / 2
-                );
-
-                this.x += (newPos.x - prevPos.x) * this.size;
-                this.y += (newPos.y - prevPos.y) * this.size;
-
-                this.update();
+                this.zoom(width() / 2, height() / 2, 1);
             }
 
             if (e.code === "Minus") {
                 e.preventDefault();
 
-                let mult = 1 / (config.zoomCoeff * 100);
-                if (mult < 0) mult = -1 / mult;
-
-                const prevPos = this.screenToGrid(
-                    this.width / 2,
-                    this.height / 2
-                );
-
-                this.size = Math.round(mult * this.size);
-                this.size = clamp(this.size, 20, 350);
-
-                const newPos = this.screenToGrid(
-                    this.width / 2,
-                    this.height / 2
-                );
-
-                this.x += (newPos.x - prevPos.x) * this.size;
-                this.y += (newPos.y - prevPos.y) * this.size;
-
-                this.update();
+                this.zoom(width() / 2, height() / 2, -1);
             }
 
             if (e.code === "Digit0") {
