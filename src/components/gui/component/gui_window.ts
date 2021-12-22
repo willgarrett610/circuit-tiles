@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as PIXI from "pixi.js";
-import { onScroll } from "../../utils";
-import { clamp } from "../../utils/math";
+import { onScroll } from "../../../utils";
+import { clamp } from "../../../utils/math";
 import { GUIComponent } from "./gui_component";
-import Layout from "./layout";
+import Layout from "../layout/layout";
 
 /** gui window */
 export default class GUIWindow extends PIXI.Container {

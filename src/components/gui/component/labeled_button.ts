@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import config from "../../config";
+import config from "../../../config";
 import { GUIComponent } from "./gui_component";
 
 export enum LabelType {
