@@ -9,6 +9,10 @@ import LineWrapLayout from "./layout/line_wrap_layout";
 import config from "../../config";
 
 import GridManager from "../grid/grid_manager";
+import { GUIComponent, GUIComponentState } from "./component/gui_component";
+import { getSprite, loadSprites } from "../sprites/sprite_loader";
+import { EditMode } from "../../utils/edit_mode";
+import state from "../../state";
 
 /** btn generator data */
 class BtnGeneratorData {
@@ -192,8 +196,93 @@ const createSelectorMenu = (
     return selector;
 };
 
-const createToolSelector = () => {
-    return null;
+const createToolBtn = (spriteKey: string): GUIComponent => {
+    const toolHover = new PIXI.Graphics();
+
+    toolHover.beginFill(config.colors.highlightTool);
+    toolHover.drawRect(0, 0, config.menubarSize, config.menubarSize);
+    toolHover.endFill();
+
+    // toolHover.scale.x = 1 / btnData.hoverContainer.scale.x;
+    // toolHover.scale.y = 1 / btnData.hoverContainer.scale.y;
+
+    toolHover.alpha = 0.2;
+    toolHover.zIndex = 200;
+
+    const tool = new GUIComponent(
+        0,
+        0,
+        config.menubarSize,
+        config.menubarSize,
+        config.colors.menuColor
+    );
+    const defaultContainer = new PIXI.Container();
+    const defaultSprite = getSprite(spriteKey);
+    defaultSprite.width = tool.cWidth;
+    defaultSprite.height = tool.cHeight;
+    defaultContainer.addChild(defaultSprite);
+    tool.setDefaultContainer(defaultContainer);
+
+    const hoverContainer = new PIXI.Container();
+    const hoverSprite = getSprite(spriteKey);
+    hoverSprite.width = tool.cWidth;
+    hoverSprite.height = tool.cHeight;
+    hoverContainer.addChild(hoverSprite);
+    hoverContainer.addChild(toolHover);
+    tool.setHoverContainer(hoverContainer);
+    tool.setState(GUIComponentState.DEFAULT);
+
+    return tool;
+};
+
+const createToolSelector = (onSelectionChange: (i: number) => void) => {
+    const selector = new GUIWindow(
+        0,
+        config.menubarSize,
+        config.menubarSize,
+        dimensions()[1] - config.menubarSize,
+        config.colors.menuColor
+    );
+
+    const layout = new LineWrapLayout(
+        config.menubarSize,
+        config.menubarSize,
+        0
+    );
+
+    const eraseTool = createToolBtn("eraser");
+    const tilesTool = createToolBtn("tiles");
+    const chipsTool = createToolBtn("chips");
+
+    selector.setLayout(layout);
+
+    selector.addChild(eraseTool);
+    selector.addChild(tilesTool);
+    selector.addChild(chipsTool);
+
+    const selectedGraphics = new PIXI.Graphics();
+
+    selectedGraphics.beginFill(config.colors.selectedTool);
+    selectedGraphics.drawRect(0, 0, config.menubarSize, config.menubarSize);
+    selectedGraphics.endFill();
+
+    // toolHover.scale.x = 1 / btnData.hoverContainer.scale.x;
+    // toolHover.scale.y = 1 / btnData.hoverContainer.scale.y;
+
+    selectedGraphics.alpha = 0.2;
+    selectedGraphics.zIndex = 200;
+
+    const btnGroup = new ButtonGroup(selectedGraphics);
+
+    btnGroup.addButton(eraseTool);
+    btnGroup.addButton(tilesTool);
+    btnGroup.addButton(chipsTool);
+
+    btnGroup.onSelectionChange = onSelectionChange;
+
+    btnGroup.setSelected(state.editMode);
+
+    return selector;
 };
 
 /**
@@ -203,7 +292,7 @@ const createToolSelector = () => {
  * @param gridManager Grid Manager
  */
 const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
-    const selectorHeights = (dimensions()[1] - config.menubarSize) / 2;
+    const selectorHeights = dimensions()[1] - config.menubarSize;
 
     /*
     MENU BAR
@@ -218,15 +307,11 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
     );
 
     /*
-    Tool Selector
-    */
-
-    /*
     TILE SELECTION
     */
 
     const tileSelector = createSelectorMenu(
-        0,
+        config.menubarSize,
         config.menubarSize,
         config.selectorWidth,
         selectorHeights,
@@ -251,16 +336,15 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
         },
         (i) => (gridManager.getGrid().selectedTileType = i)
     );
-    // let y = Math.floor(i / config.tileSelector.tilesPerRow);
-    // let x = i - y * config.tileSelector.tilesPerRow;
+    tileSelector.visible = false;
 
     /*
     CHIP SELECTION
     */
 
     const chipSelector = createSelectorMenu(
-        0,
-        config.menubarSize + selectorHeights,
+        config.menubarSize,
+        config.menubarSize,
         config.selectorWidth,
         selectorHeights,
         "Chips",
@@ -268,7 +352,6 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
             if (i >= getTileTypes().length) return null;
 
             const tileType = getTileTypes()[i];
-            console.log(tileType);
             const tileOff = new tileType(0, 0);
             const tileOn = new tileType(0, 0);
             tileOn.signalActive = true;
@@ -284,10 +367,33 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
         },
         (i) => (gridManager.getGrid().selectedTileType = i)
     );
+    chipSelector.visible = false;
+
+    /*
+    TOOL SELECTION
+    */
+
+    const toolSelector = createToolSelector((i) => {
+        tileSelector.visible = false;
+        chipSelector.visible = false;
+        state.editMode = i;
+        switch (i) {
+            case 1:
+                // Tiles
+                tileSelector.visible = true;
+                break;
+            case 2:
+                // Chips
+                chipSelector.visible = true;
+                break;
+        }
+    });
 
     app.stage.addChild(chipSelector);
 
     app.stage.addChild(tileSelector);
+
+    app.stage.addChild(toolSelector);
 
     app.stage.addChild(menuBar);
 
@@ -298,6 +404,10 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
         chipSelector.setSize(config.selectorWidth, selectorHeights);
         chipSelector.y = config.menubarSize + selectorHeights;
         menuBar.setSize(dimensions()[0], config.menubarSize);
+        toolSelector.setSize(
+            toolSelector.width,
+            dimensions()[1] - config.menubarSize
+        );
     });
 };
 

@@ -5,6 +5,8 @@ const config = {
     colors: {
         background: 0x333333,
         highlightTile: 0xcccccc,
+        highlightTool: 0x333333,
+        selectedTool: 0x151515,
         tileBackground: 0x666666,
         selectedTileBtn: 0x00cc00,
         activeTileColor: 0xd9514c,
@@ -25,7 +27,7 @@ const config = {
         selectedWidth: 4,
         textSize: 13,
     },
-    menubarSize: 40,
+    menubarSize: 35,
     selectorWidth: 150,
 };
 

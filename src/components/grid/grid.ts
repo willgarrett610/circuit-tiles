@@ -7,16 +7,14 @@ import {
     onResize,
     onScroll,
     pressedKeys,
-    sleep,
 } from "../../utils";
 import { clamp } from "../../utils/math";
 import config from "../../config";
 import { ConnectionType, Tile } from "../tiles/tile";
 import { Direction } from "../../utils/directions";
 import getTileTypes from "../tiles/tile_types";
-import "../../utils/compute-logic";
+import "../../utils/compute_logic";
 import { GridAction, Interaction } from "../../utils/action";
-
 /** Grid class */
 export default class Grid extends PIXI.Container {
     startingSize: number;

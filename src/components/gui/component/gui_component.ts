@@ -1,10 +1,10 @@
 import * as PIXI from "pixi.js";
 
 export enum GUIComponentState {
-    default,
-    hover,
-    pressed,
-    disabled,
+    DEFAULT,
+    HOVER,
+    PRESSED,
+    DISABLED,
 }
 
 /** gui component */
@@ -22,7 +22,7 @@ export class GUIComponent extends PIXI.Container {
     onClick?(e: PIXI.interaction.InteractionEvent): void;
     onRightClick?(e: PIXI.interaction.InteractionEvent): void;
     onStateChange?(newState: GUIComponentState): void;
-    state: GUIComponentState = GUIComponentState.default;
+    state: GUIComponentState = GUIComponentState.DEFAULT;
 
     /**
      * construct gui components
@@ -61,44 +61,44 @@ export class GUIComponent extends PIXI.Container {
 
         this.on("click", (e: PIXI.interaction.InteractionEvent) => {
             e.stopPropagation();
-            if (this.state != GUIComponentState.disabled) {
+            if (this.state != GUIComponentState.DISABLED) {
                 this.onClick?.(e);
             }
         });
 
         this.on("rightclick", (e: PIXI.interaction.InteractionEvent) => {
             e.stopPropagation();
-            if (this.state != GUIComponentState.disabled) {
+            if (this.state != GUIComponentState.DISABLED) {
                 this.onRightClick?.(e);
             }
         });
 
         this.on("mouseover", () => {
-            if (this.state != GUIComponentState.disabled) {
+            if (this.state != GUIComponentState.DISABLED) {
                 this.onHover?.();
-                this.setState(GUIComponentState.hover);
+                this.setState(GUIComponentState.HOVER);
             }
         });
         this.on("mouseout", () => {
-            if (this.state != GUIComponentState.disabled) {
+            if (this.state != GUIComponentState.DISABLED) {
                 this.onEndHover?.();
-                this.setState(GUIComponentState.default);
+                this.setState(GUIComponentState.DEFAULT);
             }
         });
 
         this.on("mousedown", () => {
-            if (this.state != GUIComponentState.disabled) {
-                this.setState(GUIComponentState.pressed);
+            if (this.state != GUIComponentState.DISABLED) {
+                this.setState(GUIComponentState.PRESSED);
             }
         });
         this.on("mouseup", () => {
-            if (this.state != GUIComponentState.disabled) {
-                this.setState(GUIComponentState.hover);
+            if (this.state != GUIComponentState.DISABLED) {
+                this.setState(GUIComponentState.HOVER);
             }
         });
         this.on("mouseupoutside", () => {
-            if (this.state != GUIComponentState.disabled) {
-                this.setState(GUIComponentState.default);
+            if (this.state != GUIComponentState.DISABLED) {
+                this.setState(GUIComponentState.DEFAULT);
             }
         });
     }
@@ -111,13 +111,13 @@ export class GUIComponent extends PIXI.Container {
      */
     getContainer(state: GUIComponentState) {
         switch (state) {
-            case GUIComponentState.default:
+            case GUIComponentState.DEFAULT:
                 return this.defaultContainer;
-            case GUIComponentState.hover:
+            case GUIComponentState.HOVER:
                 return this.hoverContainer;
-            case GUIComponentState.pressed:
+            case GUIComponentState.PRESSED:
                 return this.pressedContainer;
-            case GUIComponentState.disabled:
+            case GUIComponentState.DISABLED:
                 return this.disabledContainer;
         }
     }
@@ -156,6 +156,8 @@ export class GUIComponent extends PIXI.Container {
     setBackgroundSprite(backgroundSprite: PIXI.Sprite) {
         this.removeChild(this.backgroundSprite);
         this.backgroundSprite = backgroundSprite;
+        this.backgroundSprite.width = this.cWidth;
+        this.backgroundSprite.height = this.cHeight;
         this.addChild(this.backgroundSprite);
     }
 

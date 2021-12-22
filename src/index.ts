@@ -4,6 +4,7 @@ import config from "./config";
 import initGUI from "./components/gui/gui";
 
 import GridManager from "./components/grid/grid_manager";
+import { loadSprites } from "./components/sprites/sprite_loader";
 
 PIXI.utils.skipHello();
 
@@ -32,7 +33,7 @@ const main = async () => {
 
     app.stage.addChild(gridManager);
 
-    initGUI(app, gridManager);
+    loadSprites().then(() => initGUI(app, gridManager));
 
     window.addEventListener("contextmenu", (e) => e.preventDefault());
 
