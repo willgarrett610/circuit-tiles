@@ -58,6 +58,4 @@ export function setState(newState: { [key: string]: any }) {
     for (const key in newState) setStateByName(key, newState[key]);
 }
 
-// setState({value: 4, bruh: 9})
-
 export default state;

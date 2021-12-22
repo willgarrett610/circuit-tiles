@@ -11,7 +11,7 @@ import config from "../../config";
 import GridManager from "../grid/grid_manager";
 import { GUIComponent, GUIComponentState } from "./component/gui_component";
 import { getSprite } from "../sprites/sprite_loader";
-import state, { setStateByName, subscribe } from "../../state";
+import state, { setState, subscribe } from "../../state";
 import { EditMode } from "../../utils/edit_mode";
 
 /** btn generator data */
@@ -385,7 +385,7 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
         tileSelector.visible = false;
         chipSelector.visible = false;
         // state.editMode = i;
-        setStateByName("editMode", i);
+        setState({ editMode: i });
         switch (i) {
             case EditMode.TILE:
                 // Tiles

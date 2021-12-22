@@ -14,7 +14,7 @@ import { Direction } from "../../utils/directions";
 import getTileTypes from "../tiles/tile_types";
 import "../../utils/compute_logic";
 import { GridAction, Interaction } from "../../utils/action";
-import state, { setStateByName } from "../../state";
+import state, { setState } from "../../state";
 import { EditMode } from "../../utils/edit_mode";
 /** Grid class */
 export default class Grid extends PIXI.Container {
@@ -537,7 +537,7 @@ export default class Grid extends PIXI.Container {
         }
 
         if (e.code === "KeyX") {
-            setStateByName("editMode", EditMode.ERASER);
+            setState({ editMode: EditMode.ERASER });
         }
 
         if (!e.ctrlKey && !e.shiftKey) {
