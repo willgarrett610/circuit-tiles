@@ -12,6 +12,7 @@
             "webRoot": "${workspaceFolder}/dist",
             // very important for debugging !
             "sourceMaps": true,
+            "trace": true,
             "sourceMapPathOverrides": {
                 "webpack-internal:///dist/src/*": "${workspaceFolder}/src/*",
                 "webpack-internal:///./dist/src/*": "${workspaceFolder}/src/*",
@@ -23,7 +24,11 @@
             "type": "node-terminal",
             "request": "launch",
             "name": "Launch webpack-dev-server",
-            "command": "npm run dev"
+            "command": "npm run start",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}/src",
+            "sourceMaps": true,
+            "trace": true
         }
     ],
     "compounds": [
