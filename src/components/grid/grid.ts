@@ -547,13 +547,41 @@ export default class Grid extends PIXI.Container {
         }
     };
 
+    prevHighlightTileGraphic: PIXI.Container | undefined;
+
     updateHighlightTile = () => {
-        const gridPos = this.screenToGrid(...this.mousePos, true, true);
+        const gridScreenPos = this.screenToGrid(...this.mousePos, true, true);
+        const gridPos = this.screenToGrid(...this.mousePos, true);
+
+        const tempTile = new (getTileTypes()[this.selectedTileType])(
+            ...locationToTuple(gridPos)
+        );
+        if (this.prevHighlightTileGraphic)
+            this.removeChild(this.prevHighlightTileGraphic);
+        if (
+            this.selectedTileType !== -1 &&
+            EditMode.TILE === state.editMode &&
+            this.getTile(...locationToTuple(gridPos)) === undefined
+        ) {
+            const tileGraphics: PIXI.Container = tempTile.getContainer(
+                this.size
+            );
+            tileGraphics.alpha = 0.5;
+            this.addChild(tileGraphics);
+            this.prevHighlightTileGraphic = tileGraphics;
+            tempTile.updateContainer?.();
+            tempTile.update(this.size);
+        }
 
         this.hlTile.clear();
         this.hlTile.beginFill(config.colors.highlightTile);
         this.hlTile.lineStyle(0);
-        this.hlTile.drawRect(gridPos.x, gridPos.y, this.size, this.size);
+        this.hlTile.drawRect(
+            gridScreenPos.x,
+            gridScreenPos.y,
+            this.size,
+            this.size
+        );
     };
 
     click = (event: PIXI.interaction.InteractionEvent) => {
