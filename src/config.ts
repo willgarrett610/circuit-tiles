@@ -9,13 +9,14 @@ const config = {
         selectedTool: 0x151515,
         tileBackground: 0x666666,
         selectedTileBtn: 0x00cc00,
-        activeTileColor: 0xd9514c,
-        inactiveTileColor: 0x420f0d,
-        menuColor: 0xaaaaaa,
-        activeOutputColor: 0x37b514,
-        inactiveOutputColor: 0x174709,
-        activeInputColor: 0x6e22d4,
-        inactiveInputColor: 0x1c0738,
+        activeTile: 0xd9514c,
+        inactiveTile: 0x420f0d,
+        menu: 0xaaaaaa,
+        menuHeader: 0x888888,
+        activeOutput: 0x37b514,
+        inactiveOutput: 0x174709,
+        activeInput: 0x6e22d4,
+        inactiveInput: 0x1c0738,
     },
     zoomCoeff: 1.15,
     lineColor: 0x222222,
@@ -29,6 +30,14 @@ const config = {
     },
     menubarSize: 35,
     selectorWidth: 150,
+    formPromt: {
+        headerFontSize: 15,
+        headerHeight: 25,
+    },
+    chipCreationForm: {
+        width: 600,
+        height: 300,
+    },
 };
 
 export default config;

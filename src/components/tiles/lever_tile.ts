@@ -6,8 +6,8 @@ export default class LeverTile extends GraphicsTile {
     type = LeverTile;
     label = "Lever";
 
-    onColor = config.colors.activeTileColor;
-    offColor = config.colors.inactiveTileColor;
+    onColor = config.colors.activeTile;
+    offColor = config.colors.inactiveTile;
 
     connectionTemplate = {
         up: ConnectionType.OUTPUT,

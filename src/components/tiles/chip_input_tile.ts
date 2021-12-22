@@ -19,8 +19,8 @@ export default class ChipInputTile extends GraphicsTile {
 
         this.graphics.beginFill(
             this.signalActive
-                ? config.colors.activeInputColor
-                : config.colors.inactiveInputColor
+                ? config.colors.activeInput
+                : config.colors.inactiveInput
         );
         this.graphics.lineStyle(4, 0x000000);
         this.graphics.drawRect(6, 6, 108, 108);

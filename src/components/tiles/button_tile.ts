@@ -6,8 +6,8 @@ export default class ButtonTile extends GraphicsTile {
     type = ButtonTile;
     label = "Button";
 
-    onColor = config.colors.activeTileColor;
-    offColor = config.colors.inactiveTileColor;
+    onColor = config.colors.activeTile;
+    offColor = config.colors.inactiveTile;
 
     connectionTemplate = {
         up: ConnectionType.OUTPUT,
