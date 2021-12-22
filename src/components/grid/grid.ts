@@ -14,7 +14,7 @@ import { Direction } from "../../utils/directions";
 import getTileTypes from "../tiles/tile_types";
 import "../../utils/compute_logic";
 import { GridAction, Interaction } from "../../utils/action";
-import state, { setState } from "../../state";
+import state, { setStateByName } from "../../state";
 import { EditMode } from "../../utils/edit_mode";
 /** Grid class */
 export default class Grid extends PIXI.Container {
@@ -411,10 +411,14 @@ export default class Grid extends PIXI.Container {
         this.prevMousePos = [...this.mousePos];
         this.mousePos = [e.pageX, e.pageY];
         if (mouseDown.left) {
-            if (e.shiftKey || pressedKeys["Space"]) {
+            if (
+                e.shiftKey ||
+                pressedKeys["Space"] ||
+                state.editMode === EditMode.PAN
+            ) {
                 this.x += e.movementX;
                 this.y += e.movementY;
-            } else if (state.editMode == EditMode.ERASER) {
+            } else if (state.editMode === EditMode.ERASER) {
                 this.currentInteraction = Interaction.REMOVING;
 
                 const gridPoints = this.gridPointsBetween(
@@ -487,7 +491,8 @@ export default class Grid extends PIXI.Container {
         if (
             event.data.button == 0 &&
             !event.data.originalEvent.shiftKey &&
-            !pressedKeys["Space"]
+            !pressedKeys["Space"] &&
+            state.editMode !== EditMode.PAN
         ) {
             const gridPoint = locationToTuple(
                 this.screenToGrid(...this.mousePos, true)
@@ -532,7 +537,7 @@ export default class Grid extends PIXI.Container {
         }
 
         if (e.code === "KeyX") {
-            setState("editMode", EditMode.ERASER);
+            setStateByName("editMode", EditMode.ERASER);
         }
 
         if (!e.ctrlKey && !e.shiftKey) {

@@ -39,7 +39,7 @@ export function subscribe(
  * @param name Name of the state variable to change
  * @param value New value for the variable
  */
-export function setState<T>(name: string, value: T) {
+export function setStateByName<T>(name: string, value: T) {
     const prevValue = state[name];
     state[name] = value;
     for (const callback of callbacks) {
@@ -48,5 +48,16 @@ export function setState<T>(name: string, value: T) {
         }
     }
 }
+
+/**
+ * Update state value
+ *
+ * @param newState New state values
+ */
+export function setState(newState: { [key: string]: any }) {
+    for (const key in newState) setStateByName(key, newState[key]);
+}
+
+// setState({value: 4, bruh: 9})
 
 export default state;

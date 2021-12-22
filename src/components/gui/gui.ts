@@ -11,7 +11,8 @@ import config from "../../config";
 import GridManager from "../grid/grid_manager";
 import { GUIComponent, GUIComponentState } from "./component/gui_component";
 import { getSprite } from "../sprites/sprite_loader";
-import state, { subscribe } from "../../state";
+import state, { setStateByName, subscribe } from "../../state";
+import { EditMode } from "../../utils/edit_mode";
 
 /** btn generator data */
 class BtnGeneratorData {
@@ -249,12 +250,14 @@ const createToolSelector = (onSelectionChange: (i: number) => void) => {
         0
     );
 
+    const panTool = createToolBtn("pan");
     const eraseTool = createToolBtn("eraser");
     const tilesTool = createToolBtn("tiles");
     const chipsTool = createToolBtn("chips");
 
     selector.setLayout(layout);
 
+    selector.addChild(panTool);
     selector.addChild(eraseTool);
     selector.addChild(tilesTool);
     selector.addChild(chipsTool);
@@ -273,6 +276,7 @@ const createToolSelector = (onSelectionChange: (i: number) => void) => {
 
     const btnGroup = new ButtonGroup(selectedGraphics);
 
+    btnGroup.addButton(panTool);
     btnGroup.addButton(eraseTool);
     btnGroup.addButton(tilesTool);
     btnGroup.addButton(chipsTool);
@@ -282,6 +286,7 @@ const createToolSelector = (onSelectionChange: (i: number) => void) => {
     btnGroup.setSelected(state.editMode);
 
     subscribe(["editMode"], (e) => {
+        if (e.value === e.prevValue) return;
         btnGroup.setSelected(e.value);
     });
 
@@ -379,13 +384,14 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
     const toolSelector = createToolSelector((i) => {
         tileSelector.visible = false;
         chipSelector.visible = false;
-        state.editMode = i;
+        // state.editMode = i;
+        setStateByName("editMode", i);
         switch (i) {
-            case 1:
+            case EditMode.TILE:
                 // Tiles
                 tileSelector.visible = true;
                 break;
-            case 2:
+            case EditMode.CHIP:
                 // Chips
                 chipSelector.visible = true;
                 break;
