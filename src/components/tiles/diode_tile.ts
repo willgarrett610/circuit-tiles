@@ -31,8 +31,8 @@ export default class DiodeTile extends GraphicsTile {
 
         this.graphics.beginFill(
             this.signalActive
-                ? config.colors.activeTileColor
-                : config.colors.inactiveTileColor
+                ? config.colors.activeTile
+                : config.colors.inactiveTile
         );
 
         this.graphics.drawPolygon([10, 110, 60, 15, 110, 110]);

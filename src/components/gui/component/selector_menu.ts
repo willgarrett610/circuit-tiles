@@ -7,27 +7,12 @@ import GUIWindow from "./gui_window";
 import { LabeledButton, LabelType } from "./labeled_button";
 
 /** btn generator data */
-export class BtnGeneratorData {
+export interface BtnGeneratorData {
     name: string;
     defaultContainer: PIXI.Container;
     hoverContainer: PIXI.Container;
-
-    /**
-     * construct btn generator data
-     *
-     * @param name
-     * @param defaultContainer
-     * @param hoverContainer
-     */
-    constructor(
-        name: string,
-        defaultContainer: PIXI.Container,
-        hoverContainer: PIXI.Container
-    ) {
-        this.name = name;
-        this.defaultContainer = defaultContainer;
-        this.hoverContainer = hoverContainer;
-    }
+    selectable: boolean;
+    onClick?: (e: PIXI.interaction.InteractionEvent) => void;
 }
 
 /**
@@ -60,7 +45,7 @@ export default class SelectorMenu extends GUIWindow {
         onSelectionChange: (i: number) => void
     ) {
         // Create window for this
-        super(x, y, width, height, config.colors.menuColor, 4);
+        super(x, y, width, height, config.colors.menu, 4);
         this.scrollableY = true;
         this.scrollMarginY = config.tileSelector.margin * 2;
         this.title = title;
@@ -143,8 +128,10 @@ export default class SelectorMenu extends GUIWindow {
                 btnData.name,
                 config.tileSelector.textSize,
                 0x000000,
-                config.colors.background
+                config.colors.tileBackground
             );
+
+            if (btnData.onClick) tileBtn.on("click", btnData.onClick);
 
             if (btnLayout.compHeight == 1)
                 btnLayout.compHeight = tileBtn.height;
@@ -179,7 +166,7 @@ export default class SelectorMenu extends GUIWindow {
 
             this.addChild(tileBtn);
 
-            this.btnGroup.addButton(tileBtn);
+            if (btnData.selectable) this.btnGroup.addButton(tileBtn);
 
             i++;
         }

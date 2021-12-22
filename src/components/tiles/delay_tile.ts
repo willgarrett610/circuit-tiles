@@ -31,8 +31,8 @@ export default class DelayTile extends GraphicsTile {
 
         this.graphics.beginFill(
             this.signalActive
-                ? config.colors.activeTileColor
-                : config.colors.inactiveTileColor
+                ? config.colors.activeTile
+                : config.colors.inactiveTile
         );
         this.graphics.lineStyle(5);
         this.graphics.drawRect(40, 15, 40, 90);

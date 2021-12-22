@@ -23,8 +23,8 @@ export default class WireTile extends GraphicsTile {
 
         this.graphics.beginFill(
             this.signalActive
-                ? config.colors.activeTileColor
-                : config.colors.inactiveTileColor
+                ? config.colors.activeTile
+                : config.colors.inactiveTile
         );
         if (Object.entries(this.connections).some(([_, value]) => value))
             this.graphics.drawRect(40, 40, 40, 40);

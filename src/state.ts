@@ -1,11 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Chip } from "./components/chip/chip";
 import { EditMode } from "./utils/edit_mode";
 
 const state: {
     [key: string]: any;
 } = {
     editMode: EditMode.TILE,
-    chips: [],
+    chips: [
+        new Chip("Test", 0x9911ee),
+        new Chip("Test", 0xff0000),
+        new Chip("Test", 0x00ff00),
+    ],
 };
 
 interface StateCallback {

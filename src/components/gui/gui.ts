@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 
-import { dimensions, onResize } from "../../utils";
+import { dimensions, height, onResize, width } from "../../utils";
 import GUIWindow from "./component/gui_window";
 import getTileTypes from "../tiles/tile_types";
 import ButtonGroup from "./component/button_group";
@@ -12,7 +12,8 @@ import { GUIComponent, GUIComponentState } from "./component/gui_component";
 import { getSprite } from "../sprites/sprite_loader";
 import state, { setState, subscribe } from "../../state";
 import { EditMode } from "../../utils/edit_mode";
-import SelectorMenu, { BtnGeneratorData } from "./component/selector_menu";
+import SelectorMenu from "./component/selector_menu";
+import FormPrompt from "./component/form_prompt";
 
 const createToolBtn = (spriteKey: string): GUIComponent => {
     const toolHover = new PIXI.Graphics();
@@ -32,7 +33,7 @@ const createToolBtn = (spriteKey: string): GUIComponent => {
         0,
         config.menubarSize,
         config.menubarSize,
-        config.colors.menuColor
+        config.colors.menu
     );
     const defaultContainer = new PIXI.Container();
     const defaultSprite = getSprite(spriteKey);
@@ -59,7 +60,7 @@ const createToolSelector = (onSelectionChange: (i: number) => void) => {
         config.menubarSize,
         config.menubarSize,
         dimensions()[1] - config.menubarSize,
-        config.colors.menuColor
+        config.colors.menu
     );
 
     const layout = new LineWrapLayout(
@@ -114,6 +115,19 @@ const createToolSelector = (onSelectionChange: (i: number) => void) => {
     return selector;
 };
 
+const createChip = (app: PIXI.Application) => {
+    const form = new FormPrompt(
+        width() / 2 - config.chipCreationForm.width / 2,
+        height() / 2 - config.chipCreationForm.height / 2,
+        config.chipCreationForm.width,
+        config.chipCreationForm.height,
+        "Create chip",
+        config.colors.menu
+    );
+
+    app.stage.addChild(form);
+};
+
 /**
  * Sets up application GUI
  *
@@ -132,7 +146,7 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
         0,
         dimensions()[0],
         config.menubarSize,
-        config.colors.menuColor
+        config.colors.menu
     );
 
     /*
@@ -157,11 +171,12 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
             const defaultContainer = tileOff.getContainer(tileSize);
             const hoverContainer = tileOn.getContainer(tileSize);
 
-            return new BtnGeneratorData(
-                tileOff.label,
+            return {
+                name: tileOff.label,
                 defaultContainer,
-                hoverContainer
-            );
+                hoverContainer,
+                selectable: true,
+            };
         },
         (i) => (gridManager.getGrid().selectedTileType = i)
     );
@@ -178,25 +193,64 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
         selectorHeights,
         "Chips",
         (i, tileSize) => {
-            if (i >= getTileTypes().length) return null;
+            if (i > state.chips.length) return null;
 
-            const tileType = getTileTypes()[i];
-            const tileOff = new tileType(0, 0);
-            const tileOn = new tileType(0, 0);
-            tileOn.signalActive = true;
+            if (i == state.chips.length) {
+                const defaultContainer = new PIXI.Container();
+                const defaultSprite = getSprite("add");
+                defaultSprite.width = tileSize;
+                defaultSprite.height = tileSize;
+                defaultContainer.addChild(defaultSprite);
+                const hoverContainer = new PIXI.Container();
+                const hoverSprite = getSprite("add");
+                hoverSprite.width = tileSize;
+                hoverSprite.height = tileSize;
+                hoverContainer.addChild(hoverSprite);
 
-            const defaultContainer = tileOff.getContainer(tileSize);
-            const hoverContainer = tileOn.getContainer(tileSize);
+                return {
+                    name: "New Chip",
+                    defaultContainer,
+                    hoverContainer,
+                    selectable: false,
+                    onClick: () => {
+                        createChip(app);
+                    },
+                };
+            }
 
-            return new BtnGeneratorData(
-                tileOff.label,
+            const chip = state.chips[i];
+
+            const genContainer = () => {
+                const graphics = new PIXI.Graphics();
+                graphics.beginFill(chip.color);
+                graphics.drawRect(0, 0, 100, 100);
+                graphics.endFill();
+
+                graphics.width = tileSize;
+                graphics.height = tileSize;
+
+                const container = new PIXI.Container();
+                container.addChild(graphics);
+                return container;
+            };
+
+            const defaultContainer = genContainer();
+            const hoverContainer = genContainer();
+
+            return {
+                name: chip.name,
                 defaultContainer,
-                hoverContainer
-            );
+                hoverContainer,
+                selectable: true,
+            };
         },
         (i) => (gridManager.getGrid().selectedTileType = i)
     );
     chipSelector.visible = false;
+
+    subscribe(["chips"], () => {
+        chipSelector.generateComponents();
+    });
 
     /*
     TOOL SELECTION
