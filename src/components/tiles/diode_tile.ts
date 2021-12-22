@@ -15,6 +15,7 @@ export default class DiodeTile extends GraphicsTile {
     };
 
     direction = Rotation.CLOCKWISE;
+    rotatable = true;
 
     /** draw graphics */
     drawGraphics(): void {

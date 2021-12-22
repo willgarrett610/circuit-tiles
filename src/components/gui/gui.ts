@@ -68,6 +68,7 @@ const createToolSelector = (onSelectionChange: (i: number) => void) => {
         0
     );
 
+    const cursorTool = createToolBtn("cursor");
     const panTool = createToolBtn("pan");
     const eraseTool = createToolBtn("eraser");
     const tilesTool = createToolBtn("tiles");
@@ -75,6 +76,7 @@ const createToolSelector = (onSelectionChange: (i: number) => void) => {
 
     selector.setLayout(layout);
 
+    selector.addChild(cursorTool);
     selector.addChild(panTool);
     selector.addChild(eraseTool);
     selector.addChild(tilesTool);
@@ -94,6 +96,7 @@ const createToolSelector = (onSelectionChange: (i: number) => void) => {
 
     const btnGroup = new ButtonGroup(selectedGraphics);
 
+    btnGroup.addButton(cursorTool);
     btnGroup.addButton(panTool);
     btnGroup.addButton(eraseTool);
     btnGroup.addButton(tilesTool);

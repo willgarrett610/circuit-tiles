@@ -8,7 +8,11 @@ const textureFiles = [
     ["tiles", "/assets/sprites/tiles.png"],
     ["chips", "/assets/sprites/chips.png"],
     ["pan", "/assets/sprites/pan.png"],
+<<<<<<< HEAD
     ["add", "/assets/sprites/add.svg"],
+=======
+    ["cursor", "/assets/sprites/cursor.png"],
+>>>>>>> 679afd98ab9bc9e6a75ea205f4a0155c61e8f727
 ];
 
 const loadSprites = () => {
