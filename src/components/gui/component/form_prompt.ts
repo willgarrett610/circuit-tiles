@@ -1,7 +1,9 @@
 import * as PIXI from "pixi.js";
 
 import config from "../../../config";
+// import { dimensions } from "../../../utils";
 import GUIWindow from "./gui_window";
+import { LabeledButton, LabelType } from "./labeled_button";
 
 /**
  * Prompt user with input
@@ -46,6 +48,21 @@ export default class FormPrompt extends GUIWindow {
         headerText.y = 5;
 
         header.addChild(headerText);
+
+        const exitBtn = new LabeledButton(
+            width - config.formPromt.headerHeight,
+            0,
+            config.formPromt.headerHeight,
+            config.formPromt.headerHeight,
+            LabelType.INSIDE,
+            "X",
+            17,
+            0,
+            0xdd3333,
+            3
+        );
+
+        header.addChild(exitBtn);
 
         this.addChild(header);
     }
