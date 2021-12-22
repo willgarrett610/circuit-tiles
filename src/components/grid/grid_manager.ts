@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { onKeyDown, onResize, onScroll } from "../../utils";
 import Grid from "./grid";
 
 /** grid manager */
@@ -16,6 +17,21 @@ export default class GridManager extends PIXI.Container {
         this.mainGrid = new Grid(100);
         this.chipGrid = new Grid(100);
         this.addChild(this.mainGrid);
+
+        onResize(() => {
+            if (this.inChipGrid) this.chipGrid.update();
+            else this.mainGrid.update();
+        });
+
+        onScroll(this, (e) => {
+            if (this.inChipGrid) this.chipGrid.scroll(e);
+            else this.mainGrid.scroll(e);
+        });
+
+        onKeyDown((e) => {
+            if (this.inChipGrid) this.chipGrid.keyDown(e);
+            else this.mainGrid.keyDown(e);
+        });
     }
 
     /**

@@ -3,11 +3,7 @@ import {
     dimensions,
     locationToTuple,
     mouseDown,
-    onKeyDown,
-    onResize,
-    onScroll,
     pressedKeys,
-    sleep,
 } from "../../utils";
 import { clamp } from "../../utils/math";
 import config from "../../config";
@@ -25,14 +21,22 @@ export default class Grid extends PIXI.Container {
 
     history: {
         action: GridAction;
-        tile: Tile | undefined;
+        prevTile: Tile | undefined;
+        postTile: Tile | undefined;
         location: { x: number; y: number };
     }[][] = [[]];
     tempHistory: {
         action: GridAction;
-        tile: Tile | undefined;
+        prevTile: Tile | undefined;
+        postTile: Tile | undefined;
         location: { x: number; y: number };
     }[] = [];
+    undoHistory: {
+        action: GridAction;
+        prevTile: Tile | undefined;
+        postTile: Tile | undefined;
+        location: { x: number; y: number };
+    }[][] = [];
 
     mousePos: [x: number, y: number] = [0, 0];
     prevMousePos: [x: number, y: number] = [0, 0];
@@ -69,14 +73,7 @@ export default class Grid extends PIXI.Container {
 
         this.renderGrid();
 
-        onResize(this.update);
-
-        onScroll(this, this.scroll);
-
         this.on("mousemove", this.mouseMove);
-        // this.on("mouseup", this.mouseUp);
-
-        onKeyDown(this.keyDown);
     }
 
     /**
@@ -158,11 +155,14 @@ export default class Grid extends PIXI.Container {
                 ) {
                     this.tempHistory.push({
                         action: GridAction.EDIT,
-                        tile: prevTile.clone(),
+                        prevTile: prevTile.clone(),
+                        postTile: undefined,
                         location: { x: prevTile.x, y: prevTile.y },
                     });
 
                     prevTile.setConnection(oppositeDirection, true);
+                    this.tempHistory[this.tempHistory.length - 1].postTile =
+                        prevTile.clone();
                 }
                 if (
                     !newTile.getConnections()[directDirection] &&
@@ -172,18 +172,23 @@ export default class Grid extends PIXI.Container {
                         action: editedNewTile
                             ? GridAction.EDIT
                             : GridAction.ADD,
-                        tile: editedNewTile ? newTile.clone() : undefined,
+                        prevTile: editedNewTile ? newTile.clone() : undefined,
+                        postTile: undefined,
                         location: { x: newTile.x, y: newTile.y },
                     });
 
                     if (canConnect)
                         newTile.setConnection(directDirection, true);
+
+                    this.tempHistory[this.tempHistory.length - 1].postTile =
+                        newTile.clone();
                 }
                 prevTile.updateContainer?.();
             } else if (!editedNewTile) {
                 this.tempHistory.push({
                     action: GridAction.ADD,
-                    tile: undefined,
+                    prevTile: undefined,
+                    postTile: newTile.clone(),
                     location: { x: newTile.x, y: newTile.y },
                 });
             }
@@ -219,7 +224,8 @@ export default class Grid extends PIXI.Container {
         if (!tile) return false;
         this.tempHistory.push({
             action: GridAction.REMOVE,
-            tile: tile.clone(),
+            prevTile: tile.clone(),
+            postTile: undefined,
             location: { x: tile.x, y: tile.y },
         });
         this.removeChild(tile.getContainer(this.size));
@@ -245,10 +251,13 @@ export default class Grid extends PIXI.Container {
             ) {
                 this.tempHistory.push({
                     action: GridAction.EDIT,
-                    tile: adjacentTile.clone(),
+                    prevTile: adjacentTile.clone(),
+                    postTile: undefined,
                     location: { x: adjacentTile.x, y: adjacentTile.y },
                 });
                 adjacentTile.setConnection(removalSpot.side, false);
+                this.tempHistory[this.tempHistory.length - 1].postTile =
+                    adjacentTile.clone();
                 adjacentTile.updateContainer?.();
             }
         }
@@ -267,7 +276,7 @@ export default class Grid extends PIXI.Container {
         this.finishInteraction();
         if (this.history.length < 2) return;
         const actions = this.history[this.history.length - 2];
-        for (const { action, tile, location } of actions.reverse()) {
+        for (const { action, prevTile: tile, location } of actions.reverse()) {
             const refTile = this.getTile(location.x, location.y);
             switch (action) {
                 case GridAction.ADD: {
@@ -306,12 +315,57 @@ export default class Grid extends PIXI.Container {
             }
         }
 
+        this.undoHistory.push(actions);
+
         this.history.splice(this.history.length - 2, 1);
     };
 
     redo = async () => {
-        console.log("redoing");
         this.finishInteraction();
+        if (this.undoHistory.length === 0) {
+            console.log("nothing to redo");
+            return;
+        }
+
+        const actions = this.undoHistory.pop();
+        if (!actions) return;
+        for (const { action, postTile, location } of actions.reverse()) {
+            console.log(action);
+            const refTile = this.getTile(location.x, location.y);
+            switch (action) {
+                case GridAction.REMOVE: {
+                    if (refTile)
+                        this.removeChild(refTile.getContainer(this.size));
+                    this.deleteTile(location.x, location.y);
+
+                    break;
+                }
+                case GridAction.EDIT: {
+                    if (postTile) {
+                        if (refTile)
+                            this.removeChild(refTile.getContainer(this.size));
+                        this.setTile(location.x, location.y, postTile);
+                        const tileGraphics: PIXI.Container =
+                            postTile.getContainer(this.size);
+                        this.addChild(tileGraphics);
+                    }
+                    this.getTile(location.x, location.y)?.updateContainer?.();
+
+                    break;
+                }
+                case GridAction.ADD: {
+                    if (postTile) {
+                        this.setTile(location.x, location.y, postTile);
+                        const tileGraphics: PIXI.Container =
+                            postTile.getContainer(this.size);
+                        this.addChild(tileGraphics);
+                    }
+
+                    this.getTile(location.x, location.y)?.updateContainer?.();
+                    break;
+                }
+            }
+        }
     };
 
     cleanHistory = () => {
@@ -397,10 +451,6 @@ export default class Grid extends PIXI.Container {
         this.updateHighlightTile();
     };
 
-    // mouseUp = () => {
-    //     this.finishInteraction();
-    // };
-
     finishInteraction = () => {
         if (this.currentInteraction !== Interaction.NONE) {
             this.currentInteraction = Interaction.NONE;
@@ -409,6 +459,7 @@ export default class Grid extends PIXI.Container {
                 this.cleanHistory();
             }
             this.newHistory();
+            this.undoHistory = [];
             this.tempHistory = [];
         }
     };
@@ -466,6 +517,7 @@ export default class Grid extends PIXI.Container {
             } else {
                 this.undo();
             }
+            e.stopPropagation();
         }
 
         if (!e.ctrlKey && !e.shiftKey) {
