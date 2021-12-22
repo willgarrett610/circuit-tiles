@@ -267,6 +267,63 @@ export default class Grid extends PIXI.Container {
         return true;
     }
 
+    /**
+     * Rotates tiles clockwise
+     *
+     * @param x x coordinate
+     * @param y y coordinate
+     */
+    rotateTile(x: number, y: number) {
+        const tile = this.getTile(x, y);
+
+        if (tile && tile.rotatable) {
+            this.tempHistory.push({
+                action: GridAction.EDIT,
+                prevTile: tile.clone(),
+                postTile: undefined,
+                location: { x, y },
+            });
+            tile.direction = rotateClockWise(tile.direction);
+            this.tempHistory[this.tempHistory.length - 1].postTile =
+                tile.clone();
+
+            const removalSpots: {
+                offset: number[];
+                side: "up" | "right" | "down" | "left";
+            }[] = [
+                { offset: [-1, 0], side: "right" },
+                { offset: [1, 0], side: "left" },
+                { offset: [0, -1], side: "down" },
+                { offset: [0, 1], side: "up" },
+            ];
+            for (const removalSpot of removalSpots) {
+                const adjacentTile = this.getTile(
+                    x + removalSpot.offset[0],
+                    y + removalSpot.offset[1]
+                );
+
+                if (
+                    adjacentTile !== undefined &&
+                    adjacentTile.getConnections()[removalSpot.side]
+                ) {
+                    this.tempHistory.push({
+                        action: GridAction.EDIT,
+                        prevTile: adjacentTile.clone(),
+                        postTile: undefined,
+                        location: {
+                            x: adjacentTile.x,
+                            y: adjacentTile.y,
+                        },
+                    });
+                    adjacentTile.setConnection(removalSpot.side, false);
+                    this.tempHistory[this.tempHistory.length - 1].postTile =
+                        adjacentTile.clone();
+                    adjacentTile.updateContainer?.();
+                }
+            }
+        }
+    }
+
     currentHistory = () => {
         return this.history[this.history.length - 1];
     };
@@ -502,21 +559,8 @@ export default class Grid extends PIXI.Container {
                 this.currentInteraction = Interaction.REMOVING;
                 this.removeTile(...gridPoint);
             } else if (state.editMode == EditMode.CURSOR) {
-                // rotate tile around
-
-                const tile = this.getTile(...gridPoint);
-
-                if (tile && tile.rotatable) {
-                    this.tempHistory.push({
-                        action: GridAction.EDIT,
-                        prevTile: tile.clone(),
-                        postTile: undefined,
-                        location: { x: tile.x, y: tile.y },
-                    });
-                    tile.direction = rotateClockWise(tile.direction);
-                    this.tempHistory[this.tempHistory.length - 1].postTile =
-                        tile.clone();
-                }
+                this.currentInteraction = Interaction.PLACING;
+                this.rotateTile(...gridPoint);
             } else {
                 // TODO Tile and Chip modes
                 this.currentInteraction = Interaction.PLACING;
