@@ -68,6 +68,25 @@ export namespace Direction {
     }
 
     /**
+     * Get offset from direction
+     *
+     * @param direction direction to get offset of
+     * @returns offset corresponding to direction
+     */
+    export function getOffset(direction: Direction): [number, number] {
+        switch (direction) {
+            case Direction.UP:
+                return [0, -1];
+            case Direction.RIGHT:
+                return [1, 0];
+            case Direction.DOWN:
+                return [0, 1];
+            case Direction.LEFT:
+                return [-1, 0];
+        }
+    }
+
+    /**
      * Gets direction values
      *
      * @returns Direction values
@@ -82,11 +101,17 @@ export namespace Direction {
      * @param key direction as string
      * @returns Direction
      */
-    export function fromString(key: string) {
-        for (const dir of Direction.values()) {
-            if (Direction.toLower(dir) == key.toLowerCase()) return dir;
+    export function fromString(key: "up" | "right" | "down" | "left") {
+        switch (key) {
+            case "up":
+                return Direction.UP;
+            case "right":
+                return Direction.RIGHT;
+            case "down":
+                return Direction.DOWN;
+            case "left":
+                return Direction.LEFT;
         }
-        return null;
     }
 }
 

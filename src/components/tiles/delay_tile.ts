@@ -16,6 +16,13 @@ export default class DelayTile extends GraphicsTile {
         right: ConnectionType.BLOCKED,
     };
 
+    connectionForce = {
+        up: true,
+        right: false,
+        down: true,
+        left: false,
+    };
+
     direction = Rotation.CLOCKWISE;
     rotatable = true;
 

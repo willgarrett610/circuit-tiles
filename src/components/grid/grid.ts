@@ -116,6 +116,116 @@ export default class Grid extends PIXI.Container {
     }
 
     /**
+     * Connects tiles together
+     *
+     * @param newTile
+     * @param prevTile
+     * @param direction direction from newTile to prevTile
+     * @param editedNewTile
+     */
+    connectTiles(
+        newTile: Tile,
+        prevTile: Tile | undefined,
+        direction: Direction | undefined,
+        editedNewTile: boolean
+    ) {
+        if (
+            newTile !== undefined &&
+            prevTile !== undefined &&
+            direction !== undefined
+        ) {
+            const oppositeDirection = Direction.toLower(
+                Direction.getOpposite(direction)
+            );
+            const directDirection = Direction.toLower(direction);
+
+            const canConnect =
+                newTile.getConnectionTemplate()[directDirection] !=
+                    ConnectionType.BLOCKED &&
+                prevTile.getConnectionTemplate()[oppositeDirection] !=
+                    ConnectionType.BLOCKED;
+
+            if (!prevTile.getConnections()[oppositeDirection] && canConnect) {
+                this.tempHistory.push({
+                    action: GridAction.EDIT,
+                    prevTile: prevTile.clone(),
+                    postTile: undefined,
+                    location: { x: prevTile.x, y: prevTile.y },
+                });
+
+                prevTile.setConnection(oppositeDirection, true);
+                this.tempHistory[this.tempHistory.length - 1].postTile =
+                    prevTile.clone();
+            }
+            if (
+                !newTile.getConnections()[directDirection] &&
+                (canConnect || !editedNewTile)
+            ) {
+                this.tempHistory.push({
+                    action: editedNewTile ? GridAction.EDIT : GridAction.ADD,
+                    prevTile: editedNewTile ? newTile.clone() : undefined,
+                    postTile: undefined,
+                    location: { x: newTile.x, y: newTile.y },
+                });
+
+                if (canConnect) newTile.setConnection(directDirection, true);
+
+                this.tempHistory[this.tempHistory.length - 1].postTile =
+                    newTile.clone();
+            }
+            prevTile.updateContainer?.();
+        } else if (!editedNewTile) {
+            this.tempHistory.push({
+                action: GridAction.ADD,
+                prevTile: undefined,
+                postTile: newTile.clone(),
+                location: { x: newTile.x, y: newTile.y },
+            });
+        }
+
+        newTile.updateContainer?.();
+    }
+
+    /**
+     * handles forced connections of tiles
+     *
+     * @param tile tile to attempt to force connect
+     */
+    handleForceConnection(tile: Tile) {
+        for (const key in tile.getConnectionForce()) {
+            const forceDirectionKey = key as "up" | "right" | "down" | "left";
+            const force = tile.getConnectionForce()[forceDirectionKey];
+            const forceDirection = Direction.fromString(forceDirectionKey);
+            if (force) {
+                const forceTile = this.getTile(
+                    tile.x + Direction.getOffset(forceDirection)[0],
+                    tile.y + Direction.getOffset(forceDirection)[1]
+                );
+                if (forceTile) {
+                    console.log(forceDirection);
+                    this.connectTiles(tile, forceTile, forceDirection, true);
+                }
+            }
+        }
+
+        for (const direction of Direction.values()) {
+            const adjacentTile = this.getTile(
+                tile.x + Direction.getOffset(direction)[0],
+                tile.y + Direction.getOffset(direction)[1]
+            );
+            if (adjacentTile) {
+                if (
+                    adjacentTile.getConnectionForce()[
+                        Direction.toLower(Direction.getOpposite(direction))
+                    ]
+                ) {
+                    this.connectTiles(tile, adjacentTile, direction, true);
+                }
+            }
+        }
+    }
+
+    /**
      * add tile to grid
      *
      * @param x x location of tile
@@ -134,78 +244,9 @@ export default class Grid extends PIXI.Container {
         prevTile: Tile | undefined,
         direction: Direction | undefined
     ): Tile | undefined {
-        const connectTiles = (
-            newTile: Tile,
-            prevTile: Tile | undefined,
-            direction: Direction | undefined,
-            editedNewTile: boolean
-        ) => {
-            if (
-                newTile !== undefined &&
-                prevTile !== undefined &&
-                direction !== undefined
-            ) {
-                const oppositeDirection = Direction.toLower(
-                    Direction.getOpposite(direction)
-                );
-                const directDirection = Direction.toLower(direction);
-
-                const canConnect =
-                    newTile.getConnectionTemplate()[directDirection] !=
-                        ConnectionType.BLOCKED &&
-                    prevTile.getConnectionTemplate()[oppositeDirection] !=
-                        ConnectionType.BLOCKED;
-
-                if (
-                    !prevTile.getConnections()[oppositeDirection] &&
-                    canConnect
-                ) {
-                    this.tempHistory.push({
-                        action: GridAction.EDIT,
-                        prevTile: prevTile.clone(),
-                        postTile: undefined,
-                        location: { x: prevTile.x, y: prevTile.y },
-                    });
-
-                    prevTile.setConnection(oppositeDirection, true);
-                    this.tempHistory[this.tempHistory.length - 1].postTile =
-                        prevTile.clone();
-                }
-                if (
-                    !newTile.getConnections()[directDirection] &&
-                    (canConnect || !editedNewTile)
-                ) {
-                    this.tempHistory.push({
-                        action: editedNewTile
-                            ? GridAction.EDIT
-                            : GridAction.ADD,
-                        prevTile: editedNewTile ? newTile.clone() : undefined,
-                        postTile: undefined,
-                        location: { x: newTile.x, y: newTile.y },
-                    });
-
-                    if (canConnect)
-                        newTile.setConnection(directDirection, true);
-
-                    this.tempHistory[this.tempHistory.length - 1].postTile =
-                        newTile.clone();
-                }
-                prevTile.updateContainer?.();
-            } else if (!editedNewTile) {
-                this.tempHistory.push({
-                    action: GridAction.ADD,
-                    prevTile: undefined,
-                    postTile: newTile.clone(),
-                    location: { x: newTile.x, y: newTile.y },
-                });
-            }
-
-            newTile.updateContainer?.();
-        };
-
         const tileAtLocation = this.getTile(x, y);
         if (tileAtLocation) {
-            connectTiles(tileAtLocation, prevTile, direction, true);
+            this.connectTiles(tileAtLocation, prevTile, direction, true);
             return tileAtLocation;
         }
 
@@ -214,7 +255,9 @@ export default class Grid extends PIXI.Container {
         const tileGraphics: PIXI.Container = tileObj.getContainer(this.size);
         this.addChild(tileGraphics);
 
-        connectTiles(tileObj, prevTile, direction, false);
+        this.connectTiles(tileObj, prevTile, direction, false);
+
+        this.handleForceConnection(tileObj);
 
         return tileObj;
     }
@@ -288,6 +331,10 @@ export default class Grid extends PIXI.Container {
                 location: { x, y },
             });
             tile.direction = rotateClockWise(tile.direction);
+            tile.setConnection("up", false);
+            tile.setConnection("down", false);
+            tile.setConnection("left", false);
+            tile.setConnection("right", false);
             this.tempHistory[this.tempHistory.length - 1].postTile =
                 tile.clone();
 
@@ -325,6 +372,8 @@ export default class Grid extends PIXI.Container {
                     adjacentTile.updateContainer?.();
                 }
             }
+
+            this.handleForceConnection(tile);
         }
     }
 
@@ -771,7 +820,6 @@ export default class Grid extends PIXI.Container {
         };
 
         const createLogicEdge = (initialTile: Tile) => {
-            console.log("hello");
             const logicEdge = new LogicEdge();
 
             const findEdge = (tile: Tile): CircuitLocation[] => {
@@ -824,41 +872,9 @@ export default class Grid extends PIXI.Container {
                 graph.nodes.push(node);
                 setLogicTile(tile.x, tile.y, { tile, payload: node });
             } else if (tile.isEdge) {
-                if (getLogicTile(tile.x, tile.y)) {
-                    // unsure if needs to be handled
-                } else {
+                if (!getLogicTile(tile.x, tile.y)) {
                     graph.edges.push(createLogicEdge(tile));
                 }
-                // console.log({ tile });
-                // const connections = tile.getConnections();
-                // const connectionOffsets: {
-                //     offset: number[];
-                //     side: "up" | "right" | "down" | "left";
-                // }[] = [
-                //     { offset: [1, 0], side: "right" },
-                //     { offset: [-1, 0], side: "left" },
-                //     { offset: [0, -1], side: "down" },
-                //     { offset: [0, 1], side: "up" },
-                // ];
-                // let logicEdge: LogicEdge | undefined;
-                // for (const connectionOffset of connectionOffsets) {
-                //     if (!connections[connectionOffset.side]) continue;
-                //     const connectedTile = getLogicTiles(
-                //         tile.x + connectionOffset.offset[0],
-                //         tile.y + connectionOffset.offset[1]
-                //     );
-                //     if (!connectedTile) continue;
-                //     if (!connectedTile.tile.isEdge) continue; // do not need to handle since this was already handled with node
-                //     logicEdge = connectedTile.payload as LogicEdge;
-                // }
-                // if (!logicEdge) {
-                //     logicEdge = new LogicEdge();
-                //     graph.edges.push(logicEdge);
-                // }
-                // logicEdge.locations.push(
-                //     new CircuitLocation("global", tile.x, tile.y)
-                // );
-                // setLogicTiles(tile.x, tile.y, { tile, payload: logicEdge });
             } else {
                 // nested in a chip
             }
@@ -907,10 +923,6 @@ export default class Grid extends PIXI.Container {
                         node.outputEdge = edge;
                     }
                 }
-            } else if (logicTile.tile.isEdge) {
-                // should be handled already
-            } else {
-                // nested in a chip
             }
         }
 
