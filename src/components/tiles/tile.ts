@@ -36,6 +36,13 @@ export abstract class Tile {
         left: ConnectionType.BOTH,
     };
 
+    protected connectionForce = {
+        up: false,
+        right: false,
+        down: false,
+        left: false,
+    };
+
     abstract label: string;
     x = 0;
     y = 0;
@@ -109,12 +116,21 @@ export abstract class Tile {
     }
 
     /**
+     * get connection template
+     *
+     * @returns connection template
+     */
+    getConnectionForce() {
+        return this.rotateConnections(this.connectionForce);
+    }
+
+    /**
      * sets up connection for tile
      *
      * @param dir direction of connection
      * @param val value of connection state
      */
-    setConnection(dir: string, val: boolean) {
+    setConnection(dir: "up" | "right" | "down" | "left", val: boolean) {
         const enumDir = Direction.fromString(dir);
         if (enumDir == null) return;
         this.connections[this.getRotatedKey(enumDir)] = val;
