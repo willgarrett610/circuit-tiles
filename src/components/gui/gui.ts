@@ -14,6 +14,7 @@ import state, { setState, subscribe } from "../../state";
 import { EditMode } from "../../utils/edit_mode";
 import SelectorMenu from "./component/selector_menu";
 import FormPrompt from "./component/form_prompt";
+import TextField from "./component/input/text_field";
 
 const createToolBtn = (spriteKey: string): GUIComponent => {
     const toolHover = new PIXI.Graphics();
@@ -115,7 +116,7 @@ const createToolSelector = (onSelectionChange: (i: number) => void) => {
     return selector;
 };
 
-const createChip = (app: PIXI.Application) => {
+const initChipForm = (app: PIXI.Application) => {
     const form = new FormPrompt(
         width() / 2 - config.chipCreationForm.width / 2,
         height() / 2 - config.chipCreationForm.height / 2,
@@ -127,8 +128,48 @@ const createChip = (app: PIXI.Application) => {
             console.log(values);
         }
     );
+    form.visible = false;
+
+    const chipNameHeaderText = new PIXI.Text("Chip name:", {
+        fontFamily: "Arial",
+        fontSize: 20,
+        fill: 0x000000,
+        align: "left",
+    });
+
+    const chipNameHeader = new GUIComponent(
+        0,
+        0,
+        chipNameHeaderText.width,
+        chipNameHeaderText.height,
+        config.colors.menu
+    );
+    chipNameHeader.setDefaultContainer(chipNameHeaderText);
+
+    const textField = new TextField(
+        0,
+        0,
+        200,
+        50,
+        "Test123",
+        12,
+        0x000000,
+        config.colors.textFieldBackground,
+        (text) => {
+            console.log(text);
+        }
+    );
+    textField.update();
+
+    form.addChild(chipNameHeader);
+    form.addChild(textField);
+
+    console.log(form.components);
+
+    form.updateLayout();
 
     app.stage.addChild(form);
+    return form;
 };
 
 /**
@@ -186,6 +227,12 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
     tileSelector.visible = false;
 
     /*
+    CHIP CREATION FORM
+    */
+
+    const chipForm = initChipForm(app);
+
+    /*
     CHIP SELECTION
     */
 
@@ -216,7 +263,7 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
                     hoverContainer,
                     selectable: false,
                     onClick: () => {
-                        createChip(app);
+                        chipForm.open();
                     },
                 };
             }

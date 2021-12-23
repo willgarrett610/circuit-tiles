@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
 
 import config from "../../../config";
+import { ColumnLayout } from "../layout/column_layout";
 // import { dimensions } from "../../../utils";
 import GUIWindow from "./gui_window";
 import { LabeledButton, LabelType } from "./labeled_button";
@@ -10,6 +11,8 @@ import { LabeledButton, LabelType } from "./labeled_button";
  * Prompt user with input
  */
 export default class FormPrompt extends GUIWindow {
+    onSubmit: (values: []) => void;
+
     /**
      * Constructs a form prompts
      *
@@ -28,9 +31,15 @@ export default class FormPrompt extends GUIWindow {
         height: number,
         title: string,
         backgroundColor: number,
-        onSubmit: (values: [] | null) => void
+        onSubmit: (values: []) => void
     ) {
         super(x, y, width, height, backgroundColor);
+
+        this.onSubmit = onSubmit;
+
+        this.setLayout(
+            new ColumnLayout(10, config.formPromt.headerHeight + 10)
+        );
 
         this.zIndex = 500;
 
@@ -50,7 +59,6 @@ export default class FormPrompt extends GUIWindow {
             fontWeight: "normal",
         });
         headerText.x = 5;
-        headerText.y = 5;
 
         header.addChild(headerText);
 
@@ -68,28 +76,10 @@ export default class FormPrompt extends GUIWindow {
         );
 
         exitBtn.onClick = () => {
-            this.visible = false;
-            onSubmit(null);
+            this.close(null);
         };
 
         header.addChild(exitBtn);
-
-        // const textField = new TextField(
-        //     100,
-        //     100,
-        //     200,
-        //     50,
-        //     "Test123",
-        //     12,
-        //     0x000000,
-        //     0xffffff,
-        //     (text) => {
-        //         console.log(text);
-        //     }
-        // );
-
-        // this.addChild(textField);
-        // textField.update();
 
         this.addChild(header);
     }
@@ -101,8 +91,15 @@ export default class FormPrompt extends GUIWindow {
         this.visible = true;
     }
 
+    /**
+     * Close form prompt and submit values
+     *
+     * @param values Values that will be passed to the callback
+     */
     close(values: [] | null) {
         this.visible = false;
-        // this.onSubmit()
+        if (values) {
+            this.onSubmit(values);
+        }
     }
 }
