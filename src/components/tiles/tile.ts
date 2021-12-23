@@ -1,7 +1,7 @@
 import { Direction, Rotation } from "../../utils/directions";
 import * as PIXI from "pixi.js";
 import config from "../../config";
-
+import LogicNode from "../../logic/node";
 export enum ConnectionType {
     BOTH,
     INPUT,
@@ -14,6 +14,8 @@ export abstract class Tile {
     abstract type: typeof Tile;
 
     copyProps = ["connections", "label", "x", "y", "direction", "signalActive"];
+    isNode = false;
+    isEdge = false;
 
     protected connections: {
         up: boolean;
@@ -85,6 +87,8 @@ export abstract class Tile {
             left: T;
         };
     }
+
+    toNode?(): LogicNode;
 
     /**
      * get connections

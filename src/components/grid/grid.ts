@@ -16,6 +16,10 @@ import "../../utils/compute_logic";
 import { GridAction, Interaction } from "../../utils/action";
 import state, { setState } from "../../state";
 import { EditMode } from "../../utils/edit_mode";
+import Graph from "../../logic/graph";
+import LogicNode from "../../logic/node";
+import LogicEdge from "../../logic/edge";
+import CircuitLocation from "../../logic/circuit_location";
 /** Grid class */
 export default class Grid extends PIXI.Container {
     startingSize: number;
@@ -747,6 +751,169 @@ export default class Grid extends PIXI.Container {
         this.renderGrid();
         this.renderTiles();
         this.updateHighlightTile();
+    };
+
+    convertToGraph = () => {
+        const graph = new Graph();
+        type LogicTile = {
+            tile: Tile;
+            payload: LogicNode | LogicEdge | undefined;
+        };
+        const logicTiles: { [key: string]: LogicTile | undefined } = {};
+
+        const getLogicTile = (x: number, y: number) => {
+            return logicTiles[`${x},${y}`];
+        };
+
+        const setLogicTile = (x: number, y: number, tile: LogicTile) => {
+            logicTiles[`${x},${y}`] = tile;
+        };
+
+        const createLogicEdge = (initialTile: Tile) => {
+            console.log("hello");
+            const logicEdge = new LogicEdge();
+
+            const findEdge = (tile: Tile): CircuitLocation[] => {
+                if (!tile.isEdge) return [];
+                const edgeLocations = [
+                    new CircuitLocation("global", tile.x, tile.y),
+                ];
+
+                setLogicTile(tile.x, tile.y, { tile, payload: logicEdge });
+
+                const connections = tile.getConnections();
+                const connectionOffsets: {
+                    offset: number[];
+                    side: "up" | "right" | "down" | "left";
+                }[] = [
+                    { offset: [1, 0], side: "right" },
+                    { offset: [-1, 0], side: "left" },
+                    { offset: [0, 1], side: "down" },
+                    { offset: [0, -1], side: "up" },
+                ];
+
+                for (const connectionOffset of connectionOffsets) {
+                    if (!connections[connectionOffset.side]) continue;
+                    const connectedTile = this.getTile(
+                        tile.x + connectionOffset.offset[0],
+                        tile.y + connectionOffset.offset[1]
+                    );
+                    if (
+                        !connectedTile ||
+                        getLogicTile(
+                            tile.x + connectionOffset.offset[0],
+                            tile.y + connectionOffset.offset[1]
+                        )
+                    )
+                        continue;
+                    edgeLocations.push(...findEdge(connectedTile));
+                }
+
+                return edgeLocations;
+            };
+
+            logicEdge.locations = findEdge(initialTile);
+            return logicEdge;
+        };
+
+        for (const [_, tile] of Object.entries(this.tiles)) {
+            if (!tile) continue;
+            if (tile.isNode && tile.toNode) {
+                const node = tile.toNode();
+                graph.nodes.push(node);
+                setLogicTile(tile.x, tile.y, { tile, payload: node });
+            } else if (tile.isEdge) {
+                if (getLogicTile(tile.x, tile.y)) {
+                    // unsure if needs to be handled
+                } else {
+                    graph.edges.push(createLogicEdge(tile));
+                }
+                // console.log({ tile });
+                // const connections = tile.getConnections();
+                // const connectionOffsets: {
+                //     offset: number[];
+                //     side: "up" | "right" | "down" | "left";
+                // }[] = [
+                //     { offset: [1, 0], side: "right" },
+                //     { offset: [-1, 0], side: "left" },
+                //     { offset: [0, -1], side: "down" },
+                //     { offset: [0, 1], side: "up" },
+                // ];
+                // let logicEdge: LogicEdge | undefined;
+                // for (const connectionOffset of connectionOffsets) {
+                //     if (!connections[connectionOffset.side]) continue;
+                //     const connectedTile = getLogicTiles(
+                //         tile.x + connectionOffset.offset[0],
+                //         tile.y + connectionOffset.offset[1]
+                //     );
+                //     if (!connectedTile) continue;
+                //     if (!connectedTile.tile.isEdge) continue; // do not need to handle since this was already handled with node
+                //     logicEdge = connectedTile.payload as LogicEdge;
+                // }
+                // if (!logicEdge) {
+                //     logicEdge = new LogicEdge();
+                //     graph.edges.push(logicEdge);
+                // }
+                // logicEdge.locations.push(
+                //     new CircuitLocation("global", tile.x, tile.y)
+                // );
+                // setLogicTiles(tile.x, tile.y, { tile, payload: logicEdge });
+            } else {
+                // nested in a chip
+            }
+        }
+
+        for (const [_, logicTile] of Object.entries(logicTiles)) {
+            if (!logicTile) continue;
+            const connections = logicTile.tile.getConnections();
+            const connectionsTemplate = logicTile.tile.getConnectionTemplate();
+
+            const connectionOffsets: {
+                offset: number[];
+                side: "up" | "right" | "down" | "left";
+            }[] = [
+                { offset: [1, 0], side: "right" },
+                { offset: [-1, 0], side: "left" },
+                { offset: [0, 1], side: "down" },
+                { offset: [0, -1], side: "up" },
+            ];
+
+            if (logicTile.tile.isNode) {
+                const node = logicTile.payload as LogicNode;
+
+                for (const connectionOffset of connectionOffsets) {
+                    if (!connections[connectionOffset.side]) continue;
+                    const connectedTile = getLogicTile(
+                        logicTile.tile.x + connectionOffset.offset[0],
+                        logicTile.tile.y + connectionOffset.offset[1]
+                    );
+                    if (!connectedTile) continue;
+                    if (!connectedTile.tile.isEdge)
+                        throw Error("should be an edge");
+
+                    const edge = connectedTile.payload as LogicEdge;
+                    if (
+                        connectionsTemplate[connectionOffset.side] ===
+                        ConnectionType.INPUT
+                    ) {
+                        edge.outputs.push(node);
+                        node.inputEdge = edge;
+                    } else if (
+                        connectionsTemplate[connectionOffset.side] ===
+                        ConnectionType.OUTPUT
+                    ) {
+                        edge.inputs.push(node);
+                        node.outputEdge = edge;
+                    }
+                }
+            } else if (logicTile.tile.isEdge) {
+                // should be handled already
+            } else {
+                // nested in a chip
+            }
+        }
+
+        return graph;
     };
 
     gridPointsBetween = (x0: number, y0: number, x1: number, y1: number) => {

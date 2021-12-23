@@ -1,4 +1,6 @@
 import config from "../../config";
+import CircuitLocation from "../../logic/circuit_location";
+import LogicNode from "../../logic/node";
 import { ConnectionType, GraphicsTile } from "./tile";
 
 /** chip output tile */
@@ -12,6 +14,24 @@ export default class ChipOutputTile extends GraphicsTile {
     };
 
     label: string = "Output";
+
+    isNode = true;
+
+    /**
+     * convert tile to node
+     *
+     * @returns Logic node
+     */
+    toNode(): LogicNode {
+        const logicNode = new LogicNode(
+            this.label,
+            new CircuitLocation("global", this.x, this.y),
+            this
+        );
+        logicNode.operation = (input) => input;
+        logicNode.state = this.signalActive;
+        return logicNode;
+    }
 
     /** draw graphics */
     drawGraphics(): void {

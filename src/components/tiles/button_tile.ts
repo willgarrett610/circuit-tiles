@@ -1,4 +1,6 @@
 import config from "../../config";
+import CircuitLocation from "../../logic/circuit_location";
+import LogicNode from "../../logic/node";
 import { ConnectionType, GraphicsTile } from "./tile";
 
 /** Button Tile */
@@ -15,6 +17,24 @@ export default class ButtonTile extends GraphicsTile {
         left: ConnectionType.OUTPUT,
         right: ConnectionType.OUTPUT,
     };
+
+    isNode = true;
+
+    /**
+     * convert tile to node
+     *
+     * @returns Logic node
+     */
+    toNode(): LogicNode {
+        const logicNode = new LogicNode(
+            this.label,
+            new CircuitLocation("global", this.x, this.y),
+            this
+        );
+        logicNode.operation = (input) => input;
+        logicNode.state = this.signalActive;
+        return logicNode;
+    }
 
     /**
      * construct button tile
