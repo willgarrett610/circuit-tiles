@@ -122,12 +122,14 @@ export default class Grid extends PIXI.Container {
      * @param prevTile
      * @param direction direction from newTile to prevTile
      * @param editedNewTile
+     * @param forced if the connection should be forced
      */
     connectTiles(
         newTile: Tile,
         prevTile: Tile | undefined,
         direction: Direction | undefined,
-        editedNewTile: boolean
+        editedNewTile: boolean,
+        forced = false
     ) {
         if (
             newTile !== undefined &&
@@ -143,7 +145,8 @@ export default class Grid extends PIXI.Container {
                 newTile.getConnectionTemplate()[directDirection] !=
                     ConnectionType.BLOCKED &&
                 prevTile.getConnectionTemplate()[oppositeDirection] !=
-                    ConnectionType.BLOCKED;
+                    ConnectionType.BLOCKED &&
+                (forced || newTile.isEdge || prevTile.isEdge);
 
             if (!prevTile.getConnections()[oppositeDirection] && canConnect) {
                 this.tempHistory.push({
@@ -202,7 +205,13 @@ export default class Grid extends PIXI.Container {
                     tile.y + Direction.getOffset(forceDirection)[1]
                 );
                 if (forceTile) {
-                    this.connectTiles(tile, forceTile, forceDirection, true);
+                    this.connectTiles(
+                        tile,
+                        forceTile,
+                        forceDirection,
+                        true,
+                        true
+                    );
                 }
             }
         }
@@ -907,7 +916,8 @@ export default class Grid extends PIXI.Container {
                     let edge: LogicEdge | undefined;
                     if (
                         connectedTile.tile.isNode &&
-                        !(connectedTile.payload as LogicNode).inputEdge
+                        !(connectedTile.payload as LogicNode).inputEdge &&
+                        !(connectedTile.payload as LogicNode).outputEdge
                     ) {
                         edge = new LogicEdge();
                         graph.edges.push(edge);
