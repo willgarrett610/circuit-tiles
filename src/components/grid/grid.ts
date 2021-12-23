@@ -202,7 +202,6 @@ export default class Grid extends PIXI.Container {
                     tile.y + Direction.getOffset(forceDirection)[1]
                 );
                 if (forceTile) {
-                    console.log(forceDirection);
                     this.connectTiles(tile, forceTile, forceDirection, true);
                 }
             }
@@ -905,10 +904,20 @@ export default class Grid extends PIXI.Container {
                         logicTile.tile.y + connectionOffset.offset[1]
                     );
                     if (!connectedTile) continue;
-                    if (!connectedTile.tile.isEdge)
-                        throw Error("should be an edge");
+                    let edge: LogicEdge | undefined;
+                    if (
+                        connectedTile.tile.isNode &&
+                        !(connectedTile.payload as LogicNode).inputEdge
+                    ) {
+                        edge = new LogicEdge();
+                        graph.edges.push(edge);
+                    }
 
-                    const edge = connectedTile.payload as LogicEdge;
+                    if (connectedTile.tile.isEdge)
+                        edge = connectedTile.payload as LogicEdge;
+
+                    if (!edge) continue;
+
                     if (
                         connectionsTemplate[connectionOffset.side] ===
                         ConnectionType.INPUT
