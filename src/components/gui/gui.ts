@@ -122,7 +122,10 @@ const createChip = (app: PIXI.Application) => {
         config.chipCreationForm.width,
         config.chipCreationForm.height,
         "Create chip",
-        config.colors.menu
+        config.colors.menu,
+        (values) => {
+            console.log(values);
+        }
     );
 
     app.stage.addChild(form);
