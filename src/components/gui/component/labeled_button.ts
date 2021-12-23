@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import config from "../../../config";
+// import config from "../../../config";
 import { GUIComponent } from "./gui_component";
 
 export enum LabelType {
@@ -42,7 +42,7 @@ export class LabeledButton extends GUIComponent {
 
         this.textObj = new PIXI.Text(text, {
             fontFamily: "Arial",
-            fontSize: config.tileSelector.textSize,
+            fontSize: fontSize,
             fill: color,
             fontWeight: "bold",
         });
