@@ -17,6 +17,7 @@ const config = {
         inactiveOutput: 0x174709,
         activeInput: 0x6e22d4,
         inactiveInput: 0x1c0738,
+        textFieldBackground: 0xcccccc,
     },
     zoomCoeff: 1.15,
     lineColor: 0x222222,

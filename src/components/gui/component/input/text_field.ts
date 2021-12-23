@@ -1,15 +1,13 @@
 import * as PIXI from "pixi.js";
-import { GUIComponent } from "../gui_component";
+import InputComponent from "./input_component";
 
 /**
  * Text Field input
  */
-export default class TextField extends GUIComponent {
-    text: string;
+export default class TextField extends InputComponent<string> {
     textComp: PIXI.Text;
     fontSize: number;
     fontColor: number;
-    onChange: (text: string) => void;
 
     /**
      * Constructs a text field
@@ -18,7 +16,7 @@ export default class TextField extends GUIComponent {
      * @param y Y coordinate
      * @param width Width
      * @param height Height
-     * @param text Text
+     * @param value Text
      * @param fontSize Font size
      * @param fontColor Font color
      * @param backgroundColor Background color
@@ -29,18 +27,17 @@ export default class TextField extends GUIComponent {
         y: number,
         width: number,
         height: number,
-        text: string,
+        value: string,
         fontSize: number,
         fontColor: number,
         backgroundColor: number,
         onChange: (text: string) => void
     ) {
-        super(x, y, width, height, backgroundColor);
-        this.text = text;
+        super(x, y, width, height, backgroundColor, value, onChange);
         this.fontSize = fontSize;
         this.fontColor = fontColor;
         this.onChange = onChange;
-        this.textComp = new PIXI.Text(this.text, {
+        this.textComp = new PIXI.Text(this.value, {
             fontFamily: "Arial",
             fontSize: this.fontSize,
             fill: this.fontColor,
@@ -55,6 +52,6 @@ export default class TextField extends GUIComponent {
      * Update text field graphics
      */
     update() {
-        this.textComp.text = this.text;
+        this.textComp.text = this.value;
     }
 }

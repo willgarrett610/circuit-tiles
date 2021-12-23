@@ -4,12 +4,12 @@ import * as PIXI from "pixi.js";
 const textures: any = {};
 
 const textureFiles = [
-    ["eraser", "assets/sprites/eraser1.png"],
-    ["tiles", "assets/sprites/tiles.png"],
-    ["chips", "assets/sprites/chips.png"],
-    ["pan", "assets/sprites/pan.png"],
-    ["add", "assets/sprites/add.svg"],
-    ["cursor", "assets/sprites/cursor.png"],
+    ["eraser", "./assets/sprites/eraser1.png"],
+    ["tiles", "./assets/sprites/tiles.png"],
+    ["chips", "./assets/sprites/chips.png"],
+    ["pan", "./assets/sprites/pan.png"],
+    ["add", "./assets/sprites/add.svg"],
+    ["cursor", "./assets/sprites/cursor.png"],
 ];
 
 const loadSprites = () => {

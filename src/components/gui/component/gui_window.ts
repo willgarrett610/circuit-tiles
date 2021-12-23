@@ -182,11 +182,7 @@ export default class GUIWindow extends PIXI.Container {
         if (this.layout != undefined) {
             for (let i = 0; i < this.components.length; i++) {
                 const comp = this.components[i];
-                const posSize = this.layout.getElementPosSize(
-                    i,
-                    this.width,
-                    this.height
-                );
+                const posSize = this.layout.getElementPosSize(i, comp, this);
                 comp.x = posSize[0];
                 comp.y = posSize[1];
                 comp.width = posSize[2];

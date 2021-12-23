@@ -1,3 +1,5 @@
+import { GUIComponent } from "../component/gui_component";
+import GUIWindow from "../component/gui_window";
 import Layout from "./layout";
 
 /** line wrap layout */
@@ -35,18 +37,18 @@ export default class LineWrapLayout implements Layout {
      * get element position size
      *
      * @param i
-     * @param width
-     * @param _ for height
+     * @param component
+     * @param window
      * @returns
      */
     getElementPosSize(
         i: number,
-        width: number,
-        _: number
+        component: GUIComponent,
+        window: GUIWindow
     ): [x: number, y: number, w: number, h: number] {
         // Number of components per row
         const n = Math.floor(
-            (width - this.margin) / (this.margin + this.compWidth)
+            (window.width - this.margin) / (this.margin + this.compWidth)
         );
         const y: number =
             this.margin +
