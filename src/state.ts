@@ -11,6 +11,7 @@ const state: {
         new Chip("Test", 0xff0000),
         new Chip("Test", 0x00ff00),
     ],
+    interactive: true,
 };
 
 interface StateCallback {

@@ -4,6 +4,7 @@ import { onScroll } from "../../../utils";
 import { clamp } from "../../../utils/math";
 import { GUIComponent } from "./gui_component";
 import Layout from "../layout/layout";
+import { subscribe } from "../../../state";
 
 /** gui window */
 export default class GUIWindow extends PIXI.Container {
@@ -127,6 +128,10 @@ export default class GUIWindow extends PIXI.Container {
                     0
                 );
             }
+        });
+
+        subscribe(["interactive"], (e) => {
+            this.interactive = e.value;
         });
 
         // this.draw();

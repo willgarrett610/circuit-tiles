@@ -19,18 +19,18 @@ export default class GridManager extends PIXI.Container {
         this.addChild(this.mainGrid);
 
         onResize(() => {
-            if (this.inChipGrid) this.chipGrid.update();
-            else this.mainGrid.update();
+            const grid = this.getGrid();
+            if (grid.interactive) grid.update();
         });
 
         onScroll(this, (e) => {
-            if (this.inChipGrid) this.chipGrid.scroll(e);
-            else this.mainGrid.scroll(e);
+            const grid = this.getGrid();
+            if (grid.interactive) grid.scroll(e);
         });
 
         onKeyDown((e) => {
-            if (this.inChipGrid) this.chipGrid.keyDown(e);
-            else this.mainGrid.keyDown(e);
+            const grid = this.getGrid();
+            if (grid.interactive) grid.keyDown(e);
         });
     }
 

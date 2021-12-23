@@ -36,7 +36,7 @@ const config = {
         headerHeight: 25,
     },
     chipCreationForm: {
-        width: 600,
+        width: 250,
         height: 300,
     },
 };

@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { subscribe } from "../../../state";
 
 export enum GUIComponentState {
     DEFAULT,
@@ -100,6 +101,10 @@ export class GUIComponent extends PIXI.Container {
             if (this.state != GUIComponentState.DISABLED) {
                 this.setState(GUIComponentState.DEFAULT);
             }
+        });
+
+        subscribe(["interactive"], (e) => {
+            this.interactive = e.value;
         });
     }
 

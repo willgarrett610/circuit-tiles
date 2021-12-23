@@ -1,0 +1,134 @@
+.chip_creation {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -150px;
+    margin-left: -125px;
+    width: 250px;
+    height: 312px;
+    background-color: #aaa;
+    font-family: Arial, Helvetica, sans-serif;
+    border-radius: 10px;
+}
+
+.chip_creation_title {
+    width: 100%;
+    height: 25px;
+    background-color: #888888;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.chip_creation .content {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    flex-basis: 1em;
+    align-items: left;
+    padding: 0 10px 0 10px;
+    height: 100%;
+}
+
+.chip_creation .content > * {
+    margin: 10px 0;
+}
+
+.chip_creation input {
+    width: -webkit-fill-available;
+}
+
+.label {
+    display: block;
+    width: 100%;
+    font-size: 1.2em;
+    height: 1em;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.color_prev {
+    width: 100%;
+    height: 80px;
+    background-color: hsl(0, 50%, 50%);
+    border-radius: 10px;
+}
+
+.slider.hue {
+    background: linear-gradient(
+        0.25turn,
+        hsl(0, 50%, 40%),
+        hsl(45, 50%, 40%),
+        hsl(90, 50%, 40%),
+        hsl(135, 50%, 40%),
+        hsl(180, 50%, 40%),
+        hsl(225, 50%, 40%),
+        hsl(270, 50%, 40%),
+        hsl(315, 50%, 40%),
+        hsl(360, 50%, 40%)
+    );
+}
+
+.slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 10px;
+    border-radius: 5px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: 0.2s;
+    transition: opacity 0.2s;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #434343;
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #04aa6d;
+    cursor: pointer;
+}
+
+.chip_creation_buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.cancel_button {
+    width: 110px;
+    height: 30px;
+    background-color: #888888;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 1.2em;
+    cursor: pointer;
+}
+
+.create_button {
+    width: 110px;
+    height: 30px;
+    background-color: #04aa6d;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 1.2em;
+    cursor: pointer;
+}
