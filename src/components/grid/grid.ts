@@ -557,9 +557,6 @@ export default class Grid extends PIXI.Container {
         const gridScreenPos = this.screenToGrid(...this.mousePos, true, true);
         const gridPos = this.screenToGrid(...this.mousePos, true);
 
-        const tempTile = new (getTileTypes()[this.selectedTileType])(
-            ...locationToTuple(gridPos)
-        );
         if (this.prevHighlightTileGraphic)
             this.removeChild(this.prevHighlightTileGraphic);
         if (
@@ -567,6 +564,9 @@ export default class Grid extends PIXI.Container {
             EditMode.TILE === state.editMode &&
             this.getTile(...locationToTuple(gridPos)) === undefined
         ) {
+            const tempTile = new (getTileTypes()[this.selectedTileType])(
+                ...locationToTuple(gridPos)
+            );
             const tileGraphics: PIXI.Container = tempTile.getContainer(
                 this.size
             );
