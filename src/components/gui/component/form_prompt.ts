@@ -4,6 +4,7 @@ import config from "../../../config";
 // import { dimensions } from "../../../utils";
 import GUIWindow from "./gui_window";
 import { LabeledButton, LabelType } from "./labeled_button";
+// import TextField from "./input/text_field";
 
 /**
  * Prompt user with input
@@ -18,6 +19,7 @@ export default class FormPrompt extends GUIWindow {
      * @param height Height
      * @param title Title
      * @param backgroundColor Background color
+     * @param onSubmit Submit callback
      */
     constructor(
         x: number,
@@ -25,9 +27,12 @@ export default class FormPrompt extends GUIWindow {
         width: number,
         height: number,
         title: string,
-        backgroundColor: number
+        backgroundColor: number,
+        onSubmit: (values: [] | null) => void
     ) {
         super(x, y, width, height, backgroundColor);
+
+        this.zIndex = 500;
 
         const header = new PIXI.Container();
 
@@ -62,8 +67,42 @@ export default class FormPrompt extends GUIWindow {
             3
         );
 
+        exitBtn.onClick = () => {
+            this.visible = false;
+            onSubmit(null);
+        };
+
         header.addChild(exitBtn);
 
+        // const textField = new TextField(
+        //     100,
+        //     100,
+        //     200,
+        //     50,
+        //     "Test123",
+        //     12,
+        //     0x000000,
+        //     0xffffff,
+        //     (text) => {
+        //         console.log(text);
+        //     }
+        // );
+
+        // this.addChild(textField);
+        // textField.update();
+
         this.addChild(header);
+    }
+
+    /**
+     * Open form prompt
+     */
+    open() {
+        this.visible = true;
+    }
+
+    close(values: [] | null) {
+        this.visible = false;
+        // this.onSubmit()
     }
 }
