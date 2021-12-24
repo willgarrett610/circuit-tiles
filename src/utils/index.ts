@@ -13,8 +13,8 @@ interface CreateChipValues {
  *
  * @returns Promise that resolves when the menu is closed
  */
-export function getCreateChipInput(): Promise<CreateChipValues> {
-    return new Promise<CreateChipValues>((resolve, reject) => {
+export function getCreateChipInput(): Promise<CreateChipValues | null> {
+    return new Promise<CreateChipValues | null>((resolve) => {
         setState({
             chipCreation: {
                 open: true,
@@ -46,7 +46,7 @@ export function getCreateChipInput(): Promise<CreateChipValues> {
                         colorValue: 0x993333,
                     },
                 });
-                reject();
+                resolve(null);
             },
             { once: true }
         );
@@ -58,6 +58,7 @@ export function getCreateChipInput(): Promise<CreateChipValues> {
                 const color = PIXI.utils.string2hex(
                     "hsl(" + parseInt(hueInput.value) + ", 50%, 40%)"
                 );
+                console.log("hsl(" + parseInt(hueInput.value) + ", 50%, 40%)");
                 setState({
                     chipCreation: {
                         open: false,
@@ -69,11 +70,6 @@ export function getCreateChipInput(): Promise<CreateChipValues> {
             },
             { once: true }
         );
-
-        resolve({
-            name: "test",
-            color: 0x993333,
-        });
     });
 }
 

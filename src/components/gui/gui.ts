@@ -146,7 +146,6 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
         selectorHeights,
         "Tiles",
         (i, tileSize) => {
-            console.log({ i });
             if (i >= getTileTypes(state.chipEditor).length) return null;
 
             const tileType = getTileTypes(state.chipEditor)[i];
@@ -207,7 +206,8 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
                     selectable: false,
                     onClick: () => {
                         getCreateChipInput().then((values) => {
-                            if (values === null) return;
+                            if (!values) return;
+                            console.log(values);
                         });
                     },
                 };
