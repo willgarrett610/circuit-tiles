@@ -2,9 +2,15 @@
 import { Chip } from "./components/chip/chip";
 import { EditMode } from "./utils/edit_mode";
 
-const state: {
-    [key: string]: any;
-} = {
+interface State {
+    chipEditor: boolean;
+    editMode: EditMode;
+    chips: Chip[];
+    interactive: boolean;
+}
+
+const state: State = {
+    chipEditor: false,
     editMode: EditMode.TILE,
     chips: [
         new Chip("Test", 0x9911ee),
@@ -51,7 +57,10 @@ export function subscribe(
  * @param name Name of the state variable to change
  * @param value New value for the variable
  */
-export function setStateByName<T>(name: string, value: T) {
+export function setStateByName<T extends keyof State>(
+    name: T,
+    value: State[T]
+) {
     const prevValue = state[name];
     state[name] = value;
     for (const callback of callbacks) {
@@ -65,9 +74,17 @@ export function setStateByName<T>(name: string, value: T) {
  * Update state value
  *
  * @param newState New state values
+ * @param newState.T
  */
-export function setState(newState: { [key: string]: any }) {
-    for (const key in newState) setStateByName(key, newState[key]);
+export function setState<T extends keyof State>(
+    newState: {
+        [key in T]: State[T];
+    }
+) {
+    for (const key in newState)
+        setStateByName(key as T, (newState as any)[key as T]);
 }
 
 export default state;
+
+(window as any).stateHandler = { state, setState, setStateByName, subscribe };

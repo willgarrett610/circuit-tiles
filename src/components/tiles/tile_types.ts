@@ -22,10 +22,15 @@ const tileTypes = [
 /**
  * Get tile types
  *
+ * @param chipTileIncluded whether to include chip tiles
  * @returns list of tile types
  */
-function getTileTypes(): Array<{ new (x: number, y: number): Tile }> {
-    return tileTypes;
+function getTileTypes(
+    chipTileIncluded = true
+): Array<{ new (x: number, y: number): Tile }> {
+    return chipTileIncluded
+        ? tileTypes
+        : tileTypes.filter((x) => x.chipTile === false);
 }
 
 export default getTileTypes;

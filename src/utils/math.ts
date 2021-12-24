@@ -17,3 +17,27 @@ export function clamp(
     if (max !== undefined && x > max) return max;
     return x;
 }
+
+/**
+ * linear interpolation between two numbers
+ *
+ * @param x input number
+ * @param inMin lower range for input
+ * @param inMax high range for input
+ * @param outMin low range for output
+ * @param outMax high range for output
+ * @param clamped if true, clamp output to outMin and outMax
+ * @returns number between outMin and outMax
+ */
+export function map(
+    x: number,
+    inMin: number,
+    inMax: number,
+    outMin: number,
+    outMax: number,
+    clamped: boolean = true
+): number {
+    if (clamped)
+        return map(clamp(x, inMin, inMax), inMin, inMax, outMin, outMax, false);
+    return ((x - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
+}

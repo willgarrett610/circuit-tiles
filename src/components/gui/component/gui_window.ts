@@ -238,7 +238,7 @@ export default class GUIWindow extends PIXI.Container {
     removeChild<TChildren extends PIXI.DisplayObject[]>(
         ...child: TChildren
     ): TChildren[0] {
-        for (const c in child) {
+        for (const c of child) {
             if ((c as any).__proto__ instanceof GUIComponent) {
                 const index = this.components.indexOf(c as any);
                 if (index > -1) this.components.splice(index, 1);
@@ -278,7 +278,7 @@ export default class GUIWindow extends PIXI.Container {
         endIndex?: number
     ): PIXI.DisplayObject[] {
         const children = this.container.removeChildren(beginIndex, endIndex);
-        for (const child in children) {
+        for (const child of children) {
             if ((child as any).__proto__ instanceof GUIComponent) {
                 const index = this.components.indexOf(child as any);
                 if (index > -1) {
