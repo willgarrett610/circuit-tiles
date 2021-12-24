@@ -7,6 +7,7 @@ interface State {
     editMode: EditMode;
     chips: Chip[];
     interactive: boolean;
+    chipCreation: { open: boolean; nameValue: string; colorValue: number };
 }
 
 const state: State = {
