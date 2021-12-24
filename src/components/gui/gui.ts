@@ -171,6 +171,7 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
     tileSelector.visible = false;
 
     subscribe(["chipEditor"], () => {
+        gridManager.getGrid().selectedTileType = -1;
         tileSelector.generateComponents();
     });
 
