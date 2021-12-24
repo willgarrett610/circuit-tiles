@@ -2,6 +2,7 @@ import config from "../../config";
 import CircuitLocation from "../../logic/circuit_location";
 import LogicNode from "../../logic/node";
 import { Rotation } from "../../utils/directions";
+import { map } from "../../utils/math";
 import { ConnectionType, GraphicsTile } from "./tile";
 
 /** delay tile */
@@ -23,8 +24,15 @@ export default class DelayTile extends GraphicsTile {
         left: false,
     };
 
+    signalActive = false;
+
     direction = Rotation.CLOCKWISE;
     rotatable = true;
+
+    /** delay in milliseconds */
+    delay = 1000;
+
+    time = 0;
 
     isNode = true;
 
@@ -63,6 +71,20 @@ export default class DelayTile extends GraphicsTile {
         );
         this.graphics.lineStyle(5);
         this.graphics.drawRect(40, 15, 40, 90);
+        this.graphics.endFill();
+
+        this.graphics.lineStyle(0);
+        this.graphics.beginFill(
+            this.signalActive
+                ? config.colors.inactiveTile
+                : config.colors.activeTile
+        );
+        this.graphics.drawRect(
+            42.5,
+            map(this.time / this.delay, 0, 1, 102.5, 17.5),
+            35,
+            map(this.time / this.delay, 0, 1, 0, 85)
+        );
         this.graphics.endFill();
 
         this.graphics.beginFill(0x000000);

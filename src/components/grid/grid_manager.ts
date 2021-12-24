@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import state, { setState } from "../../state";
 import { onKeyDown, onResize, onScroll } from "../../utils";
 import Grid from "./grid";
 
@@ -7,7 +8,7 @@ export default class GridManager extends PIXI.Container {
     mainGrid: Grid;
     chipGrid: Grid;
 
-    inChipGrid = false;
+    inChipGrid = state.chipEditor;
 
     /**
      * constructs grid manager
@@ -40,6 +41,7 @@ export default class GridManager extends PIXI.Container {
      * @param val chip grid state
      */
     setInChipGrid(val: boolean) {
+        setState({ chipEditor: val });
         this.inChipGrid = val;
         this.removeChildren();
         if (this.inChipGrid) {

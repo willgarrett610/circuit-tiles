@@ -11,6 +11,7 @@ export enum ConnectionType {
 
 /** Tile */
 export abstract class Tile {
+    static chipTile = false;
     abstract type: typeof Tile;
 
     copyProps = ["connections", "label", "x", "y", "direction", "signalActive"];

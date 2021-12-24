@@ -5,6 +5,8 @@ import { ConnectionType, GraphicsTile } from "./tile";
 
 /** chip output tile */
 export default class ChipOutputTile extends GraphicsTile {
+    static chipTile = true;
+
     type = ChipOutputTile;
     connectionTemplate = {
         up: ConnectionType.OUTPUT,
