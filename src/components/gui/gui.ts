@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 
-import { dimensions, height, onResize, width } from "../../utils";
+import { dimensions, onResize } from "../../utils";
 import GUIWindow from "./component/gui_window";
 import getTileTypes from "../tiles/tile_types";
 import ButtonGroup from "./component/button_group";
@@ -13,8 +13,6 @@ import { getSprite } from "../sprites/sprite_loader";
 import state, { setState, subscribe } from "../../state";
 import { EditMode } from "../../utils/edit_mode";
 import SelectorMenu from "./component/selector_menu";
-import FormPrompt from "./component/form_prompt";
-import TextField from "./component/input/text_field";
 
 const createToolBtn = (spriteKey: string): GUIComponent => {
     const toolHover = new PIXI.Graphics();
@@ -116,62 +114,6 @@ const createToolSelector = (onSelectionChange: (i: number) => void) => {
     return selector;
 };
 
-const initChipForm = (app: PIXI.Application) => {
-    const form = new FormPrompt(
-        width() / 2 - config.chipCreationForm.width / 2,
-        height() / 2 - config.chipCreationForm.height / 2,
-        config.chipCreationForm.width,
-        config.chipCreationForm.height,
-        "Create chip",
-        config.colors.menu,
-        (values) => {
-            console.log(values);
-        }
-    );
-    form.visible = false;
-
-    const chipNameHeaderText = new PIXI.Text("Chip name:", {
-        fontFamily: "Arial",
-        fontSize: 20,
-        fill: 0x000000,
-        align: "left",
-    });
-
-    const chipNameHeader = new GUIComponent(
-        0,
-        0,
-        chipNameHeaderText.width,
-        chipNameHeaderText.height,
-        config.colors.menu
-    );
-    chipNameHeader.setDefaultContainer(chipNameHeaderText);
-
-    const textField = new TextField(
-        0,
-        0,
-        200,
-        50,
-        "Test123",
-        12,
-        0x000000,
-        config.colors.textFieldBackground,
-        (text) => {
-            console.log(text);
-        }
-    );
-    textField.update();
-
-    form.addChild(chipNameHeader);
-    form.addChild(textField);
-
-    console.log(form.components);
-
-    form.updateLayout();
-
-    app.stage.addChild(form);
-    return form;
-};
-
 /**
  * Sets up application GUI
  *
@@ -234,7 +176,7 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
     CHIP CREATION FORM
     */
 
-    const chipForm = initChipForm(app);
+    // const chipForm = initChipForm(app);
 
     /*
     CHIP SELECTION
@@ -267,7 +209,7 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
                     hoverContainer,
                     selectable: false,
                     onClick: () => {
-                        chipForm.open();
+                        // chipForm.open();
                     },
                 };
             }
@@ -347,6 +289,8 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
             dimensions()[1] - config.menubarSize
         );
     });
+
+    setState({ interactive: false });
 };
 
 export default initGUI;

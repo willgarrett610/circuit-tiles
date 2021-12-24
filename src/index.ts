@@ -22,7 +22,14 @@ const main = async () => {
     app.renderer.view.style.height = "100%";
     app.renderer.view.style.width = "100%";
     app.renderer.resize(window.innerWidth, window.innerHeight);
+
     document.body.appendChild(app.view);
+
+    const child = document.getElementById("chip_creation");
+    if (child) {
+        document.body.removeChild(child);
+        document.body.appendChild(child);
+    }
 
     app.renderer.backgroundColor = config.colors.background;
 
@@ -61,6 +68,20 @@ const main = async () => {
             }
         }
     });
+
+    // Set up chip creation color preview
+    const hueInput = document.getElementById(
+        "chip_hue_input"
+    ) as HTMLInputElement;
+    const huePreview = document.getElementById("chip_color_prev");
+
+    if (hueInput && huePreview) {
+        console.log("input listener");
+        hueInput.addEventListener("input", () => {
+            const hue = parseInt(hueInput.value);
+            huePreview.style.backgroundColor = `hsl(${hue}, 50%, 40%)`;
+        });
+    }
 };
 
 main();

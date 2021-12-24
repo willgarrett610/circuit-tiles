@@ -14,7 +14,7 @@ import { Direction, rotateClockWise } from "../../utils/directions";
 import getTileTypes from "../tiles/tile_types";
 import "../../utils/compute_logic";
 import { GridAction, Interaction } from "../../utils/action";
-import state, { setState } from "../../state";
+import state, { setState, subscribe } from "../../state";
 import { EditMode } from "../../utils/edit_mode";
 import Graph from "../../logic/graph";
 import LogicNode from "../../logic/node";
@@ -81,6 +81,10 @@ export default class Grid extends PIXI.Container {
         this.renderGrid();
 
         this.on("mousemove", this.mouseMove);
+
+        subscribe(["interactive"], (e) => {
+            this.interactive = e.value;
+        });
     }
 
     /**

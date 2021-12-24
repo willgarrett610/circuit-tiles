@@ -7,6 +7,7 @@ import Layout from "./layout";
  */
 export class ColumnLayout implements Layout {
     nextY: number = 0;
+    margin: number = 0;
     xOffset: number;
     yOffset: number;
 
@@ -38,9 +39,9 @@ export class ColumnLayout implements Layout {
         const h = component.height;
 
         const x = this.xOffset;
-        const y = this.nextY + this.yOffset;
+        const y = this.nextY + this.yOffset + this.margin;
 
-        this.nextY += component.height;
+        this.nextY += component.height + this.margin;
 
         console.log({ x, y });
 
