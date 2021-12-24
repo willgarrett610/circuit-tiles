@@ -1,4 +1,81 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { setState } from "../state";
+
+interface CreateChipValues {
+    name: string;
+    color: number;
+}
+
+/**
+ * Open chip creation menu and return a promise that resolves when the menu is closed
+ *
+ * @returns Promise that resolves when the menu is closed
+ */
+export function getCreateChipInput(): Promise<CreateChipValues> {
+    return new Promise<CreateChipValues>((resolve, reject) => {
+        setState({
+            chipCreation: {
+                open: true,
+                nameValue: "",
+                colorValue: 0x993333,
+            },
+        });
+        const nameInput = document.getElementById(
+            "chip_name_input"
+        ) as HTMLInputElement;
+        const hueInput = document.getElementById(
+            "chip_hue_input"
+        ) as HTMLInputElement;
+
+        const cancelButton = document.getElementById(
+            "chip_cancel_button"
+        ) as HTMLButtonElement;
+        const createButton = document.getElementById(
+            "chip_create_button"
+        ) as HTMLButtonElement;
+
+        cancelButton.addEventListener(
+            "click",
+            () => {
+                setState({
+                    chipCreation: {
+                        open: false,
+                        nameValue: "",
+                        colorValue: 0x993333,
+                    },
+                });
+                reject();
+            },
+            { once: true }
+        );
+
+        createButton.addEventListener(
+            "click",
+            () => {
+                const name = nameInput.value;
+                const color = PIXI.utils.string2hex(
+                    "hsl(" + parseInt(hueInput.value) + ", 50%, 40%)"
+                );
+                setState({
+                    chipCreation: {
+                        open: false,
+                        nameValue: name,
+                        colorValue: color,
+                    },
+                });
+                resolve({ name, color });
+            },
+            { once: true }
+        );
+
+        resolve({
+            name: "test",
+            color: 0x993333,
+        });
+    });
+}
+
 /**
  * Gets the dimensions of the viewport
  *

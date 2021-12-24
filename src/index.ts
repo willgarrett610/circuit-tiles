@@ -5,6 +5,7 @@ import initGUI from "./components/gui/gui";
 
 import GridManager from "./components/grid/grid_manager";
 import { loadSprites } from "./components/sprites/sprite_loader";
+import { setState, subscribe } from "./state";
 
 PIXI.utils.skipHello();
 
@@ -80,6 +81,19 @@ const main = async () => {
         hueInput.addEventListener("input", () => {
             const hue = parseInt(hueInput.value);
             huePreview.style.backgroundColor = `hsl(${hue}, 50%, 40%)`;
+        });
+    }
+
+    const chipCreationForm = document.getElementById("chip_creation");
+    if (chipCreationForm) {
+        subscribe(["chipCreation"], (e) => {
+            if (e.value.open) {
+                chipCreationForm.style.display = "block";
+                setState({ interactive: false });
+            } else {
+                chipCreationForm.style.display = "none";
+                setState({ interactive: true });
+            }
         });
     }
 };

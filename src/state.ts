@@ -12,6 +12,11 @@ const state: {
         new Chip("Test", 0x00ff00),
     ],
     interactive: true,
+    chipCreation: {
+        open: false,
+        nameValue: "",
+        colorValue: 0x993333,
+    },
 };
 
 interface StateCallback {

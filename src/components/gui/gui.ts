@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 
-import { dimensions, onResize } from "../../utils";
+import { dimensions, getCreateChipInput, onResize } from "../../utils";
 import GUIWindow from "./component/gui_window";
 import getTileTypes from "../tiles/tile_types";
 import ButtonGroup from "./component/button_group";
@@ -169,12 +169,6 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
     tileSelector.visible = false;
 
     /*
-    CHIP CREATION FORM
-    */
-
-    // const chipForm = initChipForm(app);
-
-    /*
     CHIP SELECTION
     */
 
@@ -205,7 +199,10 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
                     hoverContainer,
                     selectable: false,
                     onClick: () => {
-                        // chipForm.open();
+                        getCreateChipInput().then((values) => {
+                            if (values == null) return;
+                            console.log({ values });
+                        });
                     },
                 };
             }
@@ -285,8 +282,6 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
             dimensions()[1] - config.menubarSize
         );
     });
-
-    setState({ interactive: false });
 };
 
 export default initGUI;
