@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import * as PIXI from "pixi.js";
 import { setState } from "../state";
 
 interface CreateChipValues {

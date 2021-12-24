@@ -119,7 +119,9 @@ export default class SelectorMenu extends GUIWindow {
         let btnData: BtnGeneratorData | null = null;
         let i = 0;
 
-        while ((btnData = this.btnGenerator(i, this.tileSize)) != null) {
+        this.btnGroup.buttons = [];
+
+        while ((btnData = this.btnGenerator(i, this.tileSize)) !== null) {
             const tileBtn = new LabeledButton(
                 0,
                 0,
@@ -134,7 +136,7 @@ export default class SelectorMenu extends GUIWindow {
 
             if (btnData.onClick) tileBtn.on("click", btnData.onClick);
 
-            if (btnLayout.compHeight == 1)
+            if (btnLayout.compHeight === 1)
                 btnLayout.compHeight = tileBtn.height;
 
             btnData.defaultContainer.zIndex = 100;

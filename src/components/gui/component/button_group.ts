@@ -24,7 +24,7 @@ export default class ButtonGroup {
      * @param i index of button
      */
     setSelected(i: number) {
-        if (this.selected != -1)
+        if (this.selected !== -1)
             this.buttons[i].removeChild(this.selectedOverlay);
         this.selected = i;
         this.buttons[i].addChild(this.selectedOverlay);
@@ -43,12 +43,12 @@ export default class ButtonGroup {
             e.stopPropagation();
         });
         button.onStateChange = () => {
-            if (this.selected == i) {
+            if (this.selected === i) {
                 button.removeChild(this.selectedOverlay);
                 button.addChild(this.selectedOverlay);
             }
         };
         this.buttons.push(button);
-        if (this.selected == -1) this.setSelected(0);
+        if (this.selected === -1) this.setSelected(0);
     }
 }

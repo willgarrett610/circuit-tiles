@@ -62,43 +62,43 @@ export class GUIComponent extends PIXI.Container {
 
         this.on("click", (e: PIXI.interaction.InteractionEvent) => {
             e.stopPropagation();
-            if (this.state != GUIComponentState.DISABLED) {
+            if (this.state !== GUIComponentState.DISABLED) {
                 this.onClick?.(e);
             }
         });
 
         this.on("rightclick", (e: PIXI.interaction.InteractionEvent) => {
             e.stopPropagation();
-            if (this.state != GUIComponentState.DISABLED) {
+            if (this.state !== GUIComponentState.DISABLED) {
                 this.onRightClick?.(e);
             }
         });
 
         this.on("mouseover", () => {
-            if (this.state != GUIComponentState.DISABLED) {
+            if (this.state !== GUIComponentState.DISABLED) {
                 this.onHover?.();
                 this.setState(GUIComponentState.HOVER);
             }
         });
         this.on("mouseout", () => {
-            if (this.state != GUIComponentState.DISABLED) {
+            if (this.state !== GUIComponentState.DISABLED) {
                 this.onEndHover?.();
                 this.setState(GUIComponentState.DEFAULT);
             }
         });
 
         this.on("mousedown", () => {
-            if (this.state != GUIComponentState.DISABLED) {
+            if (this.state !== GUIComponentState.DISABLED) {
                 this.setState(GUIComponentState.PRESSED);
             }
         });
         this.on("mouseup", () => {
-            if (this.state != GUIComponentState.DISABLED) {
+            if (this.state !== GUIComponentState.DISABLED) {
                 this.setState(GUIComponentState.HOVER);
             }
         });
         this.on("mouseupoutside", () => {
-            if (this.state != GUIComponentState.DISABLED) {
+            if (this.state !== GUIComponentState.DISABLED) {
                 this.setState(GUIComponentState.DEFAULT);
             }
         });

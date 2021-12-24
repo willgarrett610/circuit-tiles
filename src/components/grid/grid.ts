@@ -146,9 +146,9 @@ export default class Grid extends PIXI.Container {
             const directDirection = Direction.toLower(direction);
 
             const canConnect =
-                newTile.getConnectionTemplate()[directDirection] !=
+                newTile.getConnectionTemplate()[directDirection] !==
                     ConnectionType.BLOCKED &&
-                prevTile.getConnectionTemplate()[oppositeDirection] !=
+                prevTile.getConnectionTemplate()[oppositeDirection] !==
                     ConnectionType.BLOCKED &&
                 (forced || newTile.isEdge || prevTile.isEdge);
 
@@ -651,7 +651,7 @@ export default class Grid extends PIXI.Container {
 
     click = (event: PIXI.interaction.InteractionEvent) => {
         if (
-            event.data.button == 0 &&
+            event.data.button === 0 &&
             !event.data.originalEvent.shiftKey &&
             !pressedKeys["Space"] &&
             state.editMode !== EditMode.PAN
@@ -660,10 +660,10 @@ export default class Grid extends PIXI.Container {
                 this.screenToGrid(...this.mousePos, true)
             );
 
-            if (state.editMode == EditMode.ERASER) {
+            if (state.editMode === EditMode.ERASER) {
                 this.currentInteraction = Interaction.REMOVING;
                 this.removeTile(...gridPoint);
-            } else if (state.editMode == EditMode.CURSOR) {
+            } else if (state.editMode === EditMode.CURSOR) {
                 this.currentInteraction = Interaction.PLACING;
                 this.rotateTile(...gridPoint);
             } else {

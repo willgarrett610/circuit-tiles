@@ -146,6 +146,7 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
         selectorHeights,
         "Tiles",
         (i, tileSize) => {
+            console.log({ i });
             if (i >= getTileTypes(state.chipEditor).length) return null;
 
             const tileType = getTileTypes(state.chipEditor)[i];
@@ -164,7 +165,9 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
                 selectable: true,
             };
         },
-        (i) => (gridManager.getGrid().selectedTileType = i)
+        (i) => {
+            return (gridManager.getGrid().selectedTileType = i);
+        }
     );
     tileSelector.visible = false;
 
@@ -185,7 +188,7 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
         (i, tileSize) => {
             if (i > state.chips.length) return null;
 
-            if (i == state.chips.length) {
+            if (i === state.chips.length) {
                 const defaultContainer = new PIXI.Container();
                 const defaultSprite = getSprite("add");
                 defaultSprite.width = tileSize;
@@ -204,8 +207,7 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
                     selectable: false,
                     onClick: () => {
                         getCreateChipInput().then((values) => {
-                            if (values == null) return;
-                            console.log({ values });
+                            if (values === null) return;
                         });
                     },
                 };

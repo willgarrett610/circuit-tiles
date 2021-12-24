@@ -15,6 +15,7 @@
         "@typescript-eslint/no-inferrable-types": "off",
         "@typescript-eslint/no-namespace": "off",
         "prefer-const": "warn",
+        "eqeqeq": "warn",
         "@typescript-eslint/no-unused-vars": [
             "warn",
             {

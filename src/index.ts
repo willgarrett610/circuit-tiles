@@ -53,12 +53,12 @@ const main = async () => {
             app.stage
         );
 
-        if (hitObject != null) {
+        if (hitObject !== null) {
             let testObject = hitObject;
-            while (testObject != undefined) {
+            while (testObject !== undefined) {
                 for (let i = 0; i < scrollListeners.length; i++) {
                     const eventObj = scrollListeners[i];
-                    if (eventObj.object == testObject) {
+                    if (eventObj.object === testObject) {
                         eventObj.listener(cE);
                         break;
                     }

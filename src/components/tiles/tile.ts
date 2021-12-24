@@ -133,7 +133,7 @@ export abstract class Tile {
      */
     setConnection(dir: "up" | "right" | "down" | "left", val: boolean) {
         const enumDir = Direction.fromString(dir);
-        if (enumDir == null) return;
+        if (enumDir === null) return;
         this.connections[this.getRotatedKey(enumDir)] = val;
     }
 
