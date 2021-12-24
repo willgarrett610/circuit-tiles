@@ -664,12 +664,14 @@ export default class Grid extends PIXI.Container {
                 this.currentInteraction = Interaction.REMOVING;
                 this.removeTile(...gridPoint);
             } else if (state.editMode === EditMode.CURSOR) {
+                if (this.currentInteraction === Interaction.NONE)
+                    this.rotateTile(...gridPoint);
                 this.currentInteraction = Interaction.PLACING;
-                this.rotateTile(...gridPoint);
             } else if (this.selectedTileType !== -1) {
                 // TODO Tile and Chip modes
+                if (this.currentInteraction === Interaction.NONE)
+                    this.rotateTile(...gridPoint);
                 this.currentInteraction = Interaction.PLACING;
-                this.rotateTile(...gridPoint);
                 this.addTile(
                     ...gridPoint,
                     getTileTypes()[this.selectedTileType],
