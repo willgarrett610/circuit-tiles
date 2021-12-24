@@ -120,6 +120,7 @@ export default class SelectorMenu extends GUIWindow {
         let i = 0;
 
         this.btnGroup.buttons = [];
+        this.btnGroup.selected = -1;
 
         while ((btnData = this.btnGenerator(i, this.tileSize)) !== null) {
             const tileBtn = new LabeledButton(
