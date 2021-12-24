@@ -208,9 +208,11 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
                     onClick: () => {
                         getCreateChipInput().then((chip) => {
                             if (!chip) return;
-                            setStateProp("chips", () => {
-                                state.chips.push(chip);
+                            setStateProp("chips", (chips) => {
+                                chips.push(chip);
                             });
+                            setState({ editingChip: chip });
+                            gridManager.setInChipGrid(true);
                         });
                     },
                 };

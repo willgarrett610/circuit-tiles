@@ -8,6 +8,7 @@ interface State {
     chips: Chip[];
     interactive: boolean;
     chipCreation: { open: boolean; nameValue: string; colorValue: number };
+    editingChip: Chip | undefined;
 }
 
 const state: State = {
@@ -20,6 +21,7 @@ const state: State = {
         nameValue: "",
         colorValue: 0x993333,
     },
+    editingChip: undefined,
 };
 
 interface StateCallback {

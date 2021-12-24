@@ -43,9 +43,7 @@ export class ColumnLayout implements Layout {
 
         this.nextY += component.height + this.margin;
 
-        console.log({ x, y });
-
-        if (i == window.components.length - 1) {
+        if (i === window.components.length - 1) {
             this.nextY = 0;
         }
 

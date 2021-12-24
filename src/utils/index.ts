@@ -55,9 +55,7 @@ export function getCreateChipInput(): Promise<Chip | null> {
                 //     "hsl(" + parseInt(hueInput.value) + ", 50%, 40%)"
                 // );
                 const color = hslToHex(parseInt(hueInput.value), 50, 40);
-                console.log(
-                    hslToHex(parseInt(hueInput.value), 50, 40).toString(16)
-                );
+
                 setState({
                     chipCreation: {
                         open: false,
@@ -65,7 +63,7 @@ export function getCreateChipInput(): Promise<Chip | null> {
                         colorValue: color,
                     },
                 });
-                resolve({ name, color });
+                resolve(new Chip(name, color));
             },
             { once: true }
         );

@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
-import state, { setState } from "../../state";
+import state, { setState, subscribe } from "../../state";
 import { onKeyDown, onResize, onScroll } from "../../utils";
+import { Chip } from "../chip/chip";
 import Grid from "./grid";
 
 /** grid manager */
@@ -33,6 +34,13 @@ export default class GridManager extends PIXI.Container {
             const grid = this.getGrid();
             if (grid.interactive) grid.keyDown(e);
         });
+
+        subscribe(["editingChip"], (e) => {
+            if (e.value) this.loadChip(e.value);
+        });
+        // subscribe(["chipEditor"], (e) => {
+
+        // });
     }
 
     /**
@@ -49,6 +57,16 @@ export default class GridManager extends PIXI.Container {
         } else {
             this.addChild(this.mainGrid);
         }
+    }
+
+    /**
+     * loads chip into the grid
+     *
+     * @param chip chip to load
+     */
+    loadChip(chip: Chip) {
+        this.chipGrid = new Grid(100);
+        this.chipGrid.tiles = chip.tiles;
     }
 
     /**
