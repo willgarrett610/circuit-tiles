@@ -114,8 +114,6 @@ export function setStateProp<T extends keyof State>(
     }
 }
 
-setStateProp("chips", (chips) => chips.push(new Chip("Test", 0x9911ee)));
-
 export default state;
 
 (window as any).stateHandler = { state, setState, setStateByName, subscribe };
