@@ -13,11 +13,7 @@ interface State {
 const state: State = {
     chipEditor: false,
     editMode: EditMode.TILE,
-    chips: [
-        new Chip("Test", 0x9911ee),
-        new Chip("Test", 0xff0000),
-        new Chip("Test", 0x00ff00),
-    ],
+    chips: [],
     interactive: true,
     chipCreation: {
         open: false,
