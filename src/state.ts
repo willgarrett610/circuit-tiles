@@ -23,9 +23,18 @@ const state: State = {
 };
 
 interface StateCallback {
-    names: Array<string>;
+    names: Array<keyof State>;
     callback: (event: StateChangeEvent) => void;
 }
+
+// interface StateSpecificCallback<T extends keyof State> {
+//     name: T;
+//     callback: (event: StateChangeEvent) => void;
+// }
+
+// type StateSubset<T extends keyof State> = {
+//     [key in T]: State[T];
+// };
 
 interface StateChangeEvent {
     name: string;
@@ -42,7 +51,7 @@ const callbacks: Array<StateCallback> = [];
  * @param callback Function to be called when the state is changed
  */
 export function subscribe(
-    names: Array<string>,
+    names: Array<keyof State>,
     callback: (event: StateChangeEvent) => void
 ) {
     callbacks.push({ names, callback });
@@ -80,6 +89,25 @@ export function setState<T extends keyof State>(
 ) {
     for (const key in newState)
         setStateByName(key as T, (newState as any)[key as T]);
+}
+
+/**
+ * Set state props
+ *
+ * @param name
+ * @param callback
+ */
+export function setStateProp<T extends keyof State>(
+    name: T,
+    callback: (value: State[T]) => void
+) {
+    callback(state[name]);
+    const value = state[name];
+    for (const callback of callbacks) {
+        if (callback.names.includes(name)) {
+            callback.callback({ name, prevValue: undefined, value });
+        }
+    }
 }
 
 export default state;
