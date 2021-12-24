@@ -10,7 +10,7 @@ import config from "../../config";
 import GridManager from "../grid/grid_manager";
 import { GUIComponent, GUIComponentState } from "./component/gui_component";
 import { getSprite } from "../sprites/sprite_loader";
-import state, { setState, subscribe } from "../../state";
+import state, { setState, setStateProp, subscribe } from "../../state";
 import { EditMode } from "../../utils/edit_mode";
 import SelectorMenu from "./component/selector_menu";
 
@@ -206,9 +206,11 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
                     hoverContainer,
                     selectable: false,
                     onClick: () => {
-                        getCreateChipInput().then((values) => {
-                            if (!values) return;
-                            console.log(values);
+                        getCreateChipInput().then((chip) => {
+                            if (!chip) return;
+                            setStateProp("chips", () => {
+                                state.chips.push(chip);
+                            });
                         });
                     },
                 };

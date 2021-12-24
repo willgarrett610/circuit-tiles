@@ -1,20 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as PIXI from "pixi.js";
+import { Chip } from "../components/chip/chip";
 import { setState } from "../state";
-
-interface CreateChipValues {
-    name: string;
-    color: number;
-}
 
 /**
  * Open chip creation menu and return a promise that resolves when the menu is closed
  *
  * @returns Promise that resolves when the menu is closed
  */
-export function getCreateChipInput(): Promise<CreateChipValues | null> {
-    return new Promise<CreateChipValues | null>((resolve) => {
+export function getCreateChipInput(): Promise<Chip | null> {
+    return new Promise<Chip | null>((resolve) => {
         setState({
             chipCreation: {
                 open: true,

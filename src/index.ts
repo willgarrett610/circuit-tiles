@@ -53,9 +53,9 @@ const main = async () => {
             app.stage
         );
 
-        if (hitObject !== null) {
+        if (hitObject) {
             let testObject = hitObject;
-            while (testObject !== undefined) {
+            while (testObject) {
                 for (let i = 0; i < scrollListeners.length; i++) {
                     const eventObj = scrollListeners[i];
                     if (eventObj.object === testObject) {
