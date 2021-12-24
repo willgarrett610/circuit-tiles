@@ -207,7 +207,8 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
                     selectable: false,
                     onClick: () => {
                         getCreateChipInput().then((values) => {
-                            if (values === null) return;
+                            if (!values) return;
+                            console.log(values);
                         });
                     },
                 };

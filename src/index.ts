@@ -71,13 +71,15 @@ const main = async () => {
     });
 
     // Set up chip creation color preview
+    const nameInput = document.getElementById(
+        "chip_name_input"
+    ) as HTMLInputElement;
     const hueInput = document.getElementById(
         "chip_hue_input"
     ) as HTMLInputElement;
     const huePreview = document.getElementById("chip_color_prev");
 
     if (hueInput && huePreview) {
-        console.log("input listener");
         hueInput.addEventListener("input", () => {
             const hue = parseInt(hueInput.value);
             huePreview.style.backgroundColor = `hsl(${hue}, 50%, 40%)`;
@@ -88,6 +90,10 @@ const main = async () => {
     if (chipCreationForm) {
         subscribe(["chipCreation"], (e) => {
             if (e.value.open) {
+                nameInput.value = "";
+                hueInput.value = "0";
+                if (huePreview)
+                    huePreview.style.backgroundColor = "hsl(0, 50%, 40%)";
                 chipCreationForm.style.display = "block";
                 setState({ interactive: false });
             } else {
