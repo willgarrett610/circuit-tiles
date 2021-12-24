@@ -6,6 +6,7 @@ interface State {
     chipEditor: boolean;
     editMode: EditMode;
     chips: Chip[];
+    interactive: boolean;
 }
 
 const state: State = {
