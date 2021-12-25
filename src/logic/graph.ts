@@ -141,12 +141,15 @@ export default class Graph {
         for (let i = 0; i < graph.nodes.length; i++) {
             const node = graph.nodes[i];
             if (node.name === "Or Wire") {
-                if (node.inputs.size === 1 && node.outputs.size === 1) {
-                    const input = [...node.inputs][0];
+                if (node.outputs.size === 1) {
                     const output = [...node.outputs][0];
-                    input.connectTo(output);
-                    input.locations.push(...node.locations);
+                    output.disconnectFrom(node);
 
+                    for (const input of node.inputs) {
+                        input.disconnectTo(node);
+                        input.connectTo(output);
+                        input.locations.push(...node.locations);
+                    }
                     // remove the node
                     graph.nodes.splice(i, 1);
                     i--;

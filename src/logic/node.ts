@@ -49,4 +49,24 @@ export default class LogicNode {
         this.inputs.add(node);
         node.outputs.add(this);
     }
+
+    /**
+     * removes node from inputs and outputs
+     *
+     * @param node node to disconnect from
+     */
+    disconnectTo(node: LogicNode) {
+        this.outputs.delete(node);
+        node.inputs.delete(this);
+    }
+
+    /**
+     * removes node from outputs and inputs
+     *
+     * @param node node to disconnect from
+     */
+    disconnectFrom(node: LogicNode) {
+        this.inputs.delete(node);
+        node.outputs.delete(this);
+    }
 }
