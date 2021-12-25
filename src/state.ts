@@ -29,15 +29,6 @@ interface StateCallback {
     callback: (event: StateChangeEvent) => void;
 }
 
-// interface StateSpecificCallback<T extends keyof State> {
-//     name: T;
-//     callback: (event: StateChangeEvent) => void;
-// }
-
-// type StateSubset<T extends keyof State> = {
-//     [key in T]: State[T];
-// };
-
 interface StateChangeEvent {
     name: string;
     prevValue: any;

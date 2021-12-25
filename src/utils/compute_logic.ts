@@ -1,19 +1,14 @@
-// let mod: typeof import("../../crate/pkg");
-// import init from "../lib";
+let mod: typeof import("../../crate/pkg");
+import init from "../lib";
 
 /**
  * load up computation logic
  */
 async function load() {
-    // mod = await init();
-    // console.log(
-    //     mod.compute_logic({
-    //         "0,0": { x: 0, y: 0, data: [1, 2, 3] },
-    //         "1,1": { x: 1, y: 1, data: [1, 2, 3] },
-    //         "2,2": { x: 2, y: 2, data: [1, 2, 3] },
-    //         "3,2": { x: 3, y: 2, data: [1, 2, 3] },
-    //     })
-    // );
+    mod = await init();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).mod = mod;
+    console.log(mod.compute_logic([1, 2, 3, 4, 5]));
 }
 
 load();
