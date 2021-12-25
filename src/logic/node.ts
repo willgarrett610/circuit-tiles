@@ -10,8 +10,8 @@ export default class LogicNode {
     outputs: Set<LogicNode> = new Set();
     originTile: Tile | undefined;
     state: boolean = false;
+    /** all the locations to set the signal active value on */
     locations: CircuitLocation[];
-    operation: (input: boolean) => boolean = (input) => input;
 
     /**
      * constructs logic node
@@ -28,5 +28,25 @@ export default class LogicNode {
         this.name = name;
         this.locations = locations;
         this.originTile = originTile;
+    }
+
+    /**
+     * adds node to outputs of this node and inputs of other node
+     *
+     * @param node node to connect to
+     */
+    connectTo(node: LogicNode) {
+        this.outputs.add(node);
+        node.inputs.add(this);
+    }
+
+    /**
+     * adds node to inputs of this node and outputs of other node
+     *
+     * @param node node to connect from
+     */
+    connectFrom(node: LogicNode) {
+        this.inputs.add(node);
+        node.outputs.add(this);
     }
 }

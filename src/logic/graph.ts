@@ -80,6 +80,7 @@ export default class Graph {
             return logicEdge;
         };
 
+        // initially create all logic nodes
         for (const [_, tile] of Object.entries(tiles)) {
             if (!tile) continue;
             if (tile.isNode && tile.toNode) {
@@ -88,12 +89,13 @@ export default class Graph {
                 graph.nodes.push(node);
                 setLogicTile(tile.x, tile.y, { tile, node: node });
             } else if (tile.isWire) {
-                if (!getLogicTile(tile.x, tile.y)) {
+                // handle wire tiles
+                if (!getLogicTile(tile.x, tile.y))
                     graph.nodes.push(createLogicEdge(tile));
-                }
             }
         }
 
+        // connect all the logic nodes
         for (const [_, logicTile] of Object.entries(logicTiles)) {
             if (!logicTile) continue;
             const connections = logicTile.tile.getConnections();
@@ -124,19 +126,33 @@ export default class Graph {
                         connectionsTemplate[connectionOffset.side] ===
                         ConnectionType.INPUT
                     ) {
-                        node.inputs.add(connectedTile.node);
-                        connectedTile.node.outputs.add(node);
+                        node.connectFrom(connectedTile.node);
                     } else if (
                         connectionsTemplate[connectionOffset.side] ===
                         ConnectionType.OUTPUT
                     ) {
-                        connectedTile.node.inputs.add(node);
-                        node.outputs.add(connectedTile.node);
+                        node.connectTo(connectedTile.node);
                     }
                 }
             }
         }
 
+        // simply OR nodes with singular inputs and outputs
+        for (let i = 0; i < graph.nodes.length; i++) {
+            const node = graph.nodes[i];
+            if (node.name === "Or Wire") {
+                if (node.inputs.size === 1 && node.outputs.size === 1) {
+                    const input = [...node.inputs][0];
+                    const output = [...node.outputs][0];
+                    input.connectTo(output);
+                    input.locations.push(...node.locations);
+
+                    // remove the node
+                    graph.nodes.splice(i, 1);
+                    i--;
+                }
+            }
+        }
         return graph;
     }
 }

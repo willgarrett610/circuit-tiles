@@ -30,7 +30,6 @@ export default class ChipInputTile extends GraphicsTile {
             [new CircuitLocation("global", this.x, this.y)],
             this
         );
-        logicNode.operation = (input) => !input;
         logicNode.state = this.signalActive;
         return logicNode;
     }
