@@ -10,8 +10,8 @@ export default class DiodeTile extends GraphicsTile {
     label: string = "Diode";
 
     connectionTemplate = {
-        up: ConnectionType.INPUT,
-        down: ConnectionType.OUTPUT,
+        up: ConnectionType.OUTPUT,
+        down: ConnectionType.INPUT,
         left: ConnectionType.BLOCKED,
         right: ConnectionType.BLOCKED,
     };

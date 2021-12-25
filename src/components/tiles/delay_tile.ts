@@ -11,8 +11,8 @@ export default class DelayTile extends GraphicsTile {
     label: string = "Delay";
 
     connectionTemplate = {
-        up: ConnectionType.INPUT,
-        down: ConnectionType.OUTPUT,
+        up: ConnectionType.OUTPUT,
+        down: ConnectionType.INPUT,
         left: ConnectionType.BLOCKED,
         right: ConnectionType.BLOCKED,
     };
