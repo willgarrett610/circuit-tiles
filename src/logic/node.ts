@@ -1,29 +1,32 @@
 import { Tile } from "../components/tiles/tile";
 import CircuitLocation from "./circuit_location";
-import LogicEdge from "./edge";
 
 /**
  * node for logic graph
  */
 export default class LogicNode {
     name = "";
-    inputEdge: LogicEdge | undefined;
-    outputEdge: LogicEdge | undefined;
+    inputs: Set<LogicNode> = new Set();
+    outputs: Set<LogicNode> = new Set();
     originTile: Tile | undefined;
     state: boolean = false;
-    location: CircuitLocation;
+    locations: CircuitLocation[];
     operation: (input: boolean) => boolean = (input) => input;
 
     /**
      * constructs logic node
      *
      * @param name name of the node
-     * @param location location of tile
+     * @param locations locations of tile
      * @param originTile tile of origin
      */
-    constructor(name: string, location: CircuitLocation, originTile?: Tile) {
+    constructor(
+        name: string,
+        locations: CircuitLocation[] = [],
+        originTile?: Tile
+    ) {
         this.name = name;
-        this.location = location;
+        this.locations = locations;
         this.originTile = originTile;
     }
 }

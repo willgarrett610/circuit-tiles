@@ -16,7 +16,7 @@ export abstract class Tile {
 
     copyProps = ["connections", "label", "x", "y", "direction", "signalActive"];
     isNode = false;
-    isEdge = false;
+    isWire = false;
 
     protected connections: {
         up: boolean;

@@ -2,6 +2,7 @@
  * configuration for the application
  */
 const config = {
+    debugMode: true,
     colors: {
         background: 0x333333,
         highlightTile: 0xcccccc,

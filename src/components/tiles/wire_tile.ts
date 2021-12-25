@@ -8,7 +8,7 @@ export default class WireTile extends GraphicsTile {
     type = WireTile;
     label = "Wire";
 
-    isEdge = true;
+    isWire = true;
 
     connectionTemplate = {
         up: ConnectionType.BOTH,

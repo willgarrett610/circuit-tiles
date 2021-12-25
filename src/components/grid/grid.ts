@@ -148,7 +148,7 @@ export default class Grid extends PIXI.Container {
                     ConnectionType.BLOCKED &&
                 prevTile.getConnectionTemplate()[oppositeDirection] !==
                     ConnectionType.BLOCKED &&
-                (forced || newTile.isEdge || prevTile.isEdge);
+                (forced || newTile.isWire || prevTile.isWire);
 
             if (!prevTile.getConnections()[oppositeDirection] && canConnect) {
                 this.tempHistory.push({
@@ -611,6 +611,7 @@ export default class Grid extends PIXI.Container {
     };
 
     prevHighlightTileGraphic: PIXI.Container | undefined;
+    locationText = new PIXI.Text("");
 
     updateHighlightTile = () => {
         const gridScreenPos = this.screenToGrid(...this.mousePos, true, true);
@@ -645,6 +646,13 @@ export default class Grid extends PIXI.Container {
             this.size,
             this.size
         );
+
+        if (config.debugMode) {
+            this.addChild(this.locationText);
+            this.locationText.zIndex = 201;
+            this.locationText.text = locationToTuple(gridPos).join();
+            this.locationText.position.set(gridScreenPos.x, gridScreenPos.y);
+        }
     };
 
     click = (event: PIXI.interaction.InteractionEvent) => {

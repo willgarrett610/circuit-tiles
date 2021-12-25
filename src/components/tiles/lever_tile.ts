@@ -28,7 +28,7 @@ export default class LeverTile extends GraphicsTile {
     toNode(): LogicNode {
         const logicNode = new LogicNode(
             this.label,
-            new CircuitLocation("global", this.x, this.y),
+            [new CircuitLocation("global", this.x, this.y)],
             this
         );
         logicNode.operation = (input) => input;

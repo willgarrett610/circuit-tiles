@@ -1,20 +1,12 @@
 import { ConnectionType, Tile } from "../components/tiles/tile";
 import CircuitLocation from "./circuit_location";
-import LogicEdge from "./edge";
 import LogicNode from "./node";
 
 /**
  * Graph to hold logic nodes.
  */
 export default class Graph {
-    nodes: LogicNode[];
-    edges: LogicEdge[];
-
-    /** constructs the graph */
-    constructor() {
-        this.nodes = [];
-        this.edges = [];
-    }
+    nodes: LogicNode[] = []; // consider changing to a map where the key is the tile
 
     /**
      * Generate graph from a grid
@@ -30,7 +22,7 @@ export default class Graph {
         const graph = new Graph();
         type LogicTile = {
             tile: Tile;
-            payload: LogicNode | LogicEdge | undefined;
+            node: LogicNode;
         };
         const logicTiles: { [key: string]: LogicTile | undefined } = {};
 
@@ -43,15 +35,15 @@ export default class Graph {
         };
 
         const createLogicEdge = (initialTile: Tile) => {
-            const logicEdge = new LogicEdge();
+            const logicEdge = new LogicNode("Or Wire");
 
             const findEdge = (tile: Tile): CircuitLocation[] => {
-                if (!tile.isEdge) return [];
+                if (!tile.isWire) return [];
                 const edgeLocations = [
                     new CircuitLocation("global", tile.x, tile.y),
                 ];
 
-                setLogicTile(tile.x, tile.y, { tile, payload: logicEdge });
+                setLogicTile(tile.x, tile.y, { tile, node: logicEdge });
 
                 const connections = tile.getConnections();
                 const connectionOffsets: {
@@ -91,15 +83,14 @@ export default class Graph {
         for (const [_, tile] of Object.entries(tiles)) {
             if (!tile) continue;
             if (tile.isNode && tile.toNode) {
+                // handle chip input / output tiles such that it leads to the chip's corresponding logic node
                 const node = tile.toNode();
                 graph.nodes.push(node);
-                setLogicTile(tile.x, tile.y, { tile, payload: node });
-            } else if (tile.isEdge) {
+                setLogicTile(tile.x, tile.y, { tile, node: node });
+            } else if (tile.isWire) {
                 if (!getLogicTile(tile.x, tile.y)) {
-                    graph.edges.push(createLogicEdge(tile));
+                    graph.nodes.push(createLogicEdge(tile));
                 }
-            } else {
-                // nested in a chip
             }
         }
 
@@ -119,7 +110,7 @@ export default class Graph {
             ];
 
             if (logicTile.tile.isNode) {
-                const node = logicTile.payload as LogicNode;
+                const node = logicTile.node;
 
                 for (const connectionOffset of connectionOffsets) {
                     if (!connections[connectionOffset.side]) continue;
@@ -128,33 +119,19 @@ export default class Graph {
                         logicTile.tile.y + connectionOffset.offset[1]
                     );
                     if (!connectedTile) continue;
-                    let edge: LogicEdge | undefined;
-                    if (
-                        connectedTile.tile.isNode &&
-                        !(connectedTile.payload as LogicNode).inputEdge &&
-                        !(connectedTile.payload as LogicNode).outputEdge
-                    ) {
-                        edge = new LogicEdge();
-                        graph.edges.push(edge);
-                    }
-
-                    if (connectedTile.tile.isEdge)
-                        edge = connectedTile.payload as LogicEdge;
-
-                    if (!edge) continue;
 
                     if (
                         connectionsTemplate[connectionOffset.side] ===
                         ConnectionType.INPUT
                     ) {
-                        node.inputEdge = edge;
-                        edge.outputs.push(node);
+                        node.inputs.add(connectedTile.node);
+                        connectedTile.node.outputs.add(node);
                     } else if (
                         connectionsTemplate[connectionOffset.side] ===
                         ConnectionType.OUTPUT
                     ) {
-                        edge.inputs.push(node);
-                        node.outputEdge = edge;
+                        connectedTile.node.inputs.add(node);
+                        node.outputs.add(connectedTile.node);
                     }
                 }
             }
