@@ -54,4 +54,18 @@ export class Chip {
     deleteTile(x: number, y: number) {
         delete this.tiles[`${x},${y}`];
     }
+
+    /**
+     * Save input and output tiles
+     */
+    finishEditing() {
+        for (const [_, tile] of Object.entries(this.tiles)) {
+            if (tile instanceof ChipInputTile) {
+                // TODO get actual names
+                this.inputTiles.push({ name: "", tile: tile });
+            } else if (tile instanceof ChipOutputTile) {
+                this.outputTiles.push({ name: "", tile: tile });
+            }
+        }
+    }
 }

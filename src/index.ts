@@ -13,7 +13,9 @@ PIXI.utils.skipHello();
  * Setups up the application
  */
 const main = async () => {
-    const app = new PIXI.Application();
+    const app = new PIXI.Application({
+        antialias: true,
+    });
 
     // Set up DOM settings for full screen
 

@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import state, { setState, subscribe } from "../../state";
+import state, { subscribe } from "../../state";
 import { onKeyDown, onResize, onScroll } from "../../utils";
 import { Chip } from "../chip/chip";
 import Grid from "./grid";
@@ -38,9 +38,9 @@ export default class GridManager extends PIXI.Container {
         subscribe(["editingChip"], (e) => {
             if (e.value) this.loadChip(e.value);
         });
-        // subscribe(["chipEditor"], (e) => {
-
-        // });
+        subscribe(["chipEditor"], (e) => {
+            this.setInChipGrid(e.value);
+        });
     }
 
     /**
@@ -49,12 +49,12 @@ export default class GridManager extends PIXI.Container {
      * @param val chip grid state
      */
     setInChipGrid(val: boolean) {
-        setState({ chipEditor: val });
         this.inChipGrid = val;
         this.removeChildren();
         if (this.inChipGrid) {
             this.addChild(this.chipGrid);
         } else {
+            state.editingChip?.finishEditing();
             this.addChild(this.mainGrid);
         }
     }

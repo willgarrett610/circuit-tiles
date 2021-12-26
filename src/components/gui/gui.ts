@@ -1,6 +1,12 @@
 import * as PIXI from "pixi.js";
 
-import { dimensions, getCreateChipInput, onResize } from "../../utils";
+import {
+    dimensions,
+    generateRoundedRectContainer,
+    getCreateChipInput,
+    onResize,
+    width,
+} from "../../utils";
 import GUIWindow from "./component/gui_window";
 import getTileTypes from "../tiles/tile_types";
 import ButtonGroup from "./component/button_group";
@@ -114,6 +120,133 @@ const createToolSelector = (onSelectionChange: (i: number) => void) => {
     return selector;
 };
 
+const createGridModeIndicator = () => {
+    const gridModeIndicator = new GUIWindow(
+        width() / 2 - config.chipModeIndicator.width / 2,
+        config.menubarSize,
+        config.chipModeIndicator.width,
+        config.chipModeIndicator.height
+    );
+    gridModeIndicator.visible = false;
+
+    subscribe(["chipEditor"], (e) => {
+        gridModeIndicator.visible = e.value;
+    });
+
+    gridModeIndicator.backgroundRect.alpha = 0;
+
+    const defaultContainer = new PIXI.Container();
+
+    const mainBackground = generateRoundedRectContainer(
+        0,
+        0,
+        gridModeIndicator.width,
+        gridModeIndicator.height,
+        config.colors.chipModeIndicator,
+        {
+            topLeft: 0,
+            topRight: 0,
+            botRight: 5,
+            botLeft: 5,
+        }
+    );
+
+    defaultContainer.addChild(mainBackground);
+
+    const gridModeBoldText = new PIXI.Text("EDITING ", {
+        fontFamily: "Arial",
+        fontSize: config.chipModeIndicator.textSize,
+        fill: 0,
+        fontWeight: "bold",
+    });
+
+    const gridModeText = new PIXI.Text("", {
+        fontFamily: "Arial",
+        fontSize: config.chipModeIndicator.textSize,
+        fill: 0,
+    });
+
+    const textContainer = new PIXI.Container();
+
+    subscribe(["editingChip"], (e) => {
+        const chip = e.value;
+        gridModeText.text = chip.name;
+
+        if (chip.name.length > 10) {
+            gridModeText.text = chip.name.slice(0, 10) + "...";
+        }
+
+        textContainer.x =
+            (gridModeIndicator.width - config.chipModeIndicator.closeBtnSize) /
+                2 -
+            textContainer.width / 2;
+    });
+
+    textContainer.addChild(gridModeBoldText);
+
+    gridModeText.x = gridModeBoldText.x + gridModeBoldText.width;
+
+    textContainer.addChild(gridModeText);
+
+    textContainer.y = (gridModeIndicator.height - textContainer.height) / 2;
+
+    textContainer.x =
+        (config.chipModeIndicator.width -
+            config.chipModeIndicator.closeBtnSize) /
+            2 -
+        textContainer.width / 2;
+
+    defaultContainer.addChild(textContainer);
+
+    const closeBtn = new GUIComponent(
+        gridModeIndicator.width - config.chipModeIndicator.closeBtnSize,
+        0,
+        config.chipModeIndicator.closeBtnSize,
+        gridModeIndicator.height,
+        0
+    );
+
+    closeBtn.onClick = () => {
+        console.log(state.editingChip);
+        setState({ chipEditor: false });
+    };
+
+    closeBtn.backgroundSprite.alpha = 0;
+
+    const closeBtnContainer = new PIXI.Container();
+
+    const closeBackground = generateRoundedRectContainer(
+        0,
+        0,
+        closeBtn.width,
+        closeBtn.height,
+        config.colors.chipModeIndicatorClose,
+        { botRight: 5 }
+    );
+
+    closeBtnContainer.addChild(closeBackground);
+
+    const closeBtnText = new PIXI.Text("Exit", {
+        fontFamily: "Arial",
+        fontSize: config.chipModeIndicator.textSize,
+        fill: 0,
+        fontWeight: "bold",
+    });
+
+    closeBtnText.y = (closeBtn.height - closeBtnText.height) / 2;
+    closeBtnText.x = (closeBtn.width - closeBtnText.width) / 2;
+
+    closeBtnContainer.addChild(closeBtnText);
+
+    closeBtn.setDefaultContainer(closeBtnContainer);
+
+    defaultContainer.addChild(closeBtn);
+
+    gridModeIndicator.addChild(defaultContainer);
+
+    return gridModeIndicator;
+};
+
 /**
  * Sets up application GUI
  *
@@ -134,6 +267,12 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
         config.menubarSize,
         config.colors.menu
     );
+
+    /*
+    GRID MODE INDICATOR
+    */
+
+    const gridModeIndicator = createGridModeIndicator();
 
     /*
     TILE SELECTION
@@ -211,8 +350,7 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
                             setStateProp("chips", (chips) => {
                                 chips.push(chip);
                             });
-                            setState({ editingChip: chip });
-                            gridManager.setInChipGrid(true);
+                            setState({ editingChip: chip, chipEditor: true });
                         });
                     },
                 };
@@ -281,6 +419,8 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
 
     app.stage.addChild(menuBar);
 
+    app.stage.addChild(gridModeIndicator);
+
     onResize(() => {
         const selectorHeights = dimensions()[1] - config.menubarSize;
         app.renderer.resize(...dimensions());
@@ -292,6 +432,7 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
             toolSelector.width,
             dimensions()[1] - config.menubarSize
         );
+        gridModeIndicator.x = width() / 2 - config.chipModeIndicator.width / 2;
     });
 };
 
