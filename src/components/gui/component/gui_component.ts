@@ -103,8 +103,8 @@ export class GUIComponent extends PIXI.Container {
             }
         });
 
-        subscribe(["interactive"], (e) => {
-            this.interactive = e.value;
+        subscribe("interactive", (value) => {
+            this.interactive = value;
         });
     }
 

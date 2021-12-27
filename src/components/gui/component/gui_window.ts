@@ -130,8 +130,8 @@ export default class GUIWindow extends PIXI.Container {
             }
         });
 
-        subscribe(["interactive"], (e) => {
-            this.interactive = e.value;
+        subscribe("interactive", (value) => {
+            this.interactive = value;
         });
 
         // this.draw();

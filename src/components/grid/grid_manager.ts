@@ -35,11 +35,11 @@ export default class GridManager extends PIXI.Container {
             if (grid.interactive) grid.keyDown(e);
         });
 
-        subscribe(["editingChip"], (e) => {
-            if (e.value) this.loadChip(e.value);
+        subscribe("editingChip", (value) => {
+            if (value) this.loadChip(value);
         });
-        subscribe(["chipEditor"], (e) => {
-            this.setInChipGrid(e.value);
+        subscribe("chipEditor", (value) => {
+            this.setInChipGrid(value);
         });
     }
 

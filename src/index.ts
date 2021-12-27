@@ -90,8 +90,8 @@ const main = async () => {
 
     const chipCreationForm = document.getElementById("chip_creation");
     if (chipCreationForm) {
-        subscribe(["chipCreation"], (e) => {
-            if (e.value.open) {
+        subscribe("chipCreation", (value) => {
+            if (value.open) {
                 nameInput.value = "";
                 hueInput.value = "0";
                 if (huePreview)

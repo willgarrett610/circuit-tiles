@@ -80,8 +80,8 @@ export default class Grid extends PIXI.Container {
 
         this.on("mousemove", this.mouseMove);
 
-        subscribe(["interactive"], (e) => {
-            this.interactive = e.value;
+        subscribe("interactive", (value) => {
+            this.interactive = value;
         });
     }
 

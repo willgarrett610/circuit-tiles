@@ -112,9 +112,9 @@ const createToolSelector = (onSelectionChange: (i: number) => void) => {
 
     btnGroup.setSelected(state.editMode);
 
-    subscribe(["editMode"], (e) => {
-        if (e.value === e.prevValue) return;
-        btnGroup.setSelected(e.value);
+    subscribe("editMode", (value, prevValue) => {
+        if (value === prevValue) return;
+        btnGroup.setSelected(value);
     });
 
     return selector;
@@ -129,8 +129,8 @@ const createGridModeIndicator = () => {
     );
     gridModeIndicator.visible = false;
 
-    subscribe(["chipEditor"], (e) => {
-        gridModeIndicator.visible = e.value;
+    subscribe("chipEditor", (value) => {
+        gridModeIndicator.visible = value;
     });
 
     gridModeIndicator.backgroundRect.alpha = 0;
@@ -168,8 +168,13 @@ const createGridModeIndicator = () => {
 
     const textContainer = new PIXI.Container();
 
-    subscribe(["editingChip"], (e) => {
-        const chip = e.value;
+    subscribe("editingChip", (value) => {
+        const chip = value;
+        if (!chip) {
+            console.error("No chip selected");
+            return;
+        }
+
         gridModeText.text = chip.name;
 
         if (chip.name.length > 10) {
@@ -309,7 +314,7 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
     );
     tileSelector.visible = false;
 
-    subscribe(["chipEditor"], () => {
+    subscribe("chipEditor", () => {
         gridManager.getGrid().selectedTileType = -1;
         tileSelector.generateComponents();
     });
@@ -386,7 +391,7 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
     );
     chipSelector.visible = false;
 
-    subscribe(["chips"], () => {
+    subscribe("chips", () => {
         chipSelector.generateComponents();
     });
 

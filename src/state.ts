@@ -35,7 +35,13 @@ interface StateChangeEvent {
     value: any;
 }
 
+interface SpecificStateCallback<T extends keyof State> {
+    name: T;
+    callback: (value: State[T], prevValue: State[T] | undefined) => void;
+}
+
 const callbacks: Array<StateCallback> = [];
+const specificCallbacks: SpecificStateCallback<keyof State>[] = [];
 
 /**
  * Subscribe to the changing of state variables
@@ -43,11 +49,24 @@ const callbacks: Array<StateCallback> = [];
  * @param names The names of the states to subscribe to
  * @param callback Function to be called when the state is changed
  */
-export function subscribe(
+export function multiSubscribe(
     names: Array<keyof State>,
     callback: (event: StateChangeEvent) => void
 ) {
     callbacks.push({ names, callback });
+}
+
+/**
+ * Subscribe to the changing of a specific state variable
+ *
+ * @param name The name of the state to subscribe to
+ * @param callback Function to be called when the state is changed
+ */
+export function subscribe<T extends keyof State>(
+    name: T,
+    callback: (value: State[T], prevValue: State[T]) => void
+) {
+    specificCallbacks.push({ name, callback: callback as any });
 }
 
 /**
@@ -65,6 +84,12 @@ export function setStateByName<T extends keyof State>(
     for (const callback of callbacks) {
         if (callback.names.includes(name)) {
             callback.callback({ name, prevValue, value });
+        }
+    }
+
+    for (const callback of specificCallbacks) {
+        if (callback.name === name) {
+            callback.callback(value, prevValue);
         }
     }
 }
@@ -101,8 +126,20 @@ export function setStateProp<T extends keyof State>(
             callback.callback({ name, prevValue: undefined, value });
         }
     }
+
+    for (const callback of specificCallbacks) {
+        if (callback.name === name) {
+            callback.callback(value, undefined);
+        }
+    }
 }
 
 export default state;
 
-(window as any).stateHandler = { state, setState, setStateByName, subscribe };
+(window as any).stateHandler = {
+    state,
+    setState,
+    setStateByName,
+    multiSubscribe,
+    subscribe,
+};
