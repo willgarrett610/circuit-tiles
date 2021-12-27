@@ -69,7 +69,7 @@ pub fn compute_logic(nodes_data: Vec<i32>) -> Result<js_sys::Array, JsValue> {
         }
         nodes.push(node);
     }
-    console::log_2(&"index_map: ".into(), &JsValue::from("bruhg"));
+    // console::log_2(&"index_map: ".into(), &JsValue::from("bruh"));
 
     Ok(arr)
 }
