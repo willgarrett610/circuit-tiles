@@ -262,12 +262,17 @@ export default class Grid extends PIXI.Container {
 
         const tileObj = new tile(x, y);
         this.setTile(x, y, tileObj);
+
         const tileGraphics: PIXI.Container = tileObj.getContainer(this.size);
         this.addChild(tileGraphics);
 
         this.connectTiles(tileObj, prevTile, direction, false);
 
         this.handleForceConnection(tileObj);
+
+        if (state.chipEditor && state.editingChip) {
+            state.editingChip.tileAdded(tileObj);
+        }
 
         return tileObj;
     }

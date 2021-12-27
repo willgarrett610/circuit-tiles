@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Chip } from "./components/chip/chip";
+import ChipGridMode from "./utils/chip_grid_mode";
 import { EditMode } from "./utils/edit_mode";
 
 interface State {
@@ -9,6 +10,7 @@ interface State {
     interactive: boolean;
     chipCreation: { open: boolean; nameValue: string; colorValue: number };
     editingChip: Chip | undefined;
+    chipGridMode: ChipGridMode;
 }
 
 const state: State = {
@@ -22,6 +24,7 @@ const state: State = {
         colorValue: 0x993333,
     },
     editingChip: undefined,
+    chipGridMode: ChipGridMode.EDITING,
 };
 
 interface StateCallback {

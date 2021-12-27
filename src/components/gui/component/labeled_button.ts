@@ -50,10 +50,10 @@ export class LabeledButton extends GUIComponent {
 
         switch (labelType) {
             case LabelType.ABOVE:
-                this.textObj.y = y - margin - fontSize;
+                this.textObj.y = -margin - fontSize;
                 break;
             case LabelType.INSIDE:
-                this.textObj.y = y + margin;
+                this.textObj.y = margin;
                 break;
             case LabelType.BELOW:
                 this.textObj.y = height + margin;

@@ -19,6 +19,7 @@ import { getSprite } from "../sprites/sprite_loader";
 import state, { setState, setStateProp, subscribe } from "../../state";
 import { EditMode } from "../../utils/edit_mode";
 import SelectorMenu from "./component/selector_menu";
+import ChipGridMode from "../../utils/chip_grid_mode";
 
 const createToolBtn = (spriteKey: string): GUIComponent => {
     const toolHover = new PIXI.Graphics();
@@ -160,6 +161,28 @@ const createGridModeIndicator = () => {
         fontWeight: "bold",
     });
 
+    subscribe(["chipGridMode"], (e) => {
+        let text = "";
+        switch (e.value) {
+            case ChipGridMode.EDITING:
+                text = "EDITING ";
+                break;
+            case ChipGridMode.STRUCTURING:
+                text = "STRUCTURING ";
+                break;
+            case ChipGridMode.VIEWING:
+                text = "VIEWING ";
+                break;
+        }
+        gridModeBoldText.text = text;
+        gridModeText.x = gridModeBoldText.x + gridModeBoldText.width;
+        textContainer.x =
+            (config.chipModeIndicator.width -
+                config.chipModeIndicator.closeBtnSize) /
+                2 -
+            textContainer.width / 2;
+    });
+
     const gridModeText = new PIXI.Text("", {
         fontFamily: "Arial",
         fontSize: config.chipModeIndicator.textSize,
@@ -272,6 +295,87 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
         config.menubarSize,
         config.colors.menu
     );
+
+    const chipGridModeText = new PIXI.Text("Switch to structure", {
+        fontFamily: "Arial",
+        fontSize: config.chipGridMode.textSize,
+        fill: 0xffffff,
+    });
+
+    const chipGridModeBtn = new GUIComponent(
+        width() - chipGridModeText.width - 35,
+        5,
+        chipGridModeText.width + 30,
+        config.chipGridMode.height,
+        config.colors.chipGridMode
+    );
+
+    chipGridModeText.y = (chipGridModeBtn.height - chipGridModeText.height) / 2;
+    chipGridModeText.x = chipGridModeBtn.width - chipGridModeText.width - 5;
+
+    chipGridModeBtn.backgroundSprite.alpha = 0;
+
+    const chipGridModeBtnContainer = generateRoundedRectContainer(
+        0,
+        0,
+        chipGridModeBtn.width,
+        config.chipGridMode.height,
+        config.colors.chipGridMode,
+        { topLeft: 5, topRight: 5, botRight: 5, botLeft: 5 }
+    );
+
+    chipGridModeBtn.setDefaultContainer(chipGridModeBtnContainer);
+
+    subscribe(["chipGridMode"], (e) => {
+        let text = "Switch to ";
+        if (e.value === ChipGridMode.EDITING) {
+            text += "structure";
+        } else {
+            text += "edit";
+        }
+        chipGridModeText.text = text;
+        chipGridModeBtn.defaultContainer?.removeChildren();
+        chipGridModeBtn.setDefaultContainer(
+            generateRoundedRectContainer(
+                0,
+                0,
+                chipGridModeText.width + 30,
+                config.chipGridMode.height,
+                config.colors.chipGridMode,
+                { topLeft: 5, topRight: 5, botRight: 5, botLeft: 5 }
+            )
+        );
+        chipGridModeBtn.defaultContainer?.addChild(chipGridModeText);
+        chipGridModeBtn.defaultContainer?.addChild(swapSprite);
+        chipGridModeBtn.x =
+            width() -
+            (chipGridModeBtn.defaultContainer as PIXI.Container).width -
+            5;
+    });
+
+    const swapSprite = getSprite("swap");
+    swapSprite.width = config.chipGridMode.height;
+    swapSprite.height = config.chipGridMode.height;
+
+    chipGridModeBtnContainer.addChild(chipGridModeText);
+
+    chipGridModeBtnContainer.addChild(swapSprite);
+
+    chipGridModeBtn.visible = false;
+
+    chipGridModeBtn.onClick = () => {
+        if (state.chipGridMode === ChipGridMode.EDITING) {
+            setState({ chipGridMode: ChipGridMode.STRUCTURING });
+        } else if (state.chipGridMode === ChipGridMode.STRUCTURING) {
+            setState({ chipGridMode: ChipGridMode.EDITING });
+        }
+    };
+
+    subscribe(["chipEditor"], (e) => {
+        chipGridModeBtn.visible = e.value;
+    });
+
+    menuBar.addChild(chipGridModeBtn);
 
     /*
     GRID MODE INDICATOR
@@ -438,6 +542,10 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
             dimensions()[1] - config.menubarSize
         );
         gridModeIndicator.x = width() / 2 - config.chipModeIndicator.width / 2;
+        chipGridModeBtn.x =
+            width() -
+            (chipGridModeBtn.defaultContainer as PIXI.Container).width -
+            5;
     });
 };
 

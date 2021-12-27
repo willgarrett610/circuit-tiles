@@ -12,6 +12,9 @@ export class Chip {
     inputTiles: { name: string; tile: ChipInputTile }[] = [];
     outputTiles: { name: string; tile: ChipOutputTile }[] = [];
 
+    inputIndex: number = 1;
+    outputIndex: number = 1;
+
     /**
      * Chip constructor
      *
@@ -53,6 +56,19 @@ export class Chip {
      */
     deleteTile(x: number, y: number) {
         delete this.tiles[`${x},${y}`];
+    }
+
+    /**
+     * Called after a tile is added to the chip
+     *
+     * @param tile Tile that was added
+     */
+    tileAdded(tile: Tile) {
+        if (tile instanceof ChipInputTile) {
+            tile.id = "IN" + this.inputIndex++;
+        } else if (tile instanceof ChipOutputTile) {
+            tile.id = "OUT" + this.outputIndex++;
+        }
     }
 
     /**
