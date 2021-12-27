@@ -33,8 +33,8 @@ pub fn compute_logic(nodes_data: Vec<i32>) -> Result<js_sys::Array, JsValue> {
 
     for index_pair in index_map {
         let mut node = Node {
-            arr_index: index_pair.0,
-            index: index_pair.1,
+            index: index_pair.0,
+            arr_index: index_pair.1,
             tile_type: nodes_data[index_pair.0],
             state: nodes_data[index_pair.0 + 1],
             inputs: Vec::new(),
