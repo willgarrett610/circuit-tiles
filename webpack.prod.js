@@ -16,17 +16,13 @@ module.exports = {
                 use: "ts-loader",
                 exclude: /node_modules/,
             },
-            {
-                test: /\.wasm$/,
-                type: "webassembly/experimental",
-            },
         ],
+    },
+    experiments: {
+        asyncWebAssembly: true,
     },
     resolve: {
         extensions: [".tsx", ".ts", ".js", ".wasm"],
-        alias: {
-            "@": path.resolve(__dirname, "src/"),
-        },
     },
     output: {
         filename: "bundle.js",
