@@ -21,6 +21,7 @@ const config = {
         textFieldBackground: 0xcccccc,
         chipModeIndicator: 0x119911,
         chipModeIndicatorClose: 0xbb3333,
+        chipGridMode: 0x444444,
     },
     zoomCoeff: 1.15,
     lineColor: 0x222222,
@@ -34,19 +35,19 @@ const config = {
     },
     menubarSize: 35,
     chipModeIndicator: {
-        width: 200,
+        width: 250,
         height: 20,
         textSize: 13,
         closeBtnSize: 50,
     },
     selectorWidth: 150,
-    formPromt: {
-        headerFontSize: 15,
-        headerHeight: 25,
-    },
     chipCreationForm: {
         width: 250,
         height: 300,
+    },
+    chipGridMode: {
+        height: 25,
+        textSize: 13,
     },
 };
 

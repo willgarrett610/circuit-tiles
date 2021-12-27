@@ -10,6 +10,7 @@ const textureFiles = [
     ["pan", "./assets/sprites/pan.png"],
     ["add", "./assets/sprites/add.svg"],
     ["cursor", "./assets/sprites/cursor.png"],
+    ["swap", "./assets/sprites/swap.png"],
 ];
 
 const loadSprites = () => {

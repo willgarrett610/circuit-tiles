@@ -124,6 +124,8 @@ export class GUIComponent extends PIXI.Container {
                 return this.pressedContainer;
             case GUIComponentState.DISABLED:
                 return this.disabledContainer;
+            default:
+                return null;
         }
     }
 
@@ -136,8 +138,8 @@ export class GUIComponent extends PIXI.Container {
         const prevContainer = this.getContainer(this.state);
         this.state = state;
         const newContainer = this.getContainer(this.state);
-        if (newContainer) {
-            if (prevContainer) this.removeChild(prevContainer);
+        if (newContainer && prevContainer) {
+            this.removeChild(prevContainer);
             this.addChild(newContainer);
         }
         this.onStateChange?.(state);
