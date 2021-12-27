@@ -1,8 +1,78 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as PIXI from "pixi.js";
+
 import { Chip } from "../components/chip/chip";
 import { setState } from "../state";
+import { clamp } from "./math";
+
+/**
+ * Generate a pixi container with a recatangle that has the specified corner radii
+ *
+ * @param x X position
+ * @param y Y position
+ * @param w Width
+ * @param h Height
+ * @param color Color
+ * @param radius Radius for each corner
+ * @param radius.topLeft
+ * @param radius.topRight
+ * @param radius.botRight
+ * @param radius.botLeft
+ * @returns Pixi container
+ */
+export function generateRoundedRectContainer(
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    color: number,
+    { topLeft = 0, topRight = 0, botRight = 0, botLeft = 0 }
+): PIXI.Container {
+    const container = new PIXI.Container();
+    container.x = x;
+    container.y = y;
+
+    const max = Math.min(w, h);
+
+    topLeft = clamp(topLeft, 0, max / 2);
+    topRight = clamp(topRight, 0, max / 2);
+    botRight = clamp(botRight, 0, max / 2);
+    botLeft = clamp(botLeft, 0, max / 2);
+
+    const graphics = new PIXI.Graphics();
+
+    graphics.beginFill(color);
+
+    // Top left
+    graphics.drawCircle(topLeft, topLeft, topLeft);
+    graphics.drawRect(0, topLeft, w / 2, h / 2 - topLeft);
+    graphics.drawRect(topLeft, 0, w / 2 - topLeft, h / 2);
+
+    // Top right
+    graphics.drawCircle(w - topRight, topRight, topRight);
+    graphics.drawRect(w / 2, topRight, w / 2, h / 2 - topRight);
+    graphics.drawRect(w / 2, 0, w / 2 - topRight, h / 2);
+
+    // Bottom right
+    graphics.drawCircle(w - botRight, h - botRight, botRight);
+    graphics.drawRect(w / 2, h / 2, w / 2, h / 2 - botRight);
+    graphics.drawRect(w / 2, h / 2, w / 2 - botRight, h / 2);
+
+    // Bottom left
+    graphics.drawCircle(botLeft, h - botLeft, botLeft);
+    graphics.drawRect(0, h / 2, w / 2, h / 2 - botLeft);
+    graphics.drawRect(botLeft, h / 2, w / 2 - botLeft, h / 2);
+
+    graphics.endFill();
+
+    container.addChild(graphics);
+
+    container.width = w;
+    container.height = h;
+
+    return container;
+}
 
 /**
  * Open chip creation menu and return a promise that resolves when the menu is closed

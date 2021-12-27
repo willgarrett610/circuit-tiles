@@ -123,13 +123,19 @@ export default class SelectorMenu extends GUIWindow {
         this.btnGroup.selected = -1;
 
         while ((btnData = this.btnGenerator(i, this.tileSize)) !== null) {
+            let name = btnData.name;
+
+            if (name.length > 8) {
+                name = name.slice(0, 8) + "...";
+            }
+
             const tileBtn = new LabeledButton(
                 0,
                 0,
                 this.tileSize,
                 this.tileSize,
                 LabelType.BELOW,
-                btnData.name,
+                name,
                 config.tileSelector.textSize,
                 0x000000,
                 config.colors.tileBackground

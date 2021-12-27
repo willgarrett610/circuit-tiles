@@ -2,7 +2,7 @@
  * configuration for the application
  */
 const config = {
-    debugMode: true,
+    debugMode: false,
     colors: {
         background: 0x333333,
         highlightTile: 0xcccccc,
@@ -19,6 +19,8 @@ const config = {
         activeInput: 0x6e22d4,
         inactiveInput: 0x1c0738,
         textFieldBackground: 0xcccccc,
+        chipModeIndicator: 0x119911,
+        chipModeIndicatorClose: 0xbb3333,
     },
     zoomCoeff: 1.15,
     lineColor: 0x222222,
@@ -31,6 +33,12 @@ const config = {
         textSize: 13,
     },
     menubarSize: 35,
+    chipModeIndicator: {
+        width: 200,
+        height: 20,
+        textSize: 13,
+        closeBtnSize: 50,
+    },
     selectorWidth: 150,
     formPromt: {
         headerFontSize: 15,
