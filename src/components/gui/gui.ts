@@ -161,9 +161,9 @@ const createGridModeIndicator = () => {
         fontWeight: "bold",
     });
 
-    subscribe(["chipGridMode"], (e) => {
+    subscribe("chipGridMode", (value) => {
         let text = "";
-        switch (e.value) {
+        switch (value) {
             case ChipGridMode.EDITING:
                 text = "EDITING ";
                 break;
@@ -326,9 +326,9 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
 
     chipGridModeBtn.setDefaultContainer(chipGridModeBtnContainer);
 
-    subscribe(["chipGridMode"], (e) => {
+    subscribe("chipGridMode", (value) => {
         let text = "Switch to ";
-        if (e.value === ChipGridMode.EDITING) {
+        if (value === ChipGridMode.EDITING) {
             text += "structure";
         } else {
             text += "edit";
@@ -371,8 +371,8 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
         }
     };
 
-    subscribe(["chipEditor"], (e) => {
-        chipGridModeBtn.visible = e.value;
+    subscribe("chipEditor", (value) => {
+        chipGridModeBtn.visible = value;
     });
 
     menuBar.addChild(chipGridModeBtn);
