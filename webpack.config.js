@@ -16,18 +16,14 @@ module.exports = {
                 test: /\.ts$/,
                 use: "ts-loader",
                 exclude: /node_modules/,
-            },
-            {
-                test: /\.wasm$/,
-                type: "webassembly/experimental",
-            },
+            }
         ],
+    },
+    experiments: {
+        asyncWebAssembly: true,
     },
     resolve: {
         extensions: [".tsx", ".ts", ".js", ".wasm"],
-        alias: {
-            "@": path.resolve(__dirname, "src/"),
-        },
     },
     output: {
         filename: "bundle.js",
@@ -41,7 +37,9 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: "src/index.html",
         }),
-        new CopyPlugin([{ from: "assets", to: "assets" }]),
+        new CopyPlugin({
+            patterns: [{ from: "assets", to: "assets" }]
+        }),
         new WasmPackPlugin({
             crateDirectory: path.join(__dirname, "crate"),
             forceWatch: true,
@@ -50,9 +48,24 @@ module.exports = {
         })
     ],
     devServer: {
-        contentBase: path.join(__dirname, "dist"),
+        client: {
+            reconnect: true,
+            progress: true,
+            overlay: {
+                errors: true,
+                warnings: false,
+            },
+        },
+        // compress: true,
         port: 3000,
         hot: true,
-        writeToDisk: true,
+        devMiddleware: {
+            writeToDisk: true,
+
+        },
+        static: {
+            directory: path.resolve(__dirname, "dist"),
+            watch: true,
+        },
     },
 };
