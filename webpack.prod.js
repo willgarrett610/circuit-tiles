@@ -37,7 +37,9 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: "src/index.html",
         }),
-        new CopyPlugin([{ from: "assets", to: "assets" }]),
+        new CopyPlugin({
+            patterns: [{ from: "assets", to: "assets" }]
+        }),
         new WasmPackPlugin({
             crateDirectory: path.join(__dirname, "crate"),
         }),

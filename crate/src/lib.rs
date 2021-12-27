@@ -29,7 +29,6 @@ pub fn compute_logic(nodes_data: Vec<i32>) -> Result<js_sys::Array, JsValue> {
 
         i += (nodes_data[(i + 2) as usize] + nodes_data[(i + 3) as usize]) as usize + 4;
         map_index += 1;
-        i -= 1;
     }
 
     let mut nodes: Vec<Node> = Vec::new();
@@ -70,7 +69,7 @@ pub fn compute_logic(nodes_data: Vec<i32>) -> Result<js_sys::Array, JsValue> {
         }
         nodes.push(node);
     }
-    // console::log_2(&"index_map: ".into(), &JsValue::from("bruh"));
+    console::log_2(&"index_map: ".into(), &JsValue::from("bruhg"));
 
     Ok(arr)
 }

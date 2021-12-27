@@ -61,7 +61,6 @@ module.exports = {
         hot: true,
         devMiddleware: {
             writeToDisk: true,
-
         },
         static: {
             directory: path.resolve(__dirname, "dist"),
