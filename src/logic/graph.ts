@@ -1,4 +1,5 @@
 import { ConnectionType, Tile } from "../components/tiles/tile";
+import { entries } from "../utils";
 import CircuitLocation from "./circuit_location";
 import LogicNode from "./node";
 
@@ -156,5 +157,35 @@ export default class Graph {
             }
         }
         return graph;
+    }
+
+    /**
+     * converts all nodes into array readable by rust
+     *
+     * @returns nodes in integer array format
+     */
+    convertForRust() {
+        // type of node
+        // current state
+        // number of inputs
+        // number of outputs
+        // input indices
+        // output indices
+        const output = [];
+        for (const [node] of entries(this.nodes)) {
+            const nodeData = [
+                node.type,
+                node.state ? 1 : 0,
+                node.inputs.size,
+                node.outputs.size,
+                [...node.inputs].map((input) => this.nodes.indexOf(input)),
+                [...node.outputs].map((output) => this.nodes.indexOf(output)),
+            ];
+            output.push(nodeData);
+        }
+
+        console.log(output);
+
+        return Int32Array.from(output.flat(2));
     }
 }

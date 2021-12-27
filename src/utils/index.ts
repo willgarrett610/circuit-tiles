@@ -158,6 +158,16 @@ export function onResize(listener: (this: Window, ev: UIEvent) => any) {
 }
 
 /**
+ * Get entries of array
+ *
+ * @param input any array
+ * @returns entries of arrays with value and index as tuple
+ */
+export function entries<T>(input: T[]): [T, number][] {
+    return Object.entries(input).map(([key, value]) => [value, +key]);
+}
+
+/**
  * Sleeps for a given amount of time
  *
  * @param ms time to sleep in milliseconds

@@ -44,6 +44,8 @@ module.exports = {
         new CopyPlugin([{ from: "assets", to: "assets" }]),
         new WasmPackPlugin({
             crateDirectory: path.join(__dirname, "crate"),
+            forceWatch: true,
+            watchDirectories: [path.resolve(__dirname, "crate/src")],
         })
     ],
     devServer: {

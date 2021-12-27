@@ -10,6 +10,7 @@ export default class LogicNode {
     outputs: Set<LogicNode> = new Set();
     originTile: Tile | undefined;
     state: boolean = false;
+    type: number = 0;
     /** all the locations to set the signal active value on */
     locations: CircuitLocation[];
 
