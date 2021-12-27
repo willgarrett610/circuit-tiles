@@ -45,6 +45,7 @@ module.exports = {
         new WasmPackPlugin({
             crateDirectory: path.join(__dirname, "crate"),
             forceWatch: true,
+            forceMode: "development",
             watchDirectories: [path.resolve(__dirname, "crate/src")],
         })
     ],

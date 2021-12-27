@@ -10,6 +10,7 @@ crate-type = ["cdylib"]
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
+console_error_panic_hook = "0.1.6"
 js-sys = "0.3.51"
 
 [dependencies.web-sys]

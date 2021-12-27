@@ -1,3 +1,4 @@
+extern crate console_error_panic_hook;
 extern crate wasm_bindgen;
 
 use serde::{Deserialize, Serialize};
@@ -15,6 +16,7 @@ pub struct Node {
 
 #[wasm_bindgen]
 pub fn compute_logic(nodes_data: Vec<i32>) -> Result<js_sys::Array, JsValue> {
+    console_error_panic_hook::set_once();
     use web_sys::console;
     let arr = js_sys::Array::new();
 
@@ -27,6 +29,7 @@ pub fn compute_logic(nodes_data: Vec<i32>) -> Result<js_sys::Array, JsValue> {
 
         i += (nodes_data[(i + 2) as usize] + nodes_data[(i + 3) as usize]) as usize + 4;
         map_index += 1;
+        i -= 1;
     }
 
     let mut nodes: Vec<Node> = Vec::new();
