@@ -44,9 +44,13 @@ export default class GridManager extends PIXI.Container {
         subscribe("chipEditor", (value) => {
             this.setInChipGrid(value);
         });
-        subscribe("chipGridMode", () => {
-            this.setInChipGrid(true);
-        });
+        subscribe(
+            "chipGridMode",
+            () => {
+                this.setInChipGrid(true);
+            },
+            5
+        );
     }
 
     /**
@@ -68,6 +72,7 @@ export default class GridManager extends PIXI.Container {
             state.editingChip?.finishEditing();
             this.addChild(this.mainGrid);
         }
+        this.getGrid().generateTileGraphics();
     }
 
     /**
@@ -76,18 +81,14 @@ export default class GridManager extends PIXI.Container {
      * @param chip chip to load
      */
     loadChip(chip: Chip) {
+        this.removeChild(this.getGrid());
+        console.log("load");
         this.chipGrid = new Grid(100);
         this.chipGrid.tiles = chip.tiles;
-    }
-
-    /**
-     * Loads structure into the grid
-     *
-     * @param chip chip to add
-     */
-    loadStructure(chip: Chip) {
         this.structureGrid = new Grid(100);
         this.structureGrid.tiles = chip.structure;
+        this.addChild(this.getGrid());
+        this.getGrid().generateTileGraphics();
     }
 
     /**

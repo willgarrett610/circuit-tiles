@@ -8,15 +8,20 @@ import NotTile from "./not_tile";
 import { Tile } from "./tile";
 import WireTile from "./wire_tile";
 
+export interface TileType {
+    name: string;
+    tile: { new (x: number, y: number): Tile };
+}
+
 const tileTypes = [
-    WireTile,
-    LeverTile,
-    NotTile,
-    DiodeTile,
-    DelayTile,
-    ButtonTile,
-    ChipInputTile,
-    ChipOutputTile,
+    { name: "Wire", tile: WireTile },
+    { name: "Lever", tile: LeverTile },
+    { name: "Not Gate", tile: NotTile },
+    { name: "Diode", tile: DiodeTile },
+    { name: "Delay", tile: DelayTile },
+    { name: "Button", tile: ButtonTile },
+    { name: "Input", tile: ChipInputTile },
+    { name: "Output", tile: ChipOutputTile },
 ];
 
 /**
@@ -25,12 +30,10 @@ const tileTypes = [
  * @param chipTileIncluded whether to include chip tiles
  * @returns list of tile types
  */
-function getTileTypes(
-    chipTileIncluded = true
-): { new (x: number, y: number): Tile }[] {
+function getTileTypes(chipTileIncluded = true): TileType[] {
     return chipTileIncluded
         ? tileTypes
-        : tileTypes.filter((x) => x.chipTile === false);
+        : tileTypes.filter((x) => x.tile.chipTile === false);
 }
 
 export default getTileTypes;

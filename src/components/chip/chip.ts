@@ -1,3 +1,5 @@
+import state from "../../state";
+import ChipGridMode from "../../utils/chip_grid_mode";
 import ChipInputTile from "../tiles/chip_input_tile";
 import ChipOutputTile from "../tiles/chip_output_tile";
 import { Tile } from "../tiles/tile";
@@ -67,10 +69,16 @@ export class Chip {
      */
     tileAdded(tile: Tile) {
         console.log(tile);
-        if (tile instanceof ChipInputTile) {
-            tile.id = "IN" + this.inputIndex++;
-        } else if (tile instanceof ChipOutputTile) {
-            tile.id = "OUT" + this.outputIndex++;
+        if (tile instanceof ChipInputTile || tile instanceof ChipOutputTile) {
+            if (state.chipGridMode === ChipGridMode.STRUCTURING) {
+                tile.id = state.selectableTiles[state.selectedTileIndex].name;
+            } else {
+                if (tile instanceof ChipInputTile) {
+                    tile.id = "IN" + this.inputIndex++;
+                } else if (tile instanceof ChipOutputTile) {
+                    tile.id = "OUT" + this.outputIndex++;
+                }
+            }
         }
     }
 
@@ -78,12 +86,14 @@ export class Chip {
      * Save input and output tiles
      */
     finishEditing() {
+        this.inputTiles = [];
+        this.outputTiles = [];
         for (const [_, tile] of Object.entries(this.tiles)) {
             if (tile instanceof ChipInputTile) {
                 // TODO get actual names
-                this.inputTiles.push({ name: "", tile: tile });
+                this.inputTiles.push({ name: tile.id, tile: tile });
             } else if (tile instanceof ChipOutputTile) {
-                this.outputTiles.push({ name: "", tile: tile });
+                this.outputTiles.push({ name: tile.id, tile: tile });
             }
         }
     }

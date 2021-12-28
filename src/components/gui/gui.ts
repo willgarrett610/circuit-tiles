@@ -8,7 +8,7 @@ import {
     width,
 } from "../../utils";
 import GUIWindow from "./component/gui_window";
-import getTileTypes from "../tiles/tile_types";
+import getTileTypes, { TileType } from "../tiles/tile_types";
 import ButtonGroup from "./component/button_group";
 import LineWrapLayout from "./layout/line_wrap_layout";
 import config from "../../config";
@@ -24,7 +24,6 @@ import state, {
 import { EditMode } from "../../utils/edit_mode";
 import SelectorMenu from "./component/selector_menu";
 import ChipGridMode from "../../utils/chip_grid_mode";
-import { Tile } from "../tiles/tile";
 
 const createToolBtn = (spriteKey: string): GUIComponent => {
     const toolHover = new PIXI.Graphics();
@@ -398,42 +397,19 @@ const initGUI = (app: PIXI.Application) => {
         selectorHeights,
         "Tiles",
         (i, tileSize) => {
-            let tileType: { new (x: number, y: number): Tile } | undefined;
+            if (i >= state.selectableTiles.length) return null;
 
-            if (
-                state.chipEditor &&
-                state.chipGridMode === ChipGridMode.STRUCTURING
-            ) {
-                if (state.editingChip) {
-                    const selectableTiles = [
-                        ...state.editingChip.inputTiles,
-                        ...state.editingChip.outputTiles,
-                    ];
+            const tileType = state.selectableTiles[i].tile;
 
-                    console.log({ selectableTiles });
-
-                    if (i >= selectableTiles.length) return null;
-                    const selectedTile = selectableTiles[i];
-                    tileType = selectedTile.tile.type;
-                }
-            } else {
-                if (i >= getTileTypes(state.chipEditor).length) return null;
-                tileType = getTileTypes(state.chipEditor)[i];
-            }
-
-            if (!tileType) return null;
-
-            const tileOff = new tileType(0, 0);
             const tileOn = new tileType(0, 0);
+            const tileOff = new tileType(0, 0);
+
             tileOn.signalActive = true;
 
-            const defaultContainer = tileOff.getContainer(tileSize);
-            const hoverContainer = tileOn.getContainer(tileSize);
-
             return {
-                name: tileOff.label,
-                defaultContainer,
-                hoverContainer,
+                name: state.selectableTiles[i].name,
+                defaultContainer: tileOff.getContainer(tileSize),
+                hoverContainer: tileOn.getContainer(tileSize),
                 selectable: true,
             };
         },
@@ -443,10 +419,55 @@ const initGUI = (app: PIXI.Application) => {
     );
     tileSelector.visible = false;
 
-    multiSubscribe(["chipEditor", "chipGridMode"], () => {
+    multiSubscribe(["chipEditor", "chipGridMode", "editingChip"], () => {
+        setStateProp("selectableTiles", (value) => {
+            value.splice(0);
+            if (state.chipEditor) {
+                if (state.chipGridMode === ChipGridMode.EDITING) {
+                    for (const tileType of getTileTypes(true)) {
+                        value.push({ ...tileType });
+                    }
+                } else {
+                    // TODO Only display what hasn't been added to chip structure
+                    if (state.editingChip) {
+                        const selectableTiles: TileType[] = [
+                            ...state.editingChip.inputTiles,
+                            ...state.editingChip.outputTiles,
+                        ]
+                            .filter(
+                                (value) =>
+                                    state.editingChip &&
+                                    !Object.values(
+                                        state.editingChip.structure
+                                    ).find((x) => x?.id === value.name)
+                            )
+                            .map(({ name, tile }) => ({
+                                name,
+                                tile: tile.type,
+                            }));
+
+                        console.log(
+                            "s",
+                            Object.values(state.editingChip.structure)
+                        );
+
+                        value.push(...selectableTiles);
+                    }
+                }
+            } else {
+                for (const tileType of getTileTypes(false)) {
+                    value.push({ ...tileType });
+                }
+            }
+        });
+    });
+
+    subscribe("selectableTiles", () => {
         setState({ selectedTileIndex: -1 });
         tileSelector.generateComponents();
     });
+
+    setState({ chipEditor: false });
 
     /*
     CHIP SELECTION

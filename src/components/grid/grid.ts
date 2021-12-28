@@ -11,12 +11,12 @@ import { clamp } from "../../utils/math";
 import config from "../../config";
 import { ConnectionType, Tile } from "../tiles/tile";
 import { Direction, rotateClockWise } from "../../utils/directions";
-import getTileTypes from "../tiles/tile_types";
 import "../../utils/compute_logic";
 import { GridAction, Interaction } from "../../utils/action";
-import state, { setState, subscribe } from "../../state";
+import state, { publish, setState, subscribe } from "../../state";
 import { EditMode } from "../../utils/edit_mode";
 import Graph from "../../logic/graph";
+import ChipGridMode from "../../utils/chip_grid_mode";
 
 /** Grid class */
 export default class Grid extends PIXI.Container {
@@ -259,6 +259,7 @@ export default class Grid extends PIXI.Container {
         }
 
         const tileObj = new tile(x, y);
+
         this.setTile(x, y, tileObj);
 
         const tileGraphics: PIXI.Container = tileObj.getContainer(this.size);
@@ -271,6 +272,13 @@ export default class Grid extends PIXI.Container {
         if (state.chipEditor && state.editingChip) {
             state.editingChip.tileAdded(tileObj);
         }
+
+        if (
+            state.chipEditor &&
+            state.editingChip &&
+            state.chipGridMode === ChipGridMode.STRUCTURING
+        )
+            publish("editingChip");
 
         return tileObj;
     }
@@ -293,6 +301,12 @@ export default class Grid extends PIXI.Container {
         });
         this.removeChild(tile.getContainer(this.size));
         this.deleteTile(x, y);
+        if (
+            state.chipEditor &&
+            state.editingChip &&
+            state.chipGridMode === ChipGridMode.STRUCTURING
+        )
+            publish("editingChip");
         const removalSpots: {
             offset: number[];
             side: "up" | "right" | "down" | "left";
@@ -586,7 +600,7 @@ export default class Grid extends PIXI.Container {
 
                     const newTile: Tile | undefined = this.addTile(
                         ...locationToTuple(gridPoint),
-                        getTileTypes()[state.selectedTileIndex],
+                        state.selectableTiles[state.selectedTileIndex].tile,
                         prevTile,
                         gridPoint.direction
                     );
@@ -627,9 +641,9 @@ export default class Grid extends PIXI.Container {
             EditMode.TILE === state.editMode &&
             this.getTile(...locationToTuple(gridPos)) === undefined
         ) {
-            const tempTile = new (getTileTypes()[state.selectedTileIndex])(
-                ...locationToTuple(gridPos)
-            );
+            const tempTile = new state.selectableTiles[
+                state.selectedTileIndex
+            ].tile(...locationToTuple(gridPos));
             const tileGraphics: PIXI.Container = tempTile.getContainer(
                 this.size
             );
@@ -683,7 +697,7 @@ export default class Grid extends PIXI.Container {
                 this.currentInteraction = Interaction.PLACING;
                 this.addTile(
                     ...gridPoint,
-                    getTileTypes()[state.selectedTileIndex],
+                    state.selectableTiles[state.selectedTileIndex].tile,
                     undefined,
                     undefined
                 );
@@ -762,6 +776,7 @@ export default class Grid extends PIXI.Container {
 
     /** renders out grid */
     renderGrid() {
+        console.log("rendering grid");
         const width = dimensions()[0];
         const height = dimensions()[1];
         const tileXCount = Math.floor(width / this.size);
@@ -820,7 +835,29 @@ export default class Grid extends PIXI.Container {
             if (tile) tile.update(this.size);
     }
 
+    /** Removes all children that are tile containers */
+    removeTileGraphics() {
+        for (const child of this.children) {
+            if (child !== this.lineGraphics && child !== this.hlTile) {
+                this.removeChild(child);
+            }
+        }
+    }
+
+    /** Generates containers for each tile */
+    generateTileGraphics() {
+        for (const [_, tile] of Object.entries(this.tiles)) {
+            if (tile) {
+                const tileGraphics: PIXI.Container = tile.getContainer(
+                    this.size
+                );
+                this.addChild(tileGraphics);
+            }
+        }
+    }
+
     update = () => {
+        console.log(this);
         this.renderGrid();
         this.renderTiles();
         this.updateHighlightTile();

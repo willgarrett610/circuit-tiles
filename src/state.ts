@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Chip } from "./components/chip/chip";
+import { TileType } from "./components/tiles/tile_types";
 import ChipGridMode from "./utils/chip_grid_mode";
 import { EditMode } from "./utils/edit_mode";
 
@@ -12,6 +13,7 @@ interface State {
     editingChip: Chip | undefined;
     chipGridMode: ChipGridMode;
     selectedTileIndex: number;
+    selectableTiles: TileType[];
 }
 
 const state: State = {
@@ -27,11 +29,13 @@ const state: State = {
     editingChip: undefined,
     chipGridMode: ChipGridMode.EDITING,
     selectedTileIndex: -1,
+    selectableTiles: [],
 };
 
 interface StateCallback {
     names: Array<keyof State>;
     callback: (event: StateChangeEvent) => void;
+    priority: number;
 }
 
 interface StateChangeEvent {
@@ -43,6 +47,7 @@ interface StateChangeEvent {
 interface SpecificStateCallback<T extends keyof State> {
     name: T;
     callback: (value: State[T], prevValue: State[T] | undefined) => void;
+    priority: number;
 }
 
 const callbacks: Array<StateCallback> = [];
@@ -53,12 +58,14 @@ const specificCallbacks: SpecificStateCallback<keyof State>[] = [];
  *
  * @param names The names of the states to subscribe to
  * @param callback Function to be called when the state is changed
+ * @param priority The priority of the callback. Higher priority callbacks are called first
  */
 export function multiSubscribe(
     names: Array<keyof State>,
-    callback: (event: StateChangeEvent) => void
+    callback: (event: StateChangeEvent) => void,
+    priority: number = 0
 ) {
-    callbacks.push({ names, callback });
+    callbacks.push({ names, callback, priority });
 }
 
 /**
@@ -66,12 +73,14 @@ export function multiSubscribe(
  *
  * @param name The name of the state to subscribe to
  * @param callback Function to be called when the state is changed
+ * @param priority Priority of the callback. Higher priority callbacks are called first
  */
 export function subscribe<T extends keyof State>(
     name: T,
-    callback: (value: State[T], prevValue: State[T]) => void
+    callback: (value: State[T], prevValue: State[T]) => void,
+    priority = 0
 ) {
-    specificCallbacks.push({ name, callback: callback as any });
+    specificCallbacks.push({ name, callback: callback as any, priority });
 }
 
 /**
@@ -86,15 +95,25 @@ export function setStateByName<T extends keyof State>(
 ) {
     const prevValue = state[name];
     state[name] = value;
-    for (const callback of callbacks) {
-        if (callback.names.includes(name)) {
-            callback.callback({ name, prevValue, value });
-        }
-    }
 
-    for (const callback of specificCallbacks) {
-        if (callback.name === name) {
-            callback.callback(value, prevValue);
+    const allCallbacks: Array<
+        SpecificStateCallback<keyof State> | StateCallback
+    > = [];
+
+    allCallbacks.push(...specificCallbacks);
+    allCallbacks.push(...callbacks);
+
+    for (const callback of allCallbacks.sort(
+        (a, b) => b.priority - a.priority
+    )) {
+        if ("name" in callback) {
+            if (callback.name === name) {
+                callback.callback(value, prevValue);
+            }
+        } else {
+            if (callback.names.includes(name)) {
+                callback.callback({ name, prevValue, value });
+            }
         }
     }
 }
@@ -105,11 +124,9 @@ export function setStateByName<T extends keyof State>(
  * @param newState New state values
  * @param newState.T
  */
-export function setState<T extends keyof State>(
-    newState: {
-        [key in T]: State[T];
-    }
-) {
+export function setState<T extends keyof State>(newState: {
+    [key in T]: State[T];
+}) {
     for (const key in newState)
         setStateByName(key as T, (newState as any)[key as T]);
 }
@@ -122,21 +139,40 @@ export function setState<T extends keyof State>(
  */
 export function setStateProp<T extends keyof State>(
     name: T,
-    callback: (value: State[T]) => void
+    callback?: (value: State[T]) => void
 ) {
-    callback(state[name]);
+    callback?.(state[name]);
     const value = state[name];
-    for (const callback of callbacks) {
-        if (callback.names.includes(name)) {
-            callback.callback({ name, prevValue: undefined, value });
-        }
-    }
 
-    for (const callback of specificCallbacks) {
-        if (callback.name === name) {
-            callback.callback(value, undefined);
+    const allCallbacks: Array<
+        SpecificStateCallback<keyof State> | StateCallback
+    > = [];
+
+    allCallbacks.push(...specificCallbacks);
+    allCallbacks.push(...callbacks);
+
+    for (const callback of allCallbacks.sort(
+        (a, b) => b.priority - a.priority
+    )) {
+        if ("name" in callback) {
+            if (callback.name === name) {
+                callback.callback(value, undefined);
+            }
+        } else {
+            if (callback.names.includes(name)) {
+                callback.callback({ name, prevValue: undefined, value });
+            }
         }
     }
+}
+
+/**
+ * Update callback functions for a state variable
+ *
+ * @param name
+ */
+export function publish<T extends keyof State>(name: T) {
+    setStateProp(name);
 }
 
 export default state;
