@@ -66,6 +66,7 @@ export class Chip {
      * @param tile Tile that was added
      */
     tileAdded(tile: Tile) {
+        console.log(tile);
         if (tile instanceof ChipInputTile) {
             tile.id = "IN" + this.inputIndex++;
         } else if (tile instanceof ChipOutputTile) {

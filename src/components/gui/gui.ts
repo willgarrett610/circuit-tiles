@@ -405,11 +405,15 @@ const initGUI = (app: PIXI.Application) => {
                 state.chipGridMode === ChipGridMode.STRUCTURING
             ) {
                 if (state.editingChip) {
-                    const selectedTile = [
+                    const selectableTiles = [
                         ...state.editingChip.inputTiles,
                         ...state.editingChip.outputTiles,
-                    ][i];
+                    ];
 
+                    console.log({ selectableTiles });
+
+                    if (i >= selectableTiles.length) return null;
+                    const selectedTile = selectableTiles[i];
                     tileType = selectedTile.tile.type;
                 }
             } else {
