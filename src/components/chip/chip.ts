@@ -11,6 +11,8 @@ export class Chip {
     tiles: { [key: string]: Tile | undefined } = {};
     inputTiles: { name: string; tile: ChipInputTile }[] = [];
     outputTiles: { name: string; tile: ChipOutputTile }[] = [];
+    structure: { [key: string]: ChipInputTile | ChipOutputTile | undefined } =
+        {};
 
     inputIndex: number = 1;
     outputIndex: number = 1;

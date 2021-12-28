@@ -27,7 +27,7 @@ const tileTypes = [
  */
 function getTileTypes(
     chipTileIncluded = true
-): Array<{ new (x: number, y: number): Tile }> {
+): { new (x: number, y: number): Tile }[] {
     return chipTileIncluded
         ? tileTypes
         : tileTypes.filter((x) => x.chipTile === false);

@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
 import state, { subscribe } from "../../state";
 import { onKeyDown, onResize, onScroll } from "../../utils";
+import ChipGridMode from "../../utils/chip_grid_mode";
 import { Chip } from "../chip/chip";
 import Grid from "./grid";
 
@@ -8,6 +9,7 @@ import Grid from "./grid";
 export default class GridManager extends PIXI.Container {
     mainGrid: Grid;
     chipGrid: Grid;
+    structureGrid: Grid;
 
     inChipGrid = state.chipEditor;
 
@@ -18,6 +20,7 @@ export default class GridManager extends PIXI.Container {
         super();
         this.mainGrid = new Grid(100);
         this.chipGrid = new Grid(100);
+        this.structureGrid = new Grid(100);
         this.addChild(this.mainGrid);
 
         onResize(() => {
@@ -41,6 +44,9 @@ export default class GridManager extends PIXI.Container {
         subscribe("chipEditor", (value) => {
             this.setInChipGrid(value);
         });
+        subscribe("chipGridMode", () => {
+            this.setInChipGrid(true);
+        });
     }
 
     /**
@@ -52,7 +58,11 @@ export default class GridManager extends PIXI.Container {
         this.inChipGrid = val;
         this.removeChildren();
         if (this.inChipGrid) {
-            this.addChild(this.chipGrid);
+            if (state.chipGridMode === ChipGridMode.STRUCTURING) {
+                this.addChild(this.structureGrid);
+            } else {
+                this.addChild(this.chipGrid);
+            }
         } else {
             state.editingChip?.finishEditing();
             this.addChild(this.mainGrid);
@@ -70,11 +80,25 @@ export default class GridManager extends PIXI.Container {
     }
 
     /**
+     * Loads structure into the grid
+     *
+     * @param chip chip to add
+     */
+    loadStructure(chip: Chip) {
+        this.structureGrid = new Grid(100);
+        this.structureGrid.tiles = chip.structure;
+    }
+
+    /**
      * get grid state
      *
      * @returns chip grid state
      */
     getGrid() {
-        return this.inChipGrid ? this.chipGrid : this.mainGrid;
+        return this.inChipGrid
+            ? state.chipGridMode === ChipGridMode.STRUCTURING
+                ? this.structureGrid
+                : this.chipGrid
+            : this.mainGrid;
     }
 }

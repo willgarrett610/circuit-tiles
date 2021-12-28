@@ -11,6 +11,7 @@ interface State {
     chipCreation: { open: boolean; nameValue: string; colorValue: number };
     editingChip: Chip | undefined;
     chipGridMode: ChipGridMode;
+    selectedTileIndex: number;
 }
 
 const state: State = {
@@ -25,6 +26,7 @@ const state: State = {
     },
     editingChip: undefined,
     chipGridMode: ChipGridMode.EDITING,
+    selectedTileIndex: -1,
 };
 
 interface StateCallback {

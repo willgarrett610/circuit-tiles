@@ -43,7 +43,7 @@ const main = async () => {
 
     app.stage.addChild(gridManager);
 
-    loadSprites().then(() => initGUI(app, gridManager));
+    loadSprites().then(() => initGUI(app));
 
     window.addEventListener("contextmenu", (e) => e.preventDefault());
 

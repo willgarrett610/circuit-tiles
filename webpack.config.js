@@ -2,6 +2,7 @@
 /* eslint-disable no-undef */
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin");
 const ESLintPlugin = require("eslint-webpack-plugin");
@@ -9,7 +10,7 @@ const ESLintPlugin = require("eslint-webpack-plugin");
 module.exports = {
     mode: "development",
     entry: "./src/index.ts",
-    devtool: "eval-source-map",
+    devtool: "cheap-source-map",
     module: {
         rules: [
             {
@@ -36,6 +37,9 @@ module.exports = {
         }),
         new HtmlWebpackPlugin({
             template: "src/index.html",
+        }),
+        new CleanWebpackPlugin({
+            cleanAfterEveryBuildPatterns: ["dist"]
         }),
         new CopyPlugin({
             patterns: [{ from: "assets", to: "assets" }]

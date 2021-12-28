@@ -49,8 +49,6 @@ export default class Grid extends PIXI.Container {
     lineGraphics: PIXI.Graphics;
     hlTile: PIXI.Graphics;
 
-    selectedTileType = -1;
-
     interactive = true;
     sortableChildren = true;
     zIndex = 1000;
@@ -588,7 +586,7 @@ export default class Grid extends PIXI.Container {
 
                     const newTile: Tile | undefined = this.addTile(
                         ...locationToTuple(gridPoint),
-                        getTileTypes()[this.selectedTileType],
+                        getTileTypes()[state.selectedTileIndex],
                         prevTile,
                         gridPoint.direction
                     );
@@ -625,11 +623,11 @@ export default class Grid extends PIXI.Container {
         if (this.prevHighlightTileGraphic)
             this.removeChild(this.prevHighlightTileGraphic);
         if (
-            this.selectedTileType !== -1 &&
+            state.selectedTileIndex !== -1 &&
             EditMode.TILE === state.editMode &&
             this.getTile(...locationToTuple(gridPos)) === undefined
         ) {
-            const tempTile = new (getTileTypes()[this.selectedTileType])(
+            const tempTile = new (getTileTypes()[state.selectedTileIndex])(
                 ...locationToTuple(gridPos)
             );
             const tileGraphics: PIXI.Container = tempTile.getContainer(
@@ -678,14 +676,14 @@ export default class Grid extends PIXI.Container {
                 if (this.currentInteraction === Interaction.NONE)
                     this.rotateTile(...gridPoint);
                 this.currentInteraction = Interaction.PLACING;
-            } else if (this.selectedTileType !== -1) {
+            } else if (state.selectedTileIndex !== -1) {
                 // TODO Tile and Chip modes
                 if (this.currentInteraction === Interaction.NONE)
                     this.rotateTile(...gridPoint);
                 this.currentInteraction = Interaction.PLACING;
                 this.addTile(
                     ...gridPoint,
-                    getTileTypes()[this.selectedTileType],
+                    getTileTypes()[state.selectedTileIndex],
                     undefined,
                     undefined
                 );

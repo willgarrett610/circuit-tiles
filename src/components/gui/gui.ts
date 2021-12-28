@@ -13,13 +13,18 @@ import ButtonGroup from "./component/button_group";
 import LineWrapLayout from "./layout/line_wrap_layout";
 import config from "../../config";
 
-import GridManager from "../grid/grid_manager";
 import { GUIComponent, GUIComponentState } from "./component/gui_component";
 import { getSprite } from "../sprites/sprite_loader";
-import state, { setState, setStateProp, subscribe } from "../../state";
+import state, {
+    multiSubscribe,
+    setState,
+    setStateProp,
+    subscribe,
+} from "../../state";
 import { EditMode } from "../../utils/edit_mode";
 import SelectorMenu from "./component/selector_menu";
 import ChipGridMode from "../../utils/chip_grid_mode";
+import { Tile } from "../tiles/tile";
 
 const createToolBtn = (spriteKey: string): GUIComponent => {
     const toolHover = new PIXI.Graphics();
@@ -279,9 +284,8 @@ const createGridModeIndicator = () => {
  * Sets up application GUI
  *
  * @param app PIXI application
- * @param gridManager Grid Manager
  */
-const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
+const initGUI = (app: PIXI.Application) => {
     const selectorHeights = dimensions()[1] - config.menubarSize;
 
     /*
@@ -394,9 +398,26 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
         selectorHeights,
         "Tiles",
         (i, tileSize) => {
-            if (i >= getTileTypes(state.chipEditor).length) return null;
+            let tileType: { new (x: number, y: number): Tile } | undefined;
 
-            const tileType = getTileTypes(state.chipEditor)[i];
+            if (
+                state.chipEditor &&
+                state.chipGridMode === ChipGridMode.STRUCTURING
+            ) {
+                if (state.editingChip) {
+                    const selectedTile = [
+                        ...state.editingChip.inputTiles,
+                        ...state.editingChip.outputTiles,
+                    ][i];
+
+                    tileType = selectedTile.tile.type;
+                }
+            } else {
+                if (i >= getTileTypes(state.chipEditor).length) return null;
+                tileType = getTileTypes(state.chipEditor)[i];
+            }
+
+            if (!tileType) return null;
 
             const tileOff = new tileType(0, 0);
             const tileOn = new tileType(0, 0);
@@ -413,13 +434,13 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
             };
         },
         (i) => {
-            return (gridManager.getGrid().selectedTileType = i);
+            return setState({ selectedTileIndex: i });
         }
     );
     tileSelector.visible = false;
 
-    subscribe("chipEditor", () => {
-        gridManager.getGrid().selectedTileType = -1;
+    multiSubscribe(["chipEditor", "chipGridMode"], () => {
+        setState({ selectedTileIndex: -1 });
         tileSelector.generateComponents();
     });
 
@@ -491,11 +512,11 @@ const initGUI = (app: PIXI.Application, gridManager: GridManager) => {
                 selectable: true,
             };
         },
-        (i) => (gridManager.getGrid().selectedTileType = i)
+        (i) => setState({ selectedTileIndex: i })
     );
     chipSelector.visible = false;
 
-    subscribe("chips", () => {
+    multiSubscribe(["chips", "chipGridMode"], () => {
         chipSelector.generateComponents();
     });
 
