@@ -2,6 +2,7 @@ import { Direction, Rotation } from "../../utils/directions";
 import * as PIXI from "pixi.js";
 import config from "../../config";
 import LogicNode from "../../logic/node";
+import { CMouseEvent, onContextMenu } from "../../utils";
 export enum ConnectionType {
     BOTH,
     INPUT,
@@ -52,6 +53,7 @@ export abstract class Tile {
     signalActive = false;
     rotatable = true;
     breakOnRotate = true;
+    forGraphicOnly = false;
 
     /**
      * Get rotation from direction
@@ -151,6 +153,9 @@ export abstract class Tile {
         this.y = y;
     }
 
+    onClick?(e: PIXI.interaction.InteractionEvent): void;
+    onContext?(e: CMouseEvent): void;
+
     abstract generateContainer(): PIXI.Container;
 
     postGenerate?(): void;
@@ -166,6 +171,10 @@ export abstract class Tile {
     getContainer(size: number): PIXI.Container {
         if (!this.container) {
             this.container = this.generateContainer();
+            if (this.onClick || this.onContext)
+                this.container.interactive = true;
+            if (this.onClick) this.container.addListener("click", this.onClick);
+            if (this.onContext) onContextMenu(this.container, this.onContext);
             this.postGenerate?.();
         }
         this.container.zIndex = 100;

@@ -3,6 +3,8 @@ import * as PIXI from "pixi.js";
 import config from "../../config";
 import CircuitLocation from "../../logic/circuit_location";
 import LogicNode from "../../logic/node";
+import { CMouseEvent } from "../../utils";
+import { displayContextMenu } from "../../utils/context_menu";
 import { ConnectionType, GraphicsTile } from "./tile";
 
 /** chip output tile */
@@ -23,6 +25,21 @@ export default class ChipOutputTile extends GraphicsTile {
     rotatable = false;
 
     id: string = "";
+
+    /**
+     * display context menu for io tile
+     *
+     * @param e Mouse event
+     */
+    onContext(e: CMouseEvent) {
+        if (this.forGraphicOnly) return;
+        displayContextMenu(e.pageX, e.pageY, "ioTile", (name) => {
+            console.log(name);
+            if (name === "rename") {
+                // rename
+            }
+        });
+    }
 
     /**
      * convert tile to node

@@ -1,10 +1,10 @@
 import * as PIXI from "pixi.js";
 
 import {
+    CMouseEvent,
     dimensions,
     generateRoundedRectContainer,
     getCreateChipInput,
-    onContextMenu,
     onResize,
     width,
 } from "../../utils";
@@ -408,6 +408,9 @@ const initGUI = (app: PIXI.Application) => {
             const tileOn = new tileType(0, 0);
             const tileOff = new tileType(0, 0);
 
+            tileOn.forGraphicOnly = true;
+            tileOff.forGraphicOnly = true;
+
             tileOn.signalActive = true;
 
             return {
@@ -423,9 +426,9 @@ const initGUI = (app: PIXI.Application) => {
     );
     tileSelector.visible = false;
 
-    onContextMenu(tileSelector, (e) => {
-        displayContextMenu(e.pageX, e.pageY, "chip");
-    });
+    // onContextMenu(tileSelector, (e) => {
+    //     displayContextMenu(e.pageX, e.pageY, "chip");
+    // });
 
     multiSubscribe(
         ["chipEditor", "chipGridMode", "currentChipGrid", "editedChip"],
@@ -548,6 +551,16 @@ const initGUI = (app: PIXI.Application) => {
                 defaultContainer,
                 hoverContainer,
                 selectable: true,
+                onContext: (e: CMouseEvent) => {
+                    displayContextMenu(
+                        e.pageX,
+                        e.pageY,
+                        "chipSelection",
+                        (name) => {
+                            console.log(name);
+                        }
+                    );
+                },
             };
         },
         (i) => setState({ selectedTileIndex: i })

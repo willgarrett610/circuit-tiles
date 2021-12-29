@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
 
 import config from "../../../config";
+import { CMouseEvent, onContextMenu } from "../../../utils";
 import LineWrapLayout from "../layout/line_wrap_layout";
 import ButtonGroup from "./button_group";
 import GUIWindow from "./gui_window";
@@ -13,6 +14,7 @@ export interface BtnGeneratorData {
     hoverContainer: PIXI.Container;
     selectable: boolean;
     onClick?: (e: PIXI.interaction.InteractionEvent) => void;
+    onContext?: (e: CMouseEvent) => void;
 }
 
 /**
@@ -140,6 +142,8 @@ export default class SelectorMenu extends GUIWindow {
                 0x000000,
                 config.colors.tileBackground
             );
+
+            if (btnData.onContext) onContextMenu(tileBtn, btnData.onContext);
 
             if (btnData.onClick) tileBtn.on("click", btnData.onClick);
 

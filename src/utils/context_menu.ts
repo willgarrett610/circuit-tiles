@@ -6,11 +6,21 @@ import GUIWindow from "../components/gui/component/gui_window";
 import config from "../config";
 
 export const contextMenus = {
-    chip: {
+    tileSelection: {
+        // rename: "Rename",
+        // delete: "Delete",
+        // edit: "Edit",
+        // duplicate: "Duplicate",
+    },
+    chipSelection: {
         rename: "Rename",
         delete: "Delete",
         edit: "Edit",
         duplicate: "Duplicate",
+    },
+    ioTile: {
+        rename: "Rename",
+        recolor: "Recolor",
     },
 };
 
@@ -31,105 +41,118 @@ export function initContextMenu(app_: PIXI.Application) {
  * @param x X position
  * @param y Y position
  * @param menuName Menu name
+ * @param callback Callback function on click
  */
-export function displayContextMenu(
+export function displayContextMenu<T extends keyof typeof contextMenus>(
     x: number,
     y: number,
-    menuName: keyof typeof contextMenus
+    menuName: T,
+    callback: (name: keyof typeof contextMenus[T]) => void
 ) {
     const menu = contextMenus[menuName];
-    if (menu) {
-        const overlay = new GUIWindow(0, 0, width(), height(), 0x000000);
-        overlay.backgroundRect.alpha = 0;
 
-        const contextMenu = new GUIComponent(
-            x,
-            y,
+    const overlay = new GUIWindow(0, 0, width(), height(), 0x000000);
+    overlay.backgroundRect.alpha = 0;
+
+    x = Math.min(x, width() - config.contextMenuWidth);
+    y = Math.min(
+        y,
+        height() - Object.keys(menu).length * config.contextMenuItemHeight
+    );
+
+    const contextMenu = new GUIComponent(
+        x,
+        y,
+        config.contextMenuWidth,
+        Object.keys(menu).length * config.contextMenuItemHeight
+    );
+
+    contextMenu.backgroundSprite.alpha = 0.01;
+    contextMenu.setDefaultContainer(
+        generateRoundedRectContainer(
+            0,
+            0,
+            contextMenu.width,
+            contextMenu.height,
+            config.colors.contextMenu,
+            {
+                topLeft: 7,
+                topRight: 7,
+                botLeft: 7,
+                botRight: 7,
+            }
+        )
+    );
+
+    let i = 0;
+    for (const k in menu) {
+        const key = k as keyof typeof menu;
+        const label = menu[key] as unknown as string;
+        const item = new GUIComponent(
+            0,
+            i * config.contextMenuItemHeight,
             config.contextMenuWidth,
-            Object.keys(menu).length * config.contextMenuItemHeight
+            config.contextMenuItemHeight
         );
+        item.backgroundSprite.alpha = 0;
+        item.interactive = true;
+        item.onClick = () => {
+            app?.stage.removeChild(overlay);
+            callback(key);
+        };
 
-        contextMenu.backgroundSprite.alpha = 0.01;
-        contextMenu.setDefaultContainer(
+        item.setDefaultContainer(new PIXI.Container());
+
+        const hoverContainer = new PIXI.Container();
+        hoverContainer.addChild(
             generateRoundedRectContainer(
-                0,
-                0,
-                contextMenu.width,
-                contextMenu.height,
-                config.colors.contextMenu,
+                2,
+                2,
+                item.width - 4,
+                item.height - 4,
+                config.colors.contextMenuHighlight,
                 {
-                    topLeft: 7,
-                    topRight: 7,
-                    botLeft: 7,
-                    botRight: 7,
+                    topLeft: 5,
+                    topRight: 5,
+                    botLeft: 5,
+                    botRight: 5,
                 }
             )
         );
+        item.cursor = "pointer";
 
-        let i = 0;
-        for (const k in menu) {
-            const key = k as keyof typeof menu;
-            const label = menu[key];
-            const item = new GUIComponent(
-                0,
-                i * config.contextMenuItemHeight,
-                config.contextMenuWidth,
-                config.contextMenuItemHeight
-            );
-            item.backgroundSprite.alpha = 0;
+        item.setHoverContainer(hoverContainer);
 
-            item.setDefaultContainer(new PIXI.Container());
+        const getText = (value: string) => {
+            const text = new PIXI.Text(value, {
+                fontFamily: "Arial",
+                fontSize: 12,
+                fill: 0xffffff,
+            });
 
-            const hoverContainer = new PIXI.Container();
-            hoverContainer.addChild(
-                generateRoundedRectContainer(
-                    5,
-                    5,
-                    item.width - 10,
-                    item.height - 10,
-                    config.colors.contextMenuHighlight,
-                    {
-                        topLeft: 7,
-                        topRight: 7,
-                        botLeft: 7,
-                        botRight: 7,
-                    }
-                )
-            );
+            text.x = 10;
+            text.y = item.height / 2 - text.height / 2;
+            return text;
+        };
 
-            item.setHoverContainer(hoverContainer);
+        const defaultText = getText(label);
 
-            const getText = (value: string) => {
-                const text = new PIXI.Text(value, {
-                    fontFamily: "Arial",
-                    fontSize: 12,
-                    fill: 0xffffff,
-                });
+        const hoverText = getText(label);
 
-                text.x = 10;
-                text.y = item.height / 2 - text.height / 2;
-                return text;
-            };
+        hoverContainer.addChild(hoverText);
 
-            const defaultText = getText(label);
+        item.defaultContainer?.addChild(defaultText);
 
-            const hoverText = getText(label);
+        contextMenu.addChild(item);
 
-            hoverContainer.addChild(hoverText);
-
-            item.defaultContainer?.addChild(defaultText);
-
-            contextMenu.addChild(item);
-
-            i++;
-        }
-
-        overlay.addChild(contextMenu);
-
-        app?.stage.addChild(overlay);
-
-        overlay.on("click", () => {
-            app?.stage.removeChild(overlay);
-        });
+        i++;
     }
+
+    overlay.addChild(contextMenu);
+
+    app?.stage.addChild(overlay);
+
+    overlay.on("click", () => {
+        app?.stage.removeChild(overlay);
+    });
 }
