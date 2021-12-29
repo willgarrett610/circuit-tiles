@@ -19,6 +19,7 @@ export default class ButtonTile extends GraphicsTile {
     };
 
     isNode = true;
+    rotatable = false;
 
     /**
      * convert tile to node

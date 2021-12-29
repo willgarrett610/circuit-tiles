@@ -20,6 +20,7 @@ export default class ChipInputTile extends GraphicsTile {
     label: string = "Input";
 
     isNode = true;
+    rotatable = false;
 
     id: string = "";
 

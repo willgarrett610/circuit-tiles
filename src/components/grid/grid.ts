@@ -417,15 +417,15 @@ export default class Grid extends PIXI.Container {
      */
     rotateTile(x: number, y: number) {
         const tile = this.getTile(x, y);
-
-        if (tile && tile.rotatable) {
+        if (tile) {
             this.tempHistory.push({
                 action: GridAction.EDIT,
                 prevTile: tile.clone(),
                 postTile: undefined,
                 location: { x, y },
             });
-            tile.direction = rotateClockWise(tile.direction);
+            if (tile.rotatable)
+                tile.direction = rotateClockWise(tile.direction);
             tile.setConnection("up", false);
             tile.setConnection("down", false);
             tile.setConnection("left", false);
