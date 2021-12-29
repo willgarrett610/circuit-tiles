@@ -23,8 +23,6 @@ export default class ChipInputTile extends GraphicsTile {
 
     id: string = "";
 
-    signalActive = true;
-
     /**
      * convert tile to node
      *
