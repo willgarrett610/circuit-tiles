@@ -1,3 +1,5 @@
+import * as PIXI from "pixi.js";
+
 import config from "../../config";
 import CircuitLocation from "../../logic/circuit_location";
 import LogicNode from "../../logic/node";
@@ -34,6 +36,25 @@ export default class ChipOutputTile extends GraphicsTile {
         );
         logicNode.state = this.signalActive;
         return logicNode;
+    }
+
+    /** Generate text component */
+    generateText(): void {
+        if (this.container) {
+            const idText = new PIXI.Text(this.id, {
+                fontFamily: "Arial",
+                fontSize: 20,
+                fill: 0xffffff,
+            });
+            idText.anchor.set(0, 0);
+            idText.x =
+                this.container.width / (this.container.scale.x * 2) -
+                idText.width / 2;
+            idText.y =
+                this.container.height / (this.container.scale.y * 2) -
+                idText.height / 2;
+            this.container.addChild(idText);
+        }
     }
 
     /** draw graphics */
