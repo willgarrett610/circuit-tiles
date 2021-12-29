@@ -632,6 +632,8 @@ export default class Grid extends PIXI.Container {
         this.dragData.isDragging = true;
         this.dragData.startLocation.screen = locationToPair(mousePos);
         this.dragData.startLocation.grid = this.screenToGrid(...mousePos, true);
+        this.dragData.endLocation.screen = locationToPair(mousePos);
+        this.dragData.endLocation.grid = this.screenToGrid(...mousePos, true);
 
         this.renderSelection();
     };
