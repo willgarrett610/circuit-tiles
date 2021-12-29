@@ -116,20 +116,22 @@ export function setStateByName<T extends keyof State>(
         SpecificStateCallback<keyof State> | StateCallback
     > = [];
 
-    allCallbacks.push(...specificCallbacks);
-    allCallbacks.push(...callbacks);
+    allCallbacks.push(
+        ...specificCallbacks.filter(
+            (specificCallback) => specificCallback.name === name
+        )
+    );
+    allCallbacks.push(
+        ...callbacks.filter((callback) => callback.names.includes(name))
+    );
 
     for (const callback of allCallbacks.sort(
         (a, b) => b.priority - a.priority
     )) {
         if ("name" in callback) {
-            if (callback.name === name) {
-                callback.callback(value, prevValue);
-            }
+            callback.callback(value, prevValue);
         } else {
-            if (callback.names.includes(name)) {
-                callback.callback({ name, prevValue, value });
-            }
+            callback.callback({ name, prevValue, value });
         }
     }
 }
@@ -164,20 +166,22 @@ export function setStateProp<T extends keyof State>(
         SpecificStateCallback<keyof State> | StateCallback
     > = [];
 
-    allCallbacks.push(...specificCallbacks);
-    allCallbacks.push(...callbacks);
+    allCallbacks.push(
+        ...specificCallbacks.filter(
+            (specificCallback) => specificCallback.name === name
+        )
+    );
+    allCallbacks.push(
+        ...callbacks.filter((callback) => callback.names.includes(name))
+    );
 
     for (const callback of allCallbacks.sort(
         (a, b) => b.priority - a.priority
     )) {
         if ("name" in callback) {
-            if (callback.name === name) {
-                callback.callback(value, undefined);
-            }
+            callback.callback(value, undefined);
         } else {
-            if (callback.names.includes(name)) {
-                callback.callback({ name, prevValue: undefined, value });
-            }
+            callback.callback({ name, prevValue: undefined, value });
         }
     }
 }
