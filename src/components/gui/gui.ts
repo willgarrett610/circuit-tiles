@@ -4,6 +4,7 @@ import {
     dimensions,
     generateRoundedRectContainer,
     getCreateChipInput,
+    onContextMenu,
     onResize,
     width,
 } from "../../utils";
@@ -27,6 +28,7 @@ import SelectorMenu from "./component/selector_menu";
 import ChipGridMode from "../../utils/chip_grid_mode";
 import ChipGrid from "../chip/chip_grid";
 import StructureTile from "../tiles/structure_tile";
+import { displayContextMenu } from "../../utils/context_menu";
 
 const createToolBtn = (spriteKey: string): GUIComponent => {
     const toolHover = new PIXI.Graphics();
@@ -420,6 +422,10 @@ const initGUI = (app: PIXI.Application) => {
         }
     );
     tileSelector.visible = false;
+
+    onContextMenu(tileSelector, (e) => {
+        displayContextMenu(e.pageX, e.pageY, "chip");
+    });
 
     multiSubscribe(
         ["chipEditor", "chipGridMode", "currentChipGrid", "editedChip"],

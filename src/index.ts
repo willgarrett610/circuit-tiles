@@ -1,11 +1,12 @@
 import * as PIXI from "pixi.js";
-import { scrollListeners, CWheelEvent } from "./utils";
+import { handleEvent } from "./utils";
 import config from "./config";
 import initGUI from "./components/gui/gui";
 
 import GridManager from "./components/grid/grid_manager";
 import { loadSprites } from "./components/sprites/sprite_loader";
 import { setState, subscribe } from "./state";
+import { initContextMenu } from "./utils/context_menu";
 
 PIXI.utils.skipHello();
 
@@ -16,6 +17,8 @@ const main = async () => {
     const app = new PIXI.Application({
         antialias: true,
     });
+
+    initContextMenu(app);
 
     // Set up DOM settings for full screen
 
@@ -45,31 +48,13 @@ const main = async () => {
 
     loadSprites().then(() => initGUI(app));
 
-    window.addEventListener("contextmenu", (e) => e.preventDefault());
+    window.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        handleEvent(e, app);
+    });
 
     window.addEventListener("wheel", (e: WheelEvent) => {
-        const cE: CWheelEvent = CWheelEvent.fromWheelEvent(e);
-
-        const hitObject = app.renderer.plugins.interaction.hitTest(
-            new PIXI.Point(cE.pageX, cE.pageY),
-            app.stage
-        );
-
-        if (hitObject) {
-            let testObject = hitObject;
-            while (testObject) {
-                for (let i = 0; i < scrollListeners.length; i++) {
-                    const eventObj = scrollListeners[i];
-                    if (eventObj.object === testObject) {
-                        eventObj.listener(cE);
-                        break;
-                    }
-                }
-
-                if (cE.propagationStopped) break;
-                testObject = testObject.parent;
-            }
-        }
+        handleEvent(e, app);
     });
 
     // Set up chip creation color preview
