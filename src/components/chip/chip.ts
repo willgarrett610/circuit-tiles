@@ -78,6 +78,7 @@ export class Chip {
                     tile.id = "OUT" + this.outputIndex++;
                 }
             }
+            tile.generateText();
         }
     }
 
