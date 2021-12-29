@@ -23,6 +23,7 @@ const config = {
         chipModeIndicator: 0x119911,
         chipModeIndicatorClose: 0xbb3333,
         chipGridMode: 0x444444,
+        gridSelection: 0x999999,
     },
     zoomCoeff: 1.15,
     lineColor: 0x222222,

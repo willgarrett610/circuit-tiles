@@ -2,6 +2,7 @@ import * as PIXI from "pixi.js";
 import {
     dimensions,
     height,
+    locationToPair,
     locationToTuple,
     mouseDown,
     pressedKeys,
@@ -75,10 +76,27 @@ export default class Grid extends PIXI.Container {
 
     lineGraphics: PIXI.Graphics;
     hlTile: PIXI.Graphics;
+    selectionGraphics: PIXI.Graphics;
 
     interactive = true;
     sortableChildren = true;
     zIndex = 1000;
+
+    dragData: {
+        isDragging: boolean;
+        startLocation: {
+            grid: { x: number; y: number } | undefined;
+            screen: { x: number; y: number } | undefined;
+        };
+        endLocation: {
+            grid: { x: number; y: number } | undefined;
+            screen: { x: number; y: number } | undefined;
+        };
+    } = {
+        isDragging: false,
+        startLocation: { grid: undefined, screen: undefined },
+        endLocation: { grid: undefined, screen: undefined },
+    };
 
     currentInteraction: Interaction = Interaction.NONE;
 
@@ -125,6 +143,9 @@ export default class Grid extends PIXI.Container {
         this.hlTile = new PIXI.Graphics();
         this.hlTile.zIndex = 200;
         this.hlTile.alpha = 0.2;
+        this.selectionGraphics = new PIXI.Graphics();
+        this.selectionGraphics.zIndex = 2000;
+        this.selectionGraphics.alpha = 0.2;
 
         if (tiles) this.tiles = tiles;
 
@@ -133,10 +154,14 @@ export default class Grid extends PIXI.Container {
 
         this.renderGrid();
 
-        this.on("mousemove", this.mouseMove);
-
         subscribe("interactive", (value) => {
             this.interactive = value;
+        });
+
+        subscribe("editMode", (value) => {
+            if (value !== EditMode.CURSOR) {
+                this.selectionGraphics.clear();
+            }
         });
     }
 
@@ -589,12 +614,41 @@ export default class Grid extends PIXI.Container {
         this.zoom(e.pageX, e.pageY, delta);
     };
 
+    mouseup = (event: PIXI.interaction.InteractionEvent) => {
+        const e = event.data.originalEvent as PointerEvent;
+        const mousePos: [x: number, y: number] = [e.pageX, e.pageY];
+
+        this.dragData.isDragging = false;
+        this.dragData.endLocation.screen = locationToPair(mousePos);
+        this.dragData.endLocation.grid = this.screenToGrid(...mousePos, true);
+
+        this.renderSelection();
+    };
+
+    mousedown = (event: PIXI.interaction.InteractionEvent) => {
+        const e = event.data.originalEvent as PointerEvent;
+        const mousePos: [x: number, y: number] = [e.pageX, e.pageY];
+
+        this.dragData.isDragging = true;
+        this.dragData.startLocation.screen = locationToPair(mousePos);
+        this.dragData.startLocation.grid = this.screenToGrid(...mousePos, true);
+
+        this.renderSelection();
+    };
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mouseMove = (event: any) => {
+    mousemove = (event: PIXI.interaction.InteractionEvent) => {
         const e = event.data.originalEvent as PointerEvent;
         this.prevMousePos = [...this.mousePos];
         this.mousePos = [e.pageX, e.pageY];
         if (mouseDown.left) {
+            this.dragData.endLocation.screen = locationToPair(this.mousePos);
+
+            this.dragData.endLocation.grid = this.screenToGrid(
+                ...this.mousePos,
+                true
+            );
+
             if (
                 e.shiftKey ||
                 pressedKeys["Space"] ||
@@ -875,6 +929,48 @@ export default class Grid extends PIXI.Container {
         }
     }
 
+    /** render selection */
+    renderSelection() {
+        if (
+            state.editMode === EditMode.CURSOR &&
+            this.dragData.startLocation.grid &&
+            this.dragData.endLocation.grid
+        ) {
+            this.addChild(this.selectionGraphics);
+
+            const minX = Math.min(
+                this.dragData.startLocation.grid.x,
+                this.dragData.endLocation.grid.x
+            );
+            const minY = Math.min(
+                this.dragData.startLocation.grid.y,
+                this.dragData.endLocation.grid.y
+            );
+
+            const maxX = Math.max(
+                this.dragData.startLocation.grid.x,
+                this.dragData.endLocation.grid.x
+            );
+            const maxY = Math.max(
+                this.dragData.startLocation.grid.y,
+                this.dragData.endLocation.grid.y
+            );
+
+            const start = this.gridToScreen(minX, minY);
+            const end = this.gridToScreen(maxX + 1, maxY + 1);
+
+            this.selectionGraphics.clear();
+            this.selectionGraphics.beginFill(config.colors.gridSelection);
+            this.selectionGraphics.lineStyle(4, config.colors.gridSelection);
+            this.selectionGraphics.drawRect(
+                start.x - this.x,
+                start.y - this.y,
+                end.x - start.x,
+                end.y - start.y
+            );
+        }
+    }
+
     /** renders all the tiles */
     renderTiles() {
         for (const [_, tile] of Object.entries(this.tiles))
@@ -905,6 +1001,7 @@ export default class Grid extends PIXI.Container {
     update = () => {
         this.renderGrid();
         this.renderTiles();
+        this.renderSelection();
         this.updateHighlightTile();
     };
 
