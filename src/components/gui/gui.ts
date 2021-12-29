@@ -552,10 +552,7 @@ const initGUI = (app: PIXI.Application) => {
                 hoverContainer,
                 selectable: true,
                 onContext: (e: CMouseEvent) => {
-                    displayContextMenu(
-                        e.pageX,
-                        e.pageY,
-                        "chipSelection",
+                    displayContextMenu(e.pageX, e.pageY, "chipSelection").then(
                         (name) => {
                             console.log(name);
                         }
