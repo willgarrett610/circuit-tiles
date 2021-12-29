@@ -25,6 +25,7 @@ const config = {
         chipGridMode: 0x444444,
         gridSelection: 0x999999,
         contextMenu: 0x18191c,
+        contextMenuHighlight: 0x6b6d74,
     },
     zoomCoeff: 1.15,
     lineColor: 0x222222,
@@ -52,8 +53,8 @@ const config = {
         height: 25,
         textSize: 13,
     },
-    contextMenuWidth: 150,
-    contextMenuItemHeight: 20,
+    contextMenuWidth: 130,
+    contextMenuItemHeight: 35,
 };
 
 export default config;

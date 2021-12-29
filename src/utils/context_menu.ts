@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { generateRoundedRectContainer, height, width } from ".";
 
 import { GUIComponent } from "../components/gui/component/gui_component";
 import GUIWindow from "../components/gui/component/gui_window";
@@ -36,16 +37,33 @@ export function displayContextMenu(
     y: number,
     menuName: keyof typeof contextMenus
 ) {
-    console.log("display");
     const menu = contextMenus[menuName];
     if (menu) {
-        console.log("menu");
-        const contextMenu = new GUIWindow(
+        const overlay = new GUIWindow(0, 0, width(), height(), 0x000000);
+        overlay.backgroundRect.alpha = 0;
+
+        const contextMenu = new GUIComponent(
             x,
             y,
             config.contextMenuWidth,
-            Object.keys(menu).length * config.contextMenuItemHeight,
-            config.colors.contextMenu
+            Object.keys(menu).length * config.contextMenuItemHeight
+        );
+
+        contextMenu.backgroundSprite.alpha = 0.01;
+        contextMenu.setDefaultContainer(
+            generateRoundedRectContainer(
+                0,
+                0,
+                contextMenu.width,
+                contextMenu.height,
+                config.colors.contextMenu,
+                {
+                    topLeft: 7,
+                    topRight: 7,
+                    botLeft: 7,
+                    botRight: 7,
+                }
+            )
         );
 
         let i = 0;
@@ -56,27 +74,62 @@ export function displayContextMenu(
                 0,
                 i * config.contextMenuItemHeight,
                 config.contextMenuWidth,
-                config.contextMenuItemHeight,
-                config.colors.contextMenu
+                config.contextMenuItemHeight
             );
-            const itemText = new PIXI.Text(label, {
-                fontFamily: "Arial",
-                fontSize: 12,
-                fill: 0xffffff,
-            });
+            item.backgroundSprite.alpha = 0;
 
-            item.addChild(itemText);
+            item.setDefaultContainer(new PIXI.Container());
 
-            itemText.x = item.width / 2 - itemText.width / 2;
-            itemText.y = item.height / 2 - itemText.height / 2;
+            const hoverContainer = new PIXI.Container();
+            hoverContainer.addChild(
+                generateRoundedRectContainer(
+                    5,
+                    5,
+                    item.width - 10,
+                    item.height - 10,
+                    config.colors.contextMenuHighlight,
+                    {
+                        topLeft: 7,
+                        topRight: 7,
+                        botLeft: 7,
+                        botRight: 7,
+                    }
+                )
+            );
+
+            item.setHoverContainer(hoverContainer);
+
+            const getText = (value: string) => {
+                const text = new PIXI.Text(value, {
+                    fontFamily: "Arial",
+                    fontSize: 12,
+                    fill: 0xffffff,
+                });
+
+                text.x = 10;
+                text.y = item.height / 2 - text.height / 2;
+                return text;
+            };
+
+            const defaultText = getText(label);
+
+            const hoverText = getText(label);
+
+            hoverContainer.addChild(hoverText);
+
+            item.defaultContainer?.addChild(defaultText);
 
             contextMenu.addChild(item);
 
             i++;
         }
 
-        console.log({ app });
+        overlay.addChild(contextMenu);
 
-        app?.stage.addChild(contextMenu);
+        app?.stage.addChild(overlay);
+
+        overlay.on("click", () => {
+            app?.stage.removeChild(overlay);
+        });
     }
 }
