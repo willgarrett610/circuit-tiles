@@ -24,6 +24,8 @@ import state, {
 import { EditMode } from "../../utils/edit_mode";
 import SelectorMenu from "./component/selector_menu";
 import ChipGridMode from "../../utils/chip_grid_mode";
+import ChipGrid from "../chip/chip_grid";
+import StructureTile from "../tiles/structure_tile";
 
 const createToolBtn = (spriteKey: string): GUIComponent => {
     const toolHover = new PIXI.Graphics();
@@ -195,8 +197,8 @@ const createGridModeIndicator = () => {
 
     const textContainer = new PIXI.Container();
 
-    subscribe("editingChip", (value) => {
-        const chip = value;
+    subscribe("currentChipGrid", (chipGrid) => {
+        const chip = chipGrid?.chip;
         if (!chip) {
             console.error("No chip selected");
             return;
@@ -239,7 +241,7 @@ const createGridModeIndicator = () => {
     );
 
     closeBtn.onClick = () => {
-        console.log(state.editingChip);
+        console.log(state.currentChipGrid?.chip);
         setState({ chipEditor: false });
     };
 
@@ -419,48 +421,58 @@ const initGUI = (app: PIXI.Application) => {
     );
     tileSelector.visible = false;
 
-    multiSubscribe(["chipEditor", "chipGridMode", "editingChip"], () => {
-        setStateProp("selectableTiles", (value) => {
-            value.splice(0);
-            if (state.chipEditor) {
-                if (state.chipGridMode === ChipGridMode.EDITING) {
-                    for (const tileType of getTileTypes(true)) {
-                        value.push({ ...tileType });
+    multiSubscribe(
+        ["chipEditor", "chipGridMode", "currentChipGrid", "editingChip"],
+        () => {
+            setStateProp("selectableTiles", (value) => {
+                value.splice(0);
+                if (state.chipEditor) {
+                    if (state.chipGridMode === ChipGridMode.EDITING) {
+                        for (const tileType of getTileTypes(true)) {
+                            value.push({ ...tileType });
+                        }
+                    } else {
+                        // TODO Only display what hasn't been added to chip structure
+                        if (state.currentChipGrid) {
+                            let selectableTiles: TileType[] = [
+                                ...state.currentChipGrid.chip.inputTiles,
+                                ...state.currentChipGrid.chip.outputTiles,
+                            ]
+                                .filter(
+                                    (value) =>
+                                        state.currentChipGrid?.chip &&
+                                        !Object.values(
+                                            state.currentChipGrid.chip.structure
+                                        ).find((x) => x?.id === value.name)
+                                )
+                                .map(({ name, tile }) => ({
+                                    name,
+                                    tile: tile.type,
+                                }));
+
+                            selectableTiles = [
+                                { name: "Block", tile: StructureTile },
+                                ...selectableTiles,
+                            ];
+
+                            console.log(
+                                "s",
+                                Object.values(
+                                    state.currentChipGrid.chip.structure
+                                )
+                            );
+
+                            value.push(...selectableTiles);
+                        }
                     }
                 } else {
-                    // TODO Only display what hasn't been added to chip structure
-                    if (state.editingChip) {
-                        const selectableTiles: TileType[] = [
-                            ...state.editingChip.inputTiles,
-                            ...state.editingChip.outputTiles,
-                        ]
-                            .filter(
-                                (value) =>
-                                    state.editingChip &&
-                                    !Object.values(
-                                        state.editingChip.structure
-                                    ).find((x) => x?.id === value.name)
-                            )
-                            .map(({ name, tile }) => ({
-                                name,
-                                tile: tile.type,
-                            }));
-
-                        console.log(
-                            "s",
-                            Object.values(state.editingChip.structure)
-                        );
-
-                        value.push(...selectableTiles);
+                    for (const tileType of getTileTypes(false)) {
+                        value.push({ ...tileType });
                     }
                 }
-            } else {
-                for (const tileType of getTileTypes(false)) {
-                    value.push({ ...tileType });
-                }
-            }
-        });
-    });
+            });
+        }
+    );
 
     subscribe("selectableTiles", () => {
         setState({ selectedTileIndex: -1 });
@@ -505,7 +517,11 @@ const initGUI = (app: PIXI.Application) => {
                             setStateProp("chips", (chips) => {
                                 chips.push(chip);
                             });
-                            setState({ editingChip: chip, chipEditor: true });
+                            setState({
+                                editingChip: chip,
+                                currentChipGrid: new ChipGrid(chip),
+                                chipEditor: true,
+                            });
                         });
                     },
                 };

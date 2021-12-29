@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Chip } from "./components/chip/chip";
+import ChipGrid from "./components/chip/chip_grid";
 import { TileType } from "./components/tiles/tile_types";
 import ChipGridMode from "./utils/chip_grid_mode";
 import { EditMode } from "./utils/edit_mode";
@@ -10,7 +11,8 @@ interface State {
     chips: Chip[];
     interactive: boolean;
     chipCreation: { open: boolean; nameValue: string; colorValue: number };
-    editingChip: Chip | undefined;
+    editingChip?: Chip;
+    currentChipGrid?: ChipGrid;
     chipGridMode: ChipGridMode;
     selectedTileIndex: number;
     selectableTiles: TileType[];
@@ -27,6 +29,7 @@ const state: State = {
         colorValue: 0x993333,
     },
     editingChip: undefined,
+    currentChipGrid: undefined,
     chipGridMode: ChipGridMode.EDITING,
     selectedTileIndex: -1,
     selectableTiles: [],

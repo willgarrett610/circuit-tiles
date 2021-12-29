@@ -55,12 +55,38 @@ export default class Grid extends PIXI.Container {
 
     currentInteraction: Interaction = Interaction.NONE;
 
+    postAdd?: (tile: Tile) => void;
+    postRemove?: (tile: Tile) => void;
+    postUndo?: (
+        actions: {
+            action: GridAction;
+            prevTile: Tile | undefined;
+            postTile: Tile | undefined;
+            location: {
+                x: number;
+                y: number;
+            };
+        }[]
+    ) => void;
+    postRedo?: (
+        actions: {
+            action: GridAction;
+            prevTile: Tile | undefined;
+            postTile: Tile | undefined;
+            location: {
+                x: number;
+                y: number;
+            };
+        }[]
+    ) => void;
+
     /**
      * Constructs grid
      *
      * @param size pixel size of grid tile
+     * @param tiles initial tiles
      */
-    constructor(size: number) {
+    constructor(size: number, tiles?: { [key: string]: Tile | undefined }) {
         super();
         this.startingSize = size;
         this.size = size;
@@ -70,6 +96,8 @@ export default class Grid extends PIXI.Container {
         this.hlTile = new PIXI.Graphics();
         this.hlTile.zIndex = 200;
         this.hlTile.alpha = 0.2;
+
+        if (tiles) this.tiles = tiles;
 
         this.addChild(this.lineGraphics);
         this.addChild(this.hlTile);
@@ -269,8 +297,8 @@ export default class Grid extends PIXI.Container {
 
         this.handleForceConnection(tileObj);
 
-        if (state.chipEditor && state.editingChip) {
-            state.editingChip.tileAdded(tileObj);
+        if (state.chipEditor && state.currentChipGrid) {
+            state.currentChipGrid?.chip.tileAdded(tileObj);
         }
 
         if (
@@ -279,6 +307,8 @@ export default class Grid extends PIXI.Container {
             state.chipGridMode === ChipGridMode.STRUCTURING
         )
             publish("editingChip");
+
+        this.postAdd?.(tileObj);
 
         return tileObj;
     }
@@ -338,6 +368,7 @@ export default class Grid extends PIXI.Container {
                 adjacentTile.updateContainer?.();
             }
         }
+        this.postRemove?.(tile);
         return true;
     }
 
@@ -460,6 +491,8 @@ export default class Grid extends PIXI.Container {
         }
 
         this.history.splice(this.history.length - 2, 1);
+
+        this.postUndo?.(actions);
     };
 
     redo = async () => {
@@ -508,6 +541,8 @@ export default class Grid extends PIXI.Container {
                 }
             }
         }
+
+        this.postRedo?.(actions);
     };
 
     cleanHistory = () => {
@@ -776,7 +811,6 @@ export default class Grid extends PIXI.Container {
 
     /** renders out grid */
     renderGrid() {
-        console.log("rendering grid");
         const width = dimensions()[0];
         const height = dimensions()[1];
         const tileXCount = Math.floor(width / this.size);
@@ -857,7 +891,6 @@ export default class Grid extends PIXI.Container {
     }
 
     update = () => {
-        console.log(this);
         this.renderGrid();
         this.renderTiles();
         this.updateHighlightTile();

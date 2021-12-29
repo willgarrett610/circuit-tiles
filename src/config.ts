@@ -18,6 +18,7 @@ const config = {
         inactiveOutput: 0x174709,
         activeInput: 0x6e22d4,
         inactiveInput: 0x1c0738,
+        structureTile: 0x555555,
         textFieldBackground: 0xcccccc,
         chipModeIndicator: 0x119911,
         chipModeIndicatorClose: 0xbb3333,

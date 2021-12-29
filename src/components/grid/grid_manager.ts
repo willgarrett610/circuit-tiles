@@ -8,8 +8,6 @@ import Grid from "./grid";
 /** grid manager */
 export default class GridManager extends PIXI.Container {
     mainGrid: Grid;
-    chipGrid: Grid;
-    structureGrid: Grid;
 
     inChipGrid = state.chipEditor;
 
@@ -19,8 +17,6 @@ export default class GridManager extends PIXI.Container {
     constructor() {
         super();
         this.mainGrid = new Grid(100);
-        this.chipGrid = new Grid(100);
-        this.structureGrid = new Grid(100);
         this.addChild(this.mainGrid);
 
         onResize(() => {
@@ -38,8 +34,8 @@ export default class GridManager extends PIXI.Container {
             if (grid.interactive) grid.keyDown(e);
         });
 
-        subscribe("editingChip", (value) => {
-            if (value) this.loadChip(value);
+        subscribe("currentChipGrid", (chipGrid) => {
+            if (chipGrid) this.loadChip(chipGrid.chip);
         });
         subscribe("chipEditor", (value) => {
             this.setInChipGrid(value);
@@ -63,13 +59,17 @@ export default class GridManager extends PIXI.Container {
         this.removeChildren();
         if (this.inChipGrid) {
             if (state.chipGridMode === ChipGridMode.STRUCTURING) {
-                state.editingChip?.finishEditing();
-                this.addChild(this.structureGrid);
+                state.currentChipGrid?.chip.finishEditing();
+                if (state.currentChipGrid?.grids.structure) {
+                    this.addChild(state.currentChipGrid.grids.structure);
+                }
             } else {
-                this.addChild(this.chipGrid);
+                if (state.currentChipGrid?.grids.chip) {
+                    this.addChild(state.currentChipGrid.grids.chip);
+                }
             }
         } else {
-            state.editingChip?.finishEditing();
+            state.currentChipGrid?.chip.finishEditing();
             this.addChild(this.mainGrid);
         }
         this.getGrid().generateTileGraphics();
@@ -79,16 +79,18 @@ export default class GridManager extends PIXI.Container {
      * loads chip into the grid
      *
      * @param chip chip to load
+     * @param generateGrid if a new grid should be generated
      */
-    loadChip(chip: Chip) {
-        this.removeChild(this.getGrid());
-        console.log("load");
-        this.chipGrid = new Grid(100);
-        this.chipGrid.tiles = chip.tiles;
-        this.structureGrid = new Grid(100);
-        this.structureGrid.tiles = chip.structure;
-        this.addChild(this.getGrid());
-        this.getGrid().generateTileGraphics();
+    loadChip(chip: Chip, generateGrid = true) {
+        // if (generateGrid) {
+        //     this.removeChild(this.getGrid());
+        //     this.chipGrid = new Grid(100);
+        //     this.chipGrid.tiles = chip.tiles;
+        //     this.structureGrid = new Grid(100);
+        //     this.structureGrid.tiles = chip.structure;
+        //     this.getGrid().generateTileGraphics();
+        // }
+        // this.addChild(this.getGrid());
     }
 
     /**
@@ -97,10 +99,12 @@ export default class GridManager extends PIXI.Container {
      * @returns chip grid state
      */
     getGrid() {
-        return this.inChipGrid
+        return this.inChipGrid &&
+            state.currentChipGrid?.grids.structure &&
+            state.currentChipGrid?.grids.chip
             ? state.chipGridMode === ChipGridMode.STRUCTURING
-                ? this.structureGrid
-                : this.chipGrid
+                ? state.currentChipGrid.grids.structure
+                : state.currentChipGrid.grids.chip
             : this.mainGrid;
     }
 }
