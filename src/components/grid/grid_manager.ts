@@ -2,7 +2,6 @@ import * as PIXI from "pixi.js";
 import state, { subscribe } from "../../state";
 import { onKeyDown, onResize, onScroll } from "../../utils";
 import ChipGridMode from "../../utils/chip_grid_mode";
-import { Chip } from "../chip/chip";
 import Grid from "./grid";
 
 /** grid manager */
@@ -34,9 +33,10 @@ export default class GridManager extends PIXI.Container {
             if (grid.interactive) grid.keyDown(e);
         });
 
-        subscribe("currentChipGrid", (chipGrid) => {
-            if (chipGrid) this.loadChip(chipGrid.chip);
-        });
+        // this might have to be changed so that is calls a reload on the ChipGrid
+        // subscribe("currentChipGrid", (chipGrid) => {
+        //     if (chipGrid) this.loadChip(chipGrid.chip);
+        // });
         subscribe("chipEditor", (value) => {
             this.setInChipGrid(value);
         });
@@ -73,24 +73,6 @@ export default class GridManager extends PIXI.Container {
             this.addChild(this.mainGrid);
         }
         this.getGrid().generateTileGraphics();
-    }
-
-    /**
-     * loads chip into the grid
-     *
-     * @param chip chip to load
-     * @param generateGrid if a new grid should be generated
-     */
-    loadChip(chip: Chip, generateGrid = true) {
-        // if (generateGrid) {
-        //     this.removeChild(this.getGrid());
-        //     this.chipGrid = new Grid(100);
-        //     this.chipGrid.tiles = chip.tiles;
-        //     this.structureGrid = new Grid(100);
-        //     this.structureGrid.tiles = chip.structure;
-        //     this.getGrid().generateTileGraphics();
-        // }
-        // this.addChild(this.getGrid());
     }
 
     /**

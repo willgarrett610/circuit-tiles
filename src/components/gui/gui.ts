@@ -20,6 +20,7 @@ import state, {
     setState,
     setStateProp,
     subscribe,
+    update,
 } from "../../state";
 import { EditMode } from "../../utils/edit_mode";
 import SelectorMenu from "./component/selector_menu";
@@ -422,7 +423,7 @@ const initGUI = (app: PIXI.Application) => {
     tileSelector.visible = false;
 
     multiSubscribe(
-        ["chipEditor", "chipGridMode", "currentChipGrid", "editingChip"],
+        ["chipEditor", "chipGridMode", "currentChipGrid", "editedChip"],
         () => {
             setStateProp("selectableTiles", (value) => {
                 value.splice(0);
@@ -518,7 +519,7 @@ const initGUI = (app: PIXI.Application) => {
                                 chips.push(chip);
                             });
                             setState({
-                                editingChip: chip,
+                                editedChip: update,
                                 currentChipGrid: new ChipGrid(chip),
                                 chipEditor: true,
                             });

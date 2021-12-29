@@ -6,17 +6,30 @@ import ChipGridMode from "./utils/chip_grid_mode";
 import { EditMode } from "./utils/edit_mode";
 
 interface State {
+    /** if the chip editor is open regardless of chip grid mode */
     chipEditor: boolean;
+    /** current editing mode */
     editMode: EditMode;
+    /** list of created chips */
     chips: Chip[];
+    /** determines if pixi events should be enabled */
     interactive: boolean;
     chipCreation: { open: boolean; nameValue: string; colorValue: number };
-    editingChip?: Chip;
+    /** used to merely to update */
+    editedChip: Updater;
+    /** the current chip grid */
     currentChipGrid?: ChipGrid;
+    /** the current chip grid mode */
     chipGridMode: ChipGridMode;
+    /** the index of the selected tile */
     selectedTileIndex: number;
+    /** possible selectable tiles */
     selectableTiles: TileType[];
 }
+
+export type Updater = undefined;
+/** purely used as a placeholder value for updater values */
+export const update: Updater = undefined;
 
 const state: State = {
     chipEditor: false,
@@ -28,7 +41,7 @@ const state: State = {
         nameValue: "",
         colorValue: 0x993333,
     },
-    editingChip: undefined,
+    editedChip: update,
     currentChipGrid: undefined,
     chipGridMode: ChipGridMode.EDITING,
     selectedTileIndex: -1,

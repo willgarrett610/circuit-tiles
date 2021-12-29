@@ -303,10 +303,10 @@ export default class Grid extends PIXI.Container {
 
         if (
             state.chipEditor &&
-            state.editingChip &&
+            state.editedChip &&
             state.chipGridMode === ChipGridMode.STRUCTURING
         )
-            publish("editingChip");
+            publish("editedChip");
 
         this.postAdd?.(tileObj);
 
@@ -333,10 +333,10 @@ export default class Grid extends PIXI.Container {
         this.deleteTile(x, y);
         if (
             state.chipEditor &&
-            state.editingChip &&
+            state.editedChip &&
             state.chipGridMode === ChipGridMode.STRUCTURING
         )
-            publish("editingChip");
+            publish("editedChip");
         const removalSpots: {
             offset: number[];
             side: "up" | "right" | "down" | "left";
