@@ -7,7 +7,7 @@ import { setState } from "../state";
 import { clamp } from "./math";
 
 /**
- * Generate a pixi container with a recatangle that has the specified corner radii
+ * Generate a pixi container with a rectangle that has the specified corner radii
  *
  * @param x X position
  * @param y Y position

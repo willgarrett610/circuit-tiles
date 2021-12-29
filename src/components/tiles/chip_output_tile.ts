@@ -33,7 +33,7 @@ export default class ChipOutputTile extends GraphicsTile {
      */
     onContext(e: CMouseEvent) {
         if (this.forGraphicOnly) return;
-        displayContextMenu(e.pageX, e.pageY, "ioTile", (name) => {
+        displayContextMenu(e.pageX, e.pageY, "ioTile").then((name) => {
             console.log(name);
             if (name === "rename") {
                 // rename
