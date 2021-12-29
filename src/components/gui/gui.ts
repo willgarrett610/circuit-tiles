@@ -434,7 +434,7 @@ const initGUI = (app: PIXI.Application) => {
                     } else {
                         // TODO Only display what hasn't been added to chip structure
                         if (state.currentChipGrid) {
-                            let selectableTiles: TileType[] = [
+                            const selectableTiles: TileType[] = [
                                 ...state.currentChipGrid.chip.inputTiles,
                                 ...state.currentChipGrid.chip.outputTiles,
                             ]
@@ -450,12 +450,10 @@ const initGUI = (app: PIXI.Application) => {
                                     tile: tile.type,
                                 }));
 
-                            selectableTiles = [
+                            value.push(
                                 { name: "Block", tile: StructureTile },
-                                ...selectableTiles,
-                            ];
-
-                            value.push(...selectableTiles);
+                                ...selectableTiles
+                            );
                         }
                     }
                 } else {
