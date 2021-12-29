@@ -417,7 +417,7 @@ export default class Grid extends PIXI.Container {
      */
     rotateTile(x: number, y: number) {
         const tile = this.getTile(x, y);
-        if (tile) {
+        if (tile && tile.breakOnRotate) {
             this.tempHistory.push({
                 action: GridAction.EDIT,
                 prevTile: tile.clone(),
