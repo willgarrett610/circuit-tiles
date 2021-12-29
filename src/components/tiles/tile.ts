@@ -51,6 +51,7 @@ export abstract class Tile {
     container?: PIXI.Container;
     signalActive = false;
     rotatable = true;
+    breakOnRotate = true;
 
     /**
      * Get rotation from direction

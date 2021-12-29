@@ -15,6 +15,8 @@ export default class StructureTile extends GraphicsTile {
 
     label: string = "Block";
 
+    rotatable = false;
+
     /** draw graphics */
     drawGraphics(): void {
         if (!this.graphics) return;

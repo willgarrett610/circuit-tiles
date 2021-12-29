@@ -19,6 +19,8 @@ export default class LeverTile extends GraphicsTile {
     };
 
     isNode = true;
+    rotatable = false;
+    breakOnRotate = false;
 
     /**
      * convert tile to node
