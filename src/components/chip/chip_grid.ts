@@ -1,3 +1,4 @@
+import { publish } from "../../state";
 import Grid from "../grid/grid";
 import { Chip } from "./chip";
 
@@ -20,6 +21,18 @@ export default class ChipGrid {
             chip: new Grid(100, chip.tiles),
             structure: new Grid(100, chip.structure),
         };
+
+        this.grids.chip.addHandler("postAddTile", (tile) => {
+            this.chip.tileAdded(tile);
+        });
+
+        this.grids.structure.addHandler("postAddTile", (tile) => {
+            this.chip.tileAdded(tile);
+            publish("editedChip");
+        });
+        this.grids.structure.addHandler("postRemoveTile", () => {
+            publish("editedChip");
+        });
     }
 
     /** reloads in the tiles for chip and structure grids */

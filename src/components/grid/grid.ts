@@ -13,10 +13,37 @@ import { ConnectionType, Tile } from "../tiles/tile";
 import { Direction, rotateClockWise } from "../../utils/directions";
 import "../../utils/compute_logic";
 import { GridAction, Interaction } from "../../utils/action";
-import state, { publish, setState, subscribe } from "../../state";
+import state, { setState, subscribe } from "../../state";
 import { EditMode } from "../../utils/edit_mode";
 import Graph from "../../logic/graph";
-import ChipGridMode from "../../utils/chip_grid_mode";
+
+interface GridHandlers {
+    postAddTile: ((tile: Tile) => void)[];
+    postRemoveTile: ((tile: Tile) => void)[];
+    postEditTile: ((tile: Tile) => void)[];
+    postUndo: ((
+        actions: {
+            action: GridAction;
+            prevTile: Tile | undefined;
+            postTile: Tile | undefined;
+            location: {
+                x: number;
+                y: number;
+            };
+        }[]
+    ) => void)[];
+    postRedo: ((
+        actions: {
+            action: GridAction;
+            prevTile: Tile | undefined;
+            postTile: Tile | undefined;
+            location: {
+                x: number;
+                y: number;
+            };
+        }[]
+    ) => void)[];
+}
 
 /** Grid class */
 export default class Grid extends PIXI.Container {
@@ -55,30 +82,31 @@ export default class Grid extends PIXI.Container {
 
     currentInteraction: Interaction = Interaction.NONE;
 
-    postAdd?: (tile: Tile) => void;
-    postRemove?: (tile: Tile) => void;
-    postUndo?: (
-        actions: {
-            action: GridAction;
-            prevTile: Tile | undefined;
-            postTile: Tile | undefined;
-            location: {
-                x: number;
-                y: number;
-            };
-        }[]
-    ) => void;
-    postRedo?: (
-        actions: {
-            action: GridAction;
-            prevTile: Tile | undefined;
-            postTile: Tile | undefined;
-            location: {
-                x: number;
-                y: number;
-            };
-        }[]
-    ) => void;
+    handlers: GridHandlers = {
+        postAddTile: [],
+        postRemoveTile: [],
+        postEditTile: [],
+        postUndo: [],
+        postRedo: [],
+    };
+
+    addHandler = <T extends keyof GridHandlers>(
+        handlerName: T,
+        handler: GridHandlers[T][number]
+    ) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        this.handlers[handlerName].push(handler as any);
+    };
+
+    dispatchHandler = <T extends keyof GridHandlers>(
+        handlerName: T,
+        ...args: Parameters<GridHandlers[T][number]>
+    ) => {
+        for (const handler of this.handlers[handlerName]) {
+            // eslint-disable-next-line prefer-spread, @typescript-eslint/no-explicit-any
+            (handler as any).apply(null, args as any);
+        }
+    };
 
     /**
      * Constructs grid
@@ -88,6 +116,7 @@ export default class Grid extends PIXI.Container {
      */
     constructor(size: number, tiles?: { [key: string]: Tile | undefined }) {
         super();
+
         this.startingSize = size;
         this.size = size;
 
@@ -297,18 +326,7 @@ export default class Grid extends PIXI.Container {
 
         this.handleForceConnection(tileObj);
 
-        if (state.chipEditor && state.currentChipGrid) {
-            state.currentChipGrid?.chip.tileAdded(tileObj);
-        }
-
-        if (
-            state.chipEditor &&
-            state.editedChip &&
-            state.chipGridMode === ChipGridMode.STRUCTURING
-        )
-            publish("editedChip");
-
-        this.postAdd?.(tileObj);
+        this.dispatchHandler("postAddTile", tileObj);
 
         return tileObj;
     }
@@ -331,12 +349,6 @@ export default class Grid extends PIXI.Container {
         });
         this.removeChild(tile.getContainer(this.size));
         this.deleteTile(x, y);
-        if (
-            state.chipEditor &&
-            state.editedChip &&
-            state.chipGridMode === ChipGridMode.STRUCTURING
-        )
-            publish("editedChip");
         const removalSpots: {
             offset: number[];
             side: "up" | "right" | "down" | "left";
@@ -368,7 +380,7 @@ export default class Grid extends PIXI.Container {
                 adjacentTile.updateContainer?.();
             }
         }
-        this.postRemove?.(tile);
+        this.dispatchHandler("postRemoveTile", tile);
         return true;
     }
 
@@ -492,7 +504,7 @@ export default class Grid extends PIXI.Container {
 
         this.history.splice(this.history.length - 2, 1);
 
-        this.postUndo?.(actions);
+        this.dispatchHandler("postUndo", actions);
     };
 
     redo = async () => {
@@ -542,7 +554,7 @@ export default class Grid extends PIXI.Container {
             }
         }
 
-        this.postRedo?.(actions);
+        this.dispatchHandler("postRedo", actions);
     };
 
     cleanHistory = () => {

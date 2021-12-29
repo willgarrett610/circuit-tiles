@@ -68,7 +68,6 @@ export class Chip {
      * @param tile Tile that was added
      */
     tileAdded(tile: Tile) {
-        console.log(tile);
         if (tile instanceof ChipInputTile || tile instanceof ChipOutputTile) {
             if (state.chipGridMode === ChipGridMode.STRUCTURING) {
                 tile.id = state.selectableTiles[state.selectedTileIndex].name;

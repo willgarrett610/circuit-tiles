@@ -242,7 +242,6 @@ const createGridModeIndicator = () => {
     );
 
     closeBtn.onClick = () => {
-        console.log(state.currentChipGrid?.chip);
         setState({ chipEditor: false });
     };
 
@@ -455,13 +454,6 @@ const initGUI = (app: PIXI.Application) => {
                                 { name: "Block", tile: StructureTile },
                                 ...selectableTiles,
                             ];
-
-                            console.log(
-                                "s",
-                                Object.values(
-                                    state.currentChipGrid.chip.structure
-                                )
-                            );
 
                             value.push(...selectableTiles);
                         }
