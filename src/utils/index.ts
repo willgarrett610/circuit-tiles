@@ -228,13 +228,35 @@ export function onResize(listener: (this: Window, ev: UIEvent) => any) {
 }
 
 /**
+ * Get entries of object
+ *
+ * @param input any object
+ * @returns entries of arrays with index and value as tuple
+ */
+export function entries<T>(input: T): [keyof T, T[keyof T]][];
+/**
  * Get entries of array
  *
  * @param input any array
  * @returns entries of arrays with value and index as tuple
  */
-export function entries<T>(input: T[]): [T, number][] {
-    return Object.entries(input).map(([key, value]) => [value, +key]);
+export function entries<T>(input: T[]): [number, T][];
+/**
+ * Get entries of array or object
+ *
+ * @param input any object or array
+ * @returns entries of arrays with index and value as tuple
+ */
+export function entries<T>(
+    input: T | T[]
+): [number, T][] | [keyof T, T[keyof T]][] {
+    if (Array.isArray(input))
+        return Object.entries(input).map(([key, value]) => [+key, value]);
+    else
+        return Object.entries(input).map(([key, value]) => [
+            key as keyof T,
+            value,
+        ]);
 }
 
 /**

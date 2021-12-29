@@ -1,5 +1,4 @@
 import { ConnectionType, Tile } from "../components/tiles/tile";
-import { entries } from "../utils";
 import CircuitLocation from "./circuit_location";
 import LogicNode from "./node";
 
@@ -172,7 +171,7 @@ export default class Graph {
         // input indices
         // output indices
         const output = [];
-        for (const [node] of entries(this.nodes)) {
+        for (const node of this.nodes) {
             const nodeData = [
                 node.type,
                 node.state ? 1 : 0,
