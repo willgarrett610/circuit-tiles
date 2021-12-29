@@ -14,6 +14,7 @@ export default class StructureTile extends GraphicsTile {
     };
 
     label: string = "Block";
+    id = "";
 
     rotatable = false;
 

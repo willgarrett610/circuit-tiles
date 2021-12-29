@@ -27,10 +27,12 @@ export default class ChipGrid {
         });
 
         this.grids.structure.addHandler("postAddTile", (tile) => {
+            console.log("structured: ", this.chip.isStructured());
             this.chip.tileAdded(tile);
             publish("editedChip");
         });
         this.grids.structure.addHandler("postRemoveTile", () => {
+            console.log("structured: ", this.chip.isStructured());
             publish("editedChip");
         });
     }

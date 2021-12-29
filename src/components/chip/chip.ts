@@ -1,7 +1,9 @@
 import state from "../../state";
 import ChipGridMode from "../../utils/chip_grid_mode";
+import { Direction } from "../../utils/directions";
 import ChipInputTile from "../tiles/chip_input_tile";
 import ChipOutputTile from "../tiles/chip_output_tile";
+import StructureTile from "../tiles/structure_tile";
 import { Tile } from "../tiles/tile";
 
 /**
@@ -13,8 +15,13 @@ export class Chip {
     tiles: { [key: string]: Tile | undefined } = {};
     inputTiles: { name: string; tile: ChipInputTile }[] = [];
     outputTiles: { name: string; tile: ChipOutputTile }[] = [];
-    structure: { [key: string]: ChipInputTile | ChipOutputTile | undefined } =
-        {};
+    structure: {
+        [key: string]:
+            | ChipInputTile
+            | ChipOutputTile
+            | StructureTile
+            | undefined;
+    } = {};
 
     inputIndex: number = 1;
     outputIndex: number = 1;
@@ -63,6 +70,42 @@ export class Chip {
     }
 
     /**
+     * get tile at location
+     *
+     * @param x x coordinate
+     * @param y y coordinate
+     * @returns tile at location
+     */
+    getStructureTile(x: number, y: number) {
+        return this.structure[`${x},${y}`];
+    }
+
+    /**
+     * set tile at location
+     *
+     * @param x x coordinate
+     * @param y y coordinate
+     * @param tile
+     */
+    setStructureTile(
+        x: number,
+        y: number,
+        tile: ChipInputTile | ChipOutputTile | StructureTile
+    ) {
+        this.structure[`${x},${y}`] = tile;
+    }
+
+    /**
+     * remove tile at coordinate
+     *
+     * @param x x coordinate
+     * @param y y coordinate
+     */
+    deleteStructureTile(x: number, y: number) {
+        delete this.structure[`${x},${y}`];
+    }
+
+    /**
      * Called after a tile is added to the chip
      *
      * @param tile Tile that was added
@@ -96,5 +139,47 @@ export class Chip {
                 this.outputTiles.push({ name: tile.id, tile: tile });
             }
         }
+    }
+
+    /**
+     * checks if the chip has had it structure using all tiles and non-disjoint
+     *
+     * @returns true if the chip is structured
+     */
+    isStructured() {
+        if (
+            Object.values(this.structure).filter(
+                (tile) => !(tile instanceof StructureTile)
+            ).length !==
+            this.inputTiles.length + this.outputTiles.length
+        )
+            return false;
+
+        const tile = Object.values(this.structure).find(
+            (tile) => tile instanceof Tile
+        );
+
+        if (!tile) return true;
+
+        let tilesLeft = Object.values(this.structure).filter((x) => x !== tile);
+
+        const isJoint = (tile: Tile) => {
+            for (const direction of Direction.values()) {
+                const offset = Direction.getOffset(direction);
+                const neighbor = this.getStructureTile(
+                    tile.x + offset[0],
+                    tile.y + offset[1]
+                );
+                if (neighbor) {
+                    const prevLength = tilesLeft.length;
+                    tilesLeft = tilesLeft.filter((x) => x !== neighbor);
+                    const newLength = tilesLeft.length;
+                    if (prevLength === newLength) continue;
+                    isJoint(neighbor);
+                }
+            }
+        };
+        isJoint(tile);
+        return tilesLeft.length === 0;
     }
 }
