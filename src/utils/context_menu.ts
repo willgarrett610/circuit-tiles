@@ -48,7 +48,7 @@ export function displayContextMenu<T extends keyof typeof contextMenus>(
     y: number,
     menuName: T
 ) {
-    return new Promise<keyof typeof contextMenus[T]>((resolve, reject) => {
+    return new Promise<keyof typeof contextMenus[T] | null>((resolve) => {
         const menu = contextMenus[menuName];
 
         const overlay = new GUIWindow(0, 0, width(), height(), 0x000000);
@@ -154,7 +154,7 @@ export function displayContextMenu<T extends keyof typeof contextMenus>(
 
         overlay.on("click", () => {
             app?.stage.removeChild(overlay);
-            reject();
+            resolve(null);
         });
     });
 }
