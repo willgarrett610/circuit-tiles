@@ -685,7 +685,6 @@ export default class Grid extends PIXI.Container {
             } else if (state.editMode === EditMode.CURSOR) {
                 // do nothing
             } else {
-                // TODO Tile and Chip modes
                 this.currentInteraction = Interaction.PLACING;
 
                 const gridPoints = this.gridPointsBetween(
@@ -794,7 +793,6 @@ export default class Grid extends PIXI.Container {
                     this.rotateTile(...gridPoint);
                 this.currentInteraction = Interaction.PLACING;
             } else if (state.selectedTileIndex !== -1) {
-                // TODO Tile and Chip modes
                 if (this.currentInteraction === Interaction.NONE)
                     this.rotateTile(...gridPoint);
                 this.currentInteraction = Interaction.PLACING;
