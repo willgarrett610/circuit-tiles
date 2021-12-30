@@ -36,41 +36,46 @@ export default class ChipInputTile extends GraphicsTile {
         if (this.forGraphicOnly) return;
         displayContextMenu(e.pageX, e.pageY, "ioTile").then((name) => {
             if (name === "rename") {
-                getTextInput("Rename", "Enter new name", this.id).then(
-                    (value) => {
-                        if (!state.currentChipGrid) return;
-                        if (
-                            Object.values(
-                                state.currentChipGrid?.chip.tiles
-                            ).find(
-                                (v) =>
-                                    v instanceof ChipInputTile && v.id === value
-                            )
-                        ) {
-                            console.log("Name already taken");
-                        }
-                        const inputTileE =
-                            state.currentChipGrid?.chip.inputTiles.find(
-                                (value) => value.name === this.id
-                            );
-                        const inputTileS = Object.values(
-                            state.currentChipGrid.chip.structure
-                        ).find(
-                            (value) =>
-                                value instanceof ChipInputTile &&
-                                value.id === this.id
-                        ) as ChipInputTile;
-                        if (inputTileE) {
-                            inputTileE.tile.id = value;
-                            inputTileE.name = value;
-                            inputTileE.tile.generateText();
-                        }
-                        if (inputTileS) {
-                            inputTileS.id = value;
-                            inputTileS.generateText();
-                        }
+                getTextInput("Rename", "Enter new name", this.id, (value) => {
+                    console.log(value);
+                    return (
+                        state.currentChipGrid !== undefined &&
+                        !Object.values(state.currentChipGrid?.chip.tiles).find(
+                            (v) => v instanceof ChipInputTile && v.id === value
+                        ) &&
+                        value.length > 0 &&
+                        value.length <= 6
+                    );
+                }).then((value) => {
+                    if (!state.currentChipGrid) return;
+                    if (
+                        Object.values(state.currentChipGrid?.chip.tiles).find(
+                            (v) => v instanceof ChipInputTile && v.id === value
+                        )
+                    ) {
+                        console.log("Name already taken");
                     }
-                );
+                    const inputTileE =
+                        state.currentChipGrid?.chip.inputTiles.find(
+                            (value) => value.name === this.id
+                        );
+                    const inputTileS = Object.values(
+                        state.currentChipGrid.chip.structure
+                    ).find(
+                        (value) =>
+                            value instanceof ChipInputTile &&
+                            value.id === this.id
+                    ) as ChipInputTile;
+                    if (inputTileE) {
+                        inputTileE.tile.id = value;
+                        inputTileE.name = value;
+                        inputTileE.tile.generateText();
+                    }
+                    if (inputTileS) {
+                        inputTileS.id = value;
+                        inputTileS.generateText();
+                    }
+                });
             }
         });
     };

@@ -17,7 +17,6 @@ import { GridAction, Interaction } from "../../utils/action";
 import state, { setState, subscribe } from "../../state";
 import { EditMode } from "../../utils/edit_mode";
 import Graph from "../../logic/graph";
-import ChipInputTile from "../tiles/chip_input_tile";
 
 interface GridHandlers {
     postAddTile: ((tile: Tile) => void)[];

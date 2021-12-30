@@ -122,6 +122,10 @@
     cursor: pointer;
 }
 
+.create_button.disabled {
+    background-color: #5c5c5c;
+}
+
 .create_button {
     width: 110px;
     height: 30px;
