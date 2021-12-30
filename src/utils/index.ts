@@ -97,12 +97,18 @@ export function getCreateChipInput(
                 colorValue: color,
             },
         });
+        const title = document.getElementById(
+            "chip_creation_title"
+        ) as HTMLElement;
         const nameInput = document.getElementById(
             "chip_name_input"
         ) as HTMLInputElement;
         const hueInput = document.getElementById(
             "chip_hue_input"
         ) as HTMLInputElement;
+        const colorPrev = document.getElementById(
+            "chip_color_prev"
+        ) as HTMLElement;
 
         const cancelButton = document.getElementById(
             "chip_cancel_button"
@@ -112,9 +118,15 @@ export function getCreateChipInput(
         ) as HTMLButtonElement;
 
         if (!createNew) {
+            title.innerText = "Edit Chip";
             nameInput.value = name;
             hueInput.value = "" + hue;
+            colorPrev.style.backgroundColor = "#" + color.toString(16);
+
             createButton.innerText = "Submit";
+        } else {
+            createButton.innerText = "Create";
+            title.innerText = "Create Chip";
         }
 
         cancelButton.addEventListener(

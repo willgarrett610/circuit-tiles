@@ -574,6 +574,7 @@ const initGUI = (app: PIXI.Application) => {
                                         if (!newChip) return;
                                         chip.name = newChip.name;
                                         chip.color = newChip.color;
+                                        chip.hue = newChip.hue;
                                         publish("chips");
                                     });
                                     break;
