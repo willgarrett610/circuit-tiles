@@ -17,6 +17,8 @@ interface State {
     chipCreation: { open: boolean; nameValue: string; colorValue: number };
     /** used to merely to update */
     editedChip: Updater;
+    /** whether the current grid is structured or not */
+    isStructured: boolean;
     /** the current chip grid */
     currentChipGrid?: ChipGrid;
     /** the current chip grid mode */
@@ -42,6 +44,7 @@ const state: State = {
         colorValue: 0x993333,
     },
     editedChip: update,
+    isStructured: true,
     currentChipGrid: undefined,
     chipGridMode: ChipGridMode.EDITING,
     selectedTileIndex: -1,

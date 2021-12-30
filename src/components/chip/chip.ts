@@ -122,8 +122,10 @@ export class Chip {
             } else {
                 if (tile instanceof ChipInputTile) {
                     tile.id = "IN" + this.inputIndex++;
+                    this.inputTiles.push({ name: tile.id, tile: tile });
                 } else if (tile instanceof ChipOutputTile) {
                     tile.id = "OUT" + this.outputIndex++;
+                    this.outputTiles.push({ name: tile.id, tile: tile });
                 }
             }
             tile.generateText();
@@ -131,17 +133,15 @@ export class Chip {
     }
 
     /**
-     * Save input and output tiles
+     * Called after a tile is removed from the chip
+     *
+     * @param tile Tile that was removed
      */
-    finishEditing() {
-        this.inputTiles = [];
-        this.outputTiles = [];
-        for (const [_, tile] of Object.entries(this.tiles)) {
-            if (tile instanceof ChipInputTile) {
-                this.inputTiles.push({ name: tile.id, tile: tile });
-            } else if (tile instanceof ChipOutputTile) {
-                this.outputTiles.push({ name: tile.id, tile: tile });
-            }
+    tileRemoved(tile: Tile) {
+        if (tile instanceof ChipInputTile) {
+            this.inputTiles = this.inputTiles.filter((x) => x.tile !== tile);
+        } else if (tile instanceof ChipOutputTile) {
+            this.outputTiles = this.outputTiles.filter((x) => x.tile !== tile);
         }
     }
 
@@ -151,6 +151,7 @@ export class Chip {
      * @returns true if the chip is structured
      */
     isStructured() {
+        console.log(this.structure);
         if (
             Object.values(this.structure).filter(
                 (tile) => !(tile instanceof StructureTile)

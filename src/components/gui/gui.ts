@@ -334,14 +334,18 @@ const initGUI = (app: PIXI.Application) => {
 
     chipGridModeBtn.setDefaultContainer(chipGridModeBtnContainer);
 
-    subscribe("chipGridMode", (value) => {
-        let text = "Switch to ";
-        if (value === ChipGridMode.EDITING) {
-            text += "structure";
-        } else {
-            text += "edit";
+    multiSubscribe(["chipGridMode", "isStructured"], (event) => {
+        console.log(event);
+        if (event.name === "chipGridMode") {
+            let text = "Switch to ";
+            if (event.value === ChipGridMode.EDITING) {
+                text += "structure";
+            } else {
+                text += "edit";
+            }
+            chipGridModeText.text = text;
         }
-        chipGridModeText.text = text;
+
         chipGridModeBtn.defaultContainer?.removeChildren();
         chipGridModeBtn.setDefaultContainer(
             generateRoundedRectContainer(
@@ -349,10 +353,13 @@ const initGUI = (app: PIXI.Application) => {
                 0,
                 chipGridModeText.width + 30,
                 config.chipGridMode.height,
-                config.colors.chipGridMode,
+                state.currentChipGrid?.chip.isStructured()
+                    ? config.colors.chipGridMode
+                    : config.colors.chipGridModeHighlight,
                 { topLeft: 5, topRight: 5, botRight: 5, botLeft: 5 }
             )
         );
+
         chipGridModeBtn.defaultContainer?.addChild(chipGridModeText);
         chipGridModeBtn.defaultContainer?.addChild(swapSprite);
         chipGridModeBtn.x =
