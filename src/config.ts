@@ -27,6 +27,7 @@ const config = {
         gridSelection: 0x999999,
         contextMenu: 0x18191c,
         contextMenuHighlight: 0x6b6d74,
+        disabledTileX: 0x000000,
     },
     zoomCoeff: 1.15,
     lineColor: 0x222222,
