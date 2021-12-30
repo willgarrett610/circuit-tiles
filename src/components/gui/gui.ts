@@ -467,10 +467,10 @@ const initGUI = (app: PIXI.Application) => {
                                     tile: tile.type,
                                 }));
 
-                            value.push(
-                                { name: "Block", tile: StructureTile },
-                                ...selectableTiles
-                            );
+                            value.push(...selectableTiles, {
+                                name: "Block",
+                                tile: StructureTile,
+                            });
                         }
                     }
                 } else {

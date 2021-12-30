@@ -17,7 +17,6 @@ import { GridAction, Interaction } from "../../utils/action";
 import state, { setState, subscribe } from "../../state";
 import { EditMode } from "../../utils/edit_mode";
 import Graph from "../../logic/graph";
-import ChipInputTile from "../tiles/chip_input_tile";
 
 interface GridHandlers {
     postAddTile: ((tile: Tile) => void)[];
@@ -493,8 +492,10 @@ export default class Grid extends PIXI.Container {
             const refTile = this.getTile(location.x, location.y);
             switch (action) {
                 case GridAction.ADD: {
-                    if (refTile)
+                    if (refTile) {
                         this.removeChild(refTile.getContainer(this.size));
+                        this.dispatchHandler("postRemoveTile", refTile);
+                    }
                     this.deleteTile(location.x, location.y);
 
                     break;
@@ -520,6 +521,7 @@ export default class Grid extends PIXI.Container {
                             this.size
                         );
                         this.addChild(tileGraphics);
+                        this.dispatchHandler("postAddTile", tile);
                     }
 
                     this.getTile(location.x, location.y)?.updateContainer?.();
@@ -547,10 +549,11 @@ export default class Grid extends PIXI.Container {
             const refTile = this.getTile(location.x, location.y);
             switch (action) {
                 case GridAction.REMOVE: {
-                    if (refTile)
+                    if (refTile) {
                         this.removeChild(refTile.getContainer(this.size));
+                        this.dispatchHandler("postRemoveTile", refTile);
+                    }
                     this.deleteTile(location.x, location.y);
-
                     break;
                 }
                 case GridAction.EDIT: {
@@ -572,6 +575,8 @@ export default class Grid extends PIXI.Container {
                         const tileGraphics: PIXI.Container =
                             postTile.getContainer(this.size);
                         this.addChild(tileGraphics);
+
+                        this.dispatchHandler("postAddTile", postTile);
                     }
 
                     this.getTile(location.x, location.y)?.updateContainer?.();

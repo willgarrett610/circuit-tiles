@@ -33,6 +33,7 @@ export default class ChipGrid {
             this.chip.tileRemoved(tile);
             setState({ isStructured: this.chip.isStructured() });
         });
+
         this.grids.structure.addHandler("postAddTile", (tile) => {
             console.log("structured: ", this.chip.isStructured());
             if (
