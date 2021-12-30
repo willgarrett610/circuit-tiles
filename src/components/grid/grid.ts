@@ -830,8 +830,22 @@ export default class Grid extends PIXI.Container {
             e.stopPropagation();
         }
 
-        if (e.code === "KeyX") {
-            setState({ editMode: EditMode.ERASER });
+        switch (e.code) {
+            case "KeyX":
+                setState({ editMode: EditMode.ERASER });
+                break;
+            case "KeyT":
+                setState({ editMode: EditMode.TILE });
+                break;
+            case "KeyC":
+                setState({ editMode: EditMode.CHIP });
+                break;
+            case "KeyP":
+                setState({ editMode: EditMode.PAN });
+                break;
+            case "KeyS":
+                setState({ editMode: EditMode.CURSOR });
+                break;
         }
 
         if (!e.ctrlKey && !e.shiftKey) {
