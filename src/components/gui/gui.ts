@@ -5,6 +5,7 @@ import {
     dimensions,
     generateRoundedRectContainer,
     getCreateChipInput,
+    hslToHex,
     onResize,
     width,
 } from "../../utils";
@@ -538,10 +539,31 @@ const initGUI = (app: PIXI.Application) => {
             const chip = state.chips[i];
             const isStructured = chip.isStructured();
 
-            const genContainer = () => {
+            const genContainer = (hover: boolean) => {
                 const graphics = new PIXI.Graphics();
-                graphics.beginFill(chip.color);
+                graphics.beginFill(
+                    isStructured ? chip.color : hslToHex(chip.hue, 50, 10)
+                );
                 graphics.drawRect(0, 0, 100, 100);
+                graphics.endFill();
+
+                graphics.beginFill(config.colors.disabledTileX, 0.5);
+                graphics.drawPolygon(
+                    [
+                        [20, 90],
+                        [50, 60],
+                        [80, 90],
+                        [90, 80],
+                        [60, 50],
+                        [90, 20],
+                        [80, 10],
+                        [50, 40],
+                        [20, 10],
+                        [10, 20],
+                        [40, 50],
+                        [10, 80],
+                    ].flat()
+                );
                 graphics.endFill();
 
                 graphics.width = tileSize;
@@ -552,8 +574,8 @@ const initGUI = (app: PIXI.Application) => {
                 return container;
             };
 
-            const defaultContainer = genContainer();
-            const hoverContainer = genContainer();
+            const defaultContainer = genContainer(false);
+            const hoverContainer = genContainer(true);
 
             return {
                 name: chip.name,
