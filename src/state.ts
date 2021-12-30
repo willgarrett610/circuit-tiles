@@ -15,6 +15,7 @@ interface State {
     /** determines if pixi events should be enabled */
     interactive: boolean;
     chipCreation: { open: boolean; nameValue: string; colorValue: number };
+    textInput: { open: boolean; title: string; name: string; value: string };
     /** used to merely to update */
     editedChip: Updater;
     /** whether the current grid is structured or not */
@@ -42,6 +43,12 @@ const state: State = {
         open: false,
         nameValue: "",
         colorValue: 0x993333,
+    },
+    textInput: {
+        open: false,
+        title: "",
+        name: "",
+        value: "",
     },
     editedChip: update,
     isStructured: true,

@@ -106,10 +106,10 @@ export function displayContextMenu<T extends keyof typeof contextMenus>(
             const hoverContainer = new PIXI.Container();
             hoverContainer.addChild(
                 generateRoundedRectContainer(
-                    2,
-                    2,
-                    item.width - 4,
-                    item.height - 4,
+                    4,
+                    4,
+                    item.width - 8,
+                    item.height - 8,
                     config.colors.contextMenuHighlight,
                     {
                         topLeft: 5,

@@ -151,7 +151,6 @@ export class Chip {
      * @returns true if the chip is structured
      */
     isStructured() {
-        console.log(this.structure);
         if (
             Object.values(this.structure).filter(
                 (tile) => !(tile instanceof StructureTile)

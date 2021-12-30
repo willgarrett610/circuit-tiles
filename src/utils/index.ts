@@ -170,6 +170,83 @@ export function getCreateChipInput(
 }
 
 /**
+ * Take a text input from the user
+ *
+ * @param title Title of the modal
+ * @param name Name of the field
+ * @param value Initial value of the field
+ * @param isValid Function that determines if the input is valid
+ * @returns Value of input from user
+ */
+export function getTextInput(
+    title: string,
+    name: string,
+    value: string,
+    isValid?: (value: string) => boolean
+): Promise<string> {
+    return new Promise<string>((resolve) => {
+        setState({
+            textInput: {
+                open: true,
+                title,
+                name,
+                value,
+            },
+        });
+        const cancelButton = document.getElementById(
+            "text_input_cancel"
+        ) as HTMLButtonElement;
+        const submitButton = document.getElementById(
+            "text_input_submit"
+        ) as HTMLButtonElement;
+        const input = document.getElementById("text_input") as HTMLInputElement;
+
+        const onChange = (event: Event) => {
+            const e = event as InputEvent;
+            console.log(e);
+            // if (isValid && !isValid(e.value)) {
+            //     submitButton.disabled = true;
+            // }
+        };
+
+        input.addEventListener("input", onChange);
+
+        cancelButton.addEventListener(
+            "click",
+            () => {
+                setState({
+                    textInput: {
+                        open: false,
+                        title,
+                        name,
+                        value,
+                    },
+                });
+                resolve(value);
+            },
+            { once: true }
+        );
+
+        submitButton.addEventListener(
+            "click",
+            () => {
+                input.removeEventListener("change", onChange);
+                setState({
+                    textInput: {
+                        open: false,
+                        title,
+                        name,
+                        value: input.value,
+                    },
+                });
+                resolve(input.value);
+            },
+            { once: true }
+        );
+    });
+}
+
+/**
  * Converts hsl value to hex
  *
  * @param h Hue value (0-360)

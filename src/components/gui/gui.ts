@@ -528,6 +528,7 @@ const initGUI = (app: PIXI.Application) => {
                             setState({
                                 editedChip: update,
                                 currentChipGrid: new ChipGrid(chip),
+                                isStructured: true,
                                 chipEditor: true,
                                 editMode: EditMode.TILE,
                             });
@@ -542,29 +543,31 @@ const initGUI = (app: PIXI.Application) => {
             const genContainer = (hover: boolean) => {
                 const graphics = new PIXI.Graphics();
                 graphics.beginFill(
-                    isStructured ? chip.color : hslToHex(chip.hue, 50, 10)
+                    isStructured ? chip.color : hslToHex(chip.hue, 50, 20)
                 );
                 graphics.drawRect(0, 0, 100, 100);
                 graphics.endFill();
 
-                graphics.beginFill(config.colors.disabledTileX, 0.5);
-                graphics.drawPolygon(
-                    [
-                        [20, 90],
-                        [50, 60],
-                        [80, 90],
-                        [90, 80],
-                        [60, 50],
-                        [90, 20],
-                        [80, 10],
-                        [50, 40],
-                        [20, 10],
-                        [10, 20],
-                        [40, 50],
-                        [10, 80],
-                    ].flat()
-                );
-                graphics.endFill();
+                if (hover && !isStructured) {
+                    graphics.beginFill(config.colors.disabledTileX, 0.7);
+                    graphics.drawPolygon(
+                        [
+                            [20, 90],
+                            [50, 60],
+                            [80, 90],
+                            [90, 80],
+                            [60, 50],
+                            [90, 20],
+                            [80, 10],
+                            [50, 40],
+                            [20, 10],
+                            [10, 20],
+                            [40, 50],
+                            [10, 80],
+                        ].flat()
+                    );
+                    graphics.endFill();
+                }
 
                 graphics.width = tileSize;
                 graphics.height = tileSize;
@@ -642,7 +645,7 @@ const initGUI = (app: PIXI.Application) => {
     );
     chipSelector.visible = false;
 
-    multiSubscribe(["chips", "chipGridMode"], () => {
+    multiSubscribe(["chips", "chipGridMode", "editMode"], () => {
         chipSelector.generateComponents();
     });
 

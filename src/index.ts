@@ -31,10 +31,16 @@ const main = async () => {
 
     document.body.appendChild(app.view);
 
-    const child = document.getElementById("chip_creation");
-    if (child) {
-        document.body.removeChild(child);
-        document.body.appendChild(child);
+    const chipCreation = document.getElementById("chip_creation");
+    if (chipCreation) {
+        document.body.removeChild(chipCreation);
+        document.body.appendChild(chipCreation);
+    }
+
+    const textInputForm = document.getElementById("text_input_modal");
+    if (textInputForm) {
+        document.body.removeChild(textInputForm);
+        document.body.appendChild(textInputForm);
     }
 
     app.renderer.backgroundColor = config.colors.background;
@@ -85,6 +91,30 @@ const main = async () => {
                 setState({ interactive: false });
             } else {
                 chipCreationForm.style.display = "none";
+                setState({ interactive: true });
+            }
+        });
+    }
+
+    const textInputTitle = document.getElementById(
+        "text_input_title"
+    ) as HTMLElement;
+    const textInputName = document.getElementById(
+        "text_input_name"
+    ) as HTMLElement;
+    const textInput = document.getElementById("text_input") as HTMLInputElement;
+
+    if (textInputForm) {
+        subscribe("textInput", (value) => {
+            if (value.open) {
+                textInputForm.style.display = "block";
+                textInputTitle.innerText = value.title;
+                textInputName.innerText = value.name + ":";
+                textInput.value = value.value;
+
+                setState({ interactive: false });
+            } else {
+                textInputForm.style.display = "none";
                 setState({ interactive: true });
             }
         });

@@ -3,7 +3,8 @@ import * as PIXI from "pixi.js";
 import config from "../../config";
 import CircuitLocation from "../../logic/circuit_location";
 import LogicNode from "../../logic/node";
-import { CMouseEvent } from "../../utils";
+import state from "../../state";
+import { CMouseEvent, getTextInput } from "../../utils";
 import { displayContextMenu } from "../../utils/context_menu";
 import { ConnectionType, GraphicsTile, Tile } from "./tile";
 
@@ -34,9 +35,42 @@ export default class ChipInputTile extends GraphicsTile {
     onContext = (e: CMouseEvent) => {
         if (this.forGraphicOnly) return;
         displayContextMenu(e.pageX, e.pageY, "ioTile").then((name) => {
-            console.log(name);
             if (name === "rename") {
-                // rename
+                getTextInput("Rename", "Enter new name", this.id).then(
+                    (value) => {
+                        if (!state.currentChipGrid) return;
+                        if (
+                            Object.values(
+                                state.currentChipGrid?.chip.tiles
+                            ).find(
+                                (v) =>
+                                    v instanceof ChipInputTile && v.id === value
+                            )
+                        ) {
+                            console.log("Name already taken");
+                        }
+                        const inputTileE =
+                            state.currentChipGrid?.chip.inputTiles.find(
+                                (value) => value.name === this.id
+                            );
+                        const inputTileS = Object.values(
+                            state.currentChipGrid.chip.structure
+                        ).find(
+                            (value) =>
+                                value instanceof ChipInputTile &&
+                                value.id === this.id
+                        ) as ChipInputTile;
+                        if (inputTileE) {
+                            inputTileE.tile.id = value;
+                            inputTileE.name = value;
+                            inputTileE.tile.generateText();
+                        }
+                        if (inputTileS) {
+                            inputTileS.id = value;
+                            inputTileS.generateText();
+                        }
+                    }
+                );
             }
         });
     };
@@ -59,6 +93,12 @@ export default class ChipInputTile extends GraphicsTile {
     /** Generate text component */
     generateText(): void {
         if (this.container) {
+            for (const child of this.container.children) {
+                if (child instanceof PIXI.Text) {
+                    this.container.removeChild(child);
+                }
+            }
+
             const idText = new PIXI.Text(this.id, {
                 fontFamily: "Arial",
                 fontSize: 20,
