@@ -14,6 +14,7 @@ import { Tile } from "../tiles/tile";
 export class Chip {
     name: string;
     color: number;
+    hue: number;
     tiles: { [key: string]: Tile | undefined } = {};
     inputTiles: { name: string; tile: ChipInputTile }[] = [];
     outputTiles: { name: string; tile: ChipOutputTile }[] = [];
@@ -33,10 +34,12 @@ export class Chip {
      *
      * @param name Name of the chip
      * @param color Color of the chip
+     * @param hue Hue of the color
      */
-    constructor(name: string, color: number) {
+    constructor(name: string, color: number, hue: number) {
         this.name = name;
         this.color = color;
+        this.hue = hue;
     }
 
     /**
@@ -190,7 +193,7 @@ export class Chip {
      * @returns cloned chip
      */
     clone() {
-        const newChip = new Chip(this.name, this.color);
+        const newChip = new Chip(this.name, this.color, this.hue);
         newChip.inputIndex = this.inputIndex;
         newChip.outputIndex = this.outputIndex;
         newChip.tiles = mapObject(this.tiles, (tile) => tile?.clone());

@@ -77,15 +77,24 @@ export function generateRoundedRectContainer(
 /**
  * Open chip creation menu and return a promise that resolves when the menu is closed
  *
+ * @param createNew whether this is a pre-existing chip or a new chip
+ * @param name default chip name
+ * @param color default chip color
+ * @param hue default chip hue color
  * @returns Promise that resolves when the menu is closed
  */
-export function getCreateChipInput(): Promise<Chip | null> {
+export function getCreateChipInput(
+    createNew = true,
+    name = "",
+    color = 0x993333,
+    hue = 0
+): Promise<Chip | null> {
     return new Promise<Chip | null>((resolve) => {
         setState({
             chipCreation: {
                 open: true,
-                nameValue: "",
-                colorValue: 0x993333,
+                nameValue: name,
+                colorValue: color,
             },
         });
         const nameInput = document.getElementById(
@@ -102,14 +111,20 @@ export function getCreateChipInput(): Promise<Chip | null> {
             "chip_create_button"
         ) as HTMLButtonElement;
 
+        if (!createNew) {
+            nameInput.value = name;
+            hueInput.value = "" + hue;
+            createButton.innerText = "Submit";
+        }
+
         cancelButton.addEventListener(
             "click",
             () => {
                 setState({
                     chipCreation: {
                         open: false,
-                        nameValue: "",
-                        colorValue: 0x993333,
+                        nameValue: name,
+                        colorValue: color,
                     },
                 });
                 resolve(null);
@@ -120,20 +135,22 @@ export function getCreateChipInput(): Promise<Chip | null> {
         createButton.addEventListener(
             "click",
             () => {
-                const name = nameInput.value;
+                const nameValue = nameInput.value;
                 // const color = PIXI.utils.string2hex(
                 //     "hsl(" + parseInt(hueInput.value) + ", 50%, 40%)"
                 // );
-                const color = hslToHex(parseInt(hueInput.value), 50, 40);
+                const colorValue = hslToHex(parseInt(hueInput.value), 50, 40);
 
                 setState({
                     chipCreation: {
                         open: false,
-                        nameValue: name,
-                        colorValue: color,
+                        nameValue,
+                        colorValue,
                     },
                 });
-                resolve(new Chip(name, color));
+                resolve(
+                    new Chip(nameValue, colorValue, parseInt(hueInput.value))
+                );
             },
             { once: true }
         );

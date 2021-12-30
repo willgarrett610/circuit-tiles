@@ -18,6 +18,7 @@ import { GUIComponent, GUIComponentState } from "./component/gui_component";
 import { getSprite } from "../sprites/sprite_loader";
 import state, {
     multiSubscribe,
+    publish,
     setState,
     setStateProp,
     subscribe,
@@ -555,6 +556,19 @@ const initGUI = (app: PIXI.Application) => {
                     displayContextMenu(e.pageX, e.pageY, "chipSelection").then(
                         (name) => {
                             switch (name) {
+                                case "settings":
+                                    getCreateChipInput(
+                                        false,
+                                        chip.name,
+                                        chip.color,
+                                        chip.hue
+                                    ).then((newChip) => {
+                                        if (!newChip) return;
+                                        chip.name = newChip.name;
+                                        chip.color = newChip.color;
+                                        publish("chips");
+                                    });
+                                    break;
                                 case "edit":
                                     setState({
                                         editedChip: update,

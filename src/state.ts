@@ -189,10 +189,10 @@ export function setStateProp<T extends keyof State>(
 /**
  * Update callback functions for a state variable
  *
- * @param name
+ * @param names
  */
-export function publish<T extends keyof State>(name: T) {
-    setStateProp(name);
+export function publish<T extends keyof State>(...names: T[]) {
+    names.forEach((name) => setStateProp(name));
 }
 
 export default state;
