@@ -1,5 +1,7 @@
-import { publish } from "../../state";
+import state, { setState, update } from "../../state";
 import Grid from "../grid/grid";
+import ChipInputTile from "../tiles/chip_input_tile";
+import ChipOutputTile from "../tiles/chip_output_tile";
 import { Chip } from "./chip";
 
 /** Chip Grid */
@@ -24,16 +26,33 @@ export default class ChipGrid {
 
         this.grids.chip.addHandler("postAddTile", (tile) => {
             this.chip.tileAdded(tile);
+            setState({ isStructured: this.chip.isStructured() });
         });
 
+        this.grids.chip.addHandler("postRemoveTile", (tile) => {
+            this.chip.tileRemoved(tile);
+            setState({ isStructured: this.chip.isStructured() });
+        });
         this.grids.structure.addHandler("postAddTile", (tile) => {
             console.log("structured: ", this.chip.isStructured());
-            this.chip.tileAdded(tile);
-            publish("editedChip");
+            if (
+                tile instanceof ChipInputTile ||
+                tile instanceof ChipOutputTile
+            ) {
+                tile.id = state.selectableTiles[state.selectedTileIndex].name;
+                tile.generateText();
+            }
+            setState({
+                isStructured: this.chip.isStructured(),
+                editedChip: update,
+            });
         });
         this.grids.structure.addHandler("postRemoveTile", () => {
             console.log("structured: ", this.chip.isStructured());
-            publish("editedChip");
+            setState({
+                isStructured: this.chip.isStructured(),
+                editedChip: update,
+            });
         });
     }
 

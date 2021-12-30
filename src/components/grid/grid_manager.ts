@@ -59,7 +59,6 @@ export default class GridManager extends PIXI.Container {
         this.removeChildren();
         if (this.inChipGrid) {
             if (state.chipGridMode === ChipGridMode.STRUCTURING) {
-                state.currentChipGrid?.chip.finishEditing();
                 if (state.currentChipGrid?.grids.structure) {
                     this.addChild(state.currentChipGrid.grids.structure);
                 }
@@ -69,7 +68,6 @@ export default class GridManager extends PIXI.Container {
                 }
             }
         } else {
-            state.currentChipGrid?.chip.finishEditing();
             this.addChild(this.mainGrid);
         }
         this.getGrid().generateTileGraphics();
