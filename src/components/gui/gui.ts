@@ -529,6 +529,7 @@ const initGUI = (app: PIXI.Application) => {
             }
 
             const chip = state.chips[i];
+            const isStructured = chip.isStructured();
 
             const genContainer = () => {
                 const graphics = new PIXI.Graphics();
@@ -551,7 +552,7 @@ const initGUI = (app: PIXI.Application) => {
                 name: chip.name,
                 defaultContainer,
                 hoverContainer,
-                selectable: true,
+                selectable: isStructured,
                 onContext: (e: CMouseEvent) => {
                     displayContextMenu(e.pageX, e.pageY, "chipSelection").then(
                         (name) => {
