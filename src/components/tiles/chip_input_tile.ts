@@ -5,7 +5,7 @@ import CircuitLocation from "../../logic/circuit_location";
 import LogicNode from "../../logic/node";
 import { CMouseEvent } from "../../utils";
 import { displayContextMenu } from "../../utils/context_menu";
-import { ConnectionType, GraphicsTile } from "./tile";
+import { ConnectionType, GraphicsTile, Tile } from "./tile";
 
 /** chip input tile */
 export default class ChipInputTile extends GraphicsTile {
@@ -87,5 +87,14 @@ export default class ChipInputTile extends GraphicsTile {
         this.graphics.lineStyle(4, 0x000000);
         this.graphics.drawRect(6, 6, 108, 108);
         this.graphics.endFill();
+    }
+
+    /**
+     * Create a clone of this tile
+     *
+     * @param tile Tile
+     */
+    createClone(tile: Tile) {
+        this.id = (tile as ChipInputTile).id;
     }
 }

@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import state from "../../state";
+import { mapObject } from "../../utils";
 import ChipGridMode from "../../utils/chip_grid_mode";
 import { Direction } from "../../utils/directions";
 import ChipInputTile from "../tiles/chip_input_tile";
@@ -181,5 +183,34 @@ export class Chip {
         };
         isJoint(tile);
         return tilesLeft.length === 0;
+    }
+
+    /**
+     * Clone chip
+     *
+     * @returns cloned chip
+     */
+    clone() {
+        const newChip = new Chip(this.name, this.color);
+        newChip.inputIndex = this.inputIndex;
+        newChip.outputIndex = this.outputIndex;
+        newChip.tiles = mapObject(this.tiles, (tile) => tile?.clone());
+        newChip.structure = mapObject(
+            this.structure,
+            (tile) => tile?.clone() as any
+        );
+        newChip.inputTiles = this.inputTiles.map((inputTile) => {
+            return {
+                name: inputTile.name,
+                tile: inputTile.tile.clone() as ChipInputTile,
+            };
+        });
+        newChip.outputTiles = this.outputTiles.map((outputTile) => {
+            return {
+                name: outputTile.name,
+                tile: outputTile.tile.clone() as ChipInputTile,
+            };
+        });
+        return newChip;
     }
 }

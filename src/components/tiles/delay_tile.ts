@@ -3,7 +3,7 @@ import CircuitLocation from "../../logic/circuit_location";
 import LogicNode from "../../logic/node";
 import { Rotation } from "../../utils/directions";
 import { map } from "../../utils/math";
-import { ConnectionType, GraphicsTile } from "./tile";
+import { ConnectionType, GraphicsTile, Tile } from "./tile";
 
 /** delay tile */
 export default class DelayTile extends GraphicsTile {
@@ -89,5 +89,15 @@ export default class DelayTile extends GraphicsTile {
         this.graphics.beginFill(0x000000);
         this.graphics.drawPolygon([50, 80, 60, 40, 70, 80]);
         this.graphics.endFill();
+    }
+
+    /**
+     * Create a clone of this tile
+     *
+     * @param tile Tile
+     */
+    createClone(tile: Tile) {
+        this.delay = (tile as DelayTile).delay;
+        this.time = (tile as DelayTile).time;
     }
 }

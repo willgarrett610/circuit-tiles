@@ -441,7 +441,6 @@ const initGUI = (app: PIXI.Application) => {
                             value.push({ ...tileType });
                         }
                     } else {
-                        // TODO Only display what hasn't been added to chip structure
                         if (state.currentChipGrid) {
                             const selectableTiles: TileType[] = [
                                 ...state.currentChipGrid.chip.inputTiles,
@@ -521,6 +520,7 @@ const initGUI = (app: PIXI.Application) => {
                                 editedChip: update,
                                 currentChipGrid: new ChipGrid(chip),
                                 chipEditor: true,
+                                editMode: EditMode.TILE,
                             });
                         });
                     },
@@ -554,7 +554,40 @@ const initGUI = (app: PIXI.Application) => {
                 onContext: (e: CMouseEvent) => {
                     displayContextMenu(e.pageX, e.pageY, "chipSelection").then(
                         (name) => {
-                            console.log(name);
+                            switch (name) {
+                                case "edit":
+                                    setState({
+                                        editedChip: update,
+                                        currentChipGrid: new ChipGrid(chip),
+                                        chipEditor: true,
+                                        chipGridMode: ChipGridMode.EDITING,
+                                        editMode: EditMode.TILE,
+                                    });
+                                    break;
+                                case "delete":
+                                    setStateProp("chips", (chips) => {
+                                        chips.splice(chips.indexOf(chip), 1);
+                                    });
+                                    break;
+                                case "duplicate":
+                                    setStateProp("chips", (chips) => {
+                                        const newChip = chip.clone();
+                                        let i = 1;
+                                        let newName = "";
+                                        do {
+                                            newName =
+                                                newChip.name + "(" + i + ")";
+                                            i++;
+                                        } while (
+                                            state.chips.find(
+                                                (x) => x.name === newName
+                                            )
+                                        );
+                                        newChip.name = newName;
+                                        chips.push(newChip);
+                                    });
+                                    break;
+                            }
                         }
                     );
                 },

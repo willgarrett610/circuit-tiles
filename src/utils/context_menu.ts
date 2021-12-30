@@ -13,7 +13,7 @@ export const contextMenus = {
         // duplicate: "Duplicate",
     },
     chipSelection: {
-        rename: "Rename",
+        settings: "Settings",
         delete: "Delete",
         edit: "Edit",
         duplicate: "Duplicate",

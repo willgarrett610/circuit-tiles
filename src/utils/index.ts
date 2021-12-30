@@ -260,6 +260,24 @@ export function entries<T>(
 }
 
 /**
+ * Applies callback to each key value pair in the given object
+ *
+ * @param object The object to iterate over
+ * @param callback Callback that takes in each key value pair
+ * @returns New object with the callback applied to each key value pair
+ */
+export function mapObject<T>(
+    object: { [key: string]: T },
+    callback: (value: T, key: string) => T
+): { [key: string]: T } {
+    const newObject: { [key: string]: T } = {};
+    for (const key of Object.keys(object)) {
+        newObject[key] = callback(object[key], key);
+    }
+    return newObject;
+}
+
+/**
  * Sleeps for a given amount of time
  *
  * @param ms time to sleep in milliseconds

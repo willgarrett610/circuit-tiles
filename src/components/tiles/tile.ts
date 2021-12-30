@@ -222,12 +222,12 @@ export abstract class Tile {
         output.direction = this.direction;
         output.signalActive = this.signalActive;
         output.label = this.label;
-        output.createClone?.();
+        output.createClone?.(this);
 
         return output;
     }
 
-    createClone?(): Tile;
+    createClone?(tile: Tile): void;
 }
 
 /** sprite tile */
