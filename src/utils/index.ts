@@ -201,12 +201,15 @@ export function getTextInput(
         ) as HTMLButtonElement;
         const input = document.getElementById("text_input") as HTMLInputElement;
 
-        const onChange = (event: Event) => {
-            const e = event as InputEvent;
-            console.log(e);
-            // if (isValid && !isValid(e.value)) {
-            //     submitButton.disabled = true;
-            // }
+        const onChange = (e: any) => {
+            if (isValid && !isValid(e.target.value)) {
+                console.log("Invalid input");
+                submitButton.disabled = true;
+                submitButton.className = "create_button disabled";
+            } else {
+                submitButton.disabled = false;
+                submitButton.className = "create_button";
+            }
         };
 
         input.addEventListener("input", onChange);
