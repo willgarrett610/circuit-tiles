@@ -210,7 +210,7 @@ export class Chip {
         newChip.outputTiles = this.outputTiles.map((outputTile) => {
             return {
                 name: outputTile.name,
-                tile: outputTile.tile.clone() as ChipInputTile,
+                tile: outputTile.tile.clone() as ChipOutputTile,
             };
         });
         return newChip;

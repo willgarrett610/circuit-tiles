@@ -44,6 +44,7 @@ export const TextInput: ComponentType<TextInputProps> = ({
     return (
         <div
             class={css({
+                pointerEvents: "auto",
                 display: "block",
                 position: "absolute",
                 top: "50%",

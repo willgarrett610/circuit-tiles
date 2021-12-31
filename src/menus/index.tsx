@@ -2,7 +2,6 @@ import { JSX, render, ComponentType, ComponentClass } from "preact";
 import { css } from "@emotion/css";
 import state, { setState, setStateProp, subscribe } from "../state";
 import { useEffect, useState } from "preact/hooks";
-import { getTextInput } from "./text_input";
 
 /**
  * builds a function to display menus
@@ -62,6 +61,7 @@ const App = () => {
     return (
         <div
             className={css({
+                pointerEvents: "none",
                 position: "absolute",
                 width: "100%",
                 height: "100%",
