@@ -1,5 +1,7 @@
 {
     "compilerOptions": {
+        "jsx": "react-jsx",
+        "jsxImportSource": "preact",
         "outDir": "./dist",
         "target": "ES5",
         "module": "esNext",
@@ -8,6 +10,7 @@
         "esModuleInterop": true,
         "moduleResolution": "node",
         "downlevelIteration": true,
-        "sourceMap": true
+        "sourceMap": true,
+        "skipLibCheck": true
     }
 }

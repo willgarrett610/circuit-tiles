@@ -7,6 +7,7 @@ import GridManager from "./components/grid/grid_manager";
 import { loadSprites } from "./components/sprites/sprite_loader";
 import { setState, subscribe } from "./state";
 import { initContextMenu } from "./utils/context_menu";
+import { setupMenus } from "./menus";
 
 PIXI.utils.skipHello();
 
@@ -30,6 +31,8 @@ const main = async () => {
     app.renderer.resize(window.innerWidth, window.innerHeight);
 
     document.body.appendChild(app.view);
+
+    setupMenus();
 
     const chipCreation = document.getElementById("chip_creation");
     if (chipCreation) {

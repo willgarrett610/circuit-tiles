@@ -4,6 +4,7 @@ import ChipGrid from "./components/chip/chip_grid";
 import { TileType } from "./components/tiles/tile_types";
 import ChipGridMode from "./utils/chip_grid_mode";
 import { EditMode } from "./utils/edit_mode";
+import { JSX } from "preact";
 
 interface State {
     /** if the chip editor is open regardless of chip grid mode */
@@ -28,6 +29,8 @@ interface State {
     selectedTileIndex: number;
     /** possible selectable tiles */
     selectableTiles: TileType[];
+    /** currently show pop-ups */
+    openMenus: JSX.Element[];
 }
 
 export type Updater = undefined;
@@ -56,6 +59,7 @@ const state: State = {
     chipGridMode: ChipGridMode.EDITING,
     selectedTileIndex: -1,
     selectableTiles: [],
+    openMenus: [],
 };
 
 interface StateCallback {
