@@ -336,7 +336,6 @@ const initGUI = (app: PIXI.Application) => {
     chipGridModeBtn.setDefaultContainer(chipGridModeBtnContainer);
 
     multiSubscribe(["chipGridMode", "isStructured"], (event) => {
-        console.log(event);
         if (event.name === "chipGridMode") {
             let text = "Switch to ";
             if (event.value === ChipGridMode.EDITING) {

@@ -35,7 +35,6 @@ export default class ChipGrid {
         });
 
         this.grids.structure.addHandler("postAddTile", (tile) => {
-            console.log("structured: ", this.chip.isStructured());
             if (
                 tile instanceof ChipInputTile ||
                 tile instanceof ChipOutputTile
@@ -49,7 +48,6 @@ export default class ChipGrid {
             });
         });
         this.grids.structure.addHandler("postRemoveTile", () => {
-            console.log("structured: ", this.chip.isStructured());
             setState({
                 isStructured: this.chip.isStructured(),
                 editedChip: update,

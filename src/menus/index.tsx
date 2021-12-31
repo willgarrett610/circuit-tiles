@@ -1,6 +1,6 @@
-import { JSX, render, ComponentType, ComponentClass } from "preact";
+import { JSX, render, ComponentType, ComponentClass, VNode } from "preact";
 import { css } from "@emotion/css";
-import state, { setState, setStateProp, subscribe } from "../state";
+import state, { setState, subscribe } from "../state";
 import { useEffect, useState } from "preact/hooks";
 
 /**
@@ -15,15 +15,58 @@ export function buildMenu<T extends object>(
     props: T
 ) {
     const builtComponent = <MenuComponent {...props} />;
-    setStateProp("openMenus", (openMenus) => openMenus.push(builtComponent));
+    setState({
+        openMenus: [...state.openMenus, builtComponent],
+        interactive: false,
+    });
 
-    return () => {
+    /** closes the pop up */
+    function close() {
         setState({
             openMenus: state.openMenus.filter(
                 (openMenu) => openMenu !== builtComponent
             ),
+            interactive: true,
         });
-    };
+    }
+
+    return close;
+}
+
+/**
+ * builds a function to display pop ups (menus with an overlay)
+ *
+ * @param PopUpComponent
+ * @param props
+ * @param autoClose if true, the pop up will close when the user clicks outside of it
+ * @returns returns function to close menu
+ */
+export function buildPopUp<T extends object>(
+    PopUpComponent: ComponentType<T> | ComponentClass<T, unknown>,
+    props: T,
+    autoClose = true
+) {
+    const builtComponent = (
+        <Overlay onClick={() => autoClose && close()}>
+            <PopUpComponent {...props} />
+        </Overlay>
+    );
+    setState({
+        openMenus: [...state.openMenus, builtComponent],
+        interactive: false,
+    });
+
+    /** closes the pop up */
+    function close() {
+        setState({
+            openMenus: state.openMenus.filter(
+                (openMenu) => openMenu !== builtComponent
+            ),
+            interactive: true,
+        });
+    }
+
+    return close;
 }
 
 /** sets up menus in dom */
@@ -31,23 +74,30 @@ export function setupMenus() {
     const attachLocation = document.getElementById("pop-ups");
     if (attachLocation) {
         render(<App />, attachLocation);
-        // setTimeout(() => {
-        //     const close = getTextInput({
-        //         title: "test",
-        //         name: "bruh",
-        //         value: "moment",
-        //         verify: (input) => {
-        //             console.log(input);
-        //             return true;
-        //         },
-        //         onSubmit: (input) => {
-        //             console.log(input);
-        //             close();
-        //         },
-        //     });
-        // }, 1000);
     }
 }
+
+const Overlay = ({
+    children,
+    onClick,
+}: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    children: VNode<any>;
+    onClick: () => void;
+}) => (
+    <div
+        class={css({
+            pointerEvents: "auto",
+            display: "block",
+            height: "100%",
+            width: "100%",
+            background: "rgba(0, 0, 0, 0.5)",
+        })}
+        onClick={onClick}
+    >
+        <div onClick={(e) => e.stopPropagation()}>{children}</div>
+    </div>
+);
 
 const App = () => {
     const [openMenus, setOpenMenus] = useState<JSX.Element[]>(state.openMenus);

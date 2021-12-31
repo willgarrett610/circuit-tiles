@@ -183,8 +183,6 @@ export default class Graph {
             output.push(nodeData);
         }
 
-        console.log(output);
-
         return Int32Array.from(output.flat(2));
     }
 }
