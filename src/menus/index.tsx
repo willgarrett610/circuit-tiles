@@ -2,7 +2,6 @@ import { JSX, render, ComponentType, ComponentClass, VNode } from "preact";
 import { css } from "@emotion/css";
 import state, { setState, subscribe } from "../state";
 import { useEffect, useState } from "preact/hooks";
-import { createChipInputForm } from "./create_chip";
 
 export type MenuComponent<T> =
     | ComponentType<T & { close: () => void }>
@@ -80,16 +79,16 @@ export function setupMenus() {
     if (attachLocation) {
         render(<App />, attachLocation);
 
-        setTimeout(() => {
-            const close = createChipInputForm({
-                hueValue: 180,
-                onSubmit: (data) => {
-                    console.log(data);
-                    close();
-                },
-                verifyText: (text) => text.length > 4,
-            });
-        }, 100);
+        // setTimeout(() => {
+        //     const close = createChipInputForm({
+        //         hueValue: 180,
+        //         onSubmit: (data) => {
+        //             console.log(data);
+        //             close();
+        //         },
+        //         verifyText: (text) => text.length > 4,
+        //     });
+        // }, 100);
     }
 }
 

@@ -7,6 +7,7 @@ type ChipFormProps = {
     title?: string;
     label?: string;
     placeholder?: string;
+    submitButtonText?: string;
     textValue?: string;
     hueValue?: number;
     verifyText?: (input: string) => boolean;
@@ -32,6 +33,7 @@ export const ChipForm: MenuComponent<ChipFormProps> = ({
     title = "Create a chip",
     label = "Name the chip:",
     placeholder = "Half adder",
+    submitButtonText = "Create",
     textValue = "",
     hueValue = 0,
     verifyText = () => true,
@@ -246,7 +248,7 @@ export const ChipForm: MenuComponent<ChipFormProps> = ({
                             })
                         }
                     >
-                        Create
+                        {submitButtonText}
                     </button>
                 </div>
             </div>

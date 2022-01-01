@@ -4,7 +4,6 @@ import {
     CMouseEvent,
     dimensions,
     generateRoundedRectContainer,
-    getCreateChipInput,
     hslToHex,
     onResize,
     width,
@@ -31,6 +30,8 @@ import ChipGridMode from "../../utils/chip_grid_mode";
 import ChipGrid from "../chip/chip_grid";
 import StructureTile from "../tiles/structure_tile";
 import { displayContextMenu } from "../../utils/context_menu";
+import { createChipInputForm } from "../../menus/create_chip";
+import { Chip } from "../chip/chip";
 
 const createToolBtn = (spriteKey: string): GUIComponent => {
     const toolHover = new PIXI.Graphics();
@@ -519,18 +520,28 @@ const initGUI = (app: PIXI.Application) => {
                     hoverContainer,
                     selectable: false,
                     onClick: () => {
-                        getCreateChipInput().then((chip) => {
-                            if (!chip) return;
-                            setStateProp("chips", (chips) => {
-                                chips.push(chip);
-                            });
-                            setState({
-                                editedChip: update,
-                                currentChipGrid: new ChipGrid(chip),
-                                isStructured: true,
-                                chipEditor: true,
-                                editMode: EditMode.TILE,
-                            });
+                        const close = createChipInputForm({
+                            hueValue: Math.floor(Math.random() * 340),
+                            onSubmit: ({ name, color, hue }) => {
+                                const chip = new Chip(name, color, hue);
+                                setStateProp("chips", (chips) => {
+                                    chips.push(chip);
+                                });
+                                setState({
+                                    editedChip: update,
+                                    currentChipGrid: new ChipGrid(chip),
+                                    isStructured: true,
+                                    chipEditor: true,
+                                    editMode: EditMode.TILE,
+                                });
+                                close();
+                            },
+                            verifyText: (name) => {
+                                // make sure name is not already taken
+                                return !state.chips.find(
+                                    (chip) => chip.name === name
+                                );
+                            },
                         });
                     },
                 };
@@ -588,20 +599,31 @@ const initGUI = (app: PIXI.Application) => {
                     displayContextMenu(e.pageX, e.pageY, "chipSelection").then(
                         (name) => {
                             switch (name) {
-                                case "settings":
-                                    getCreateChipInput(
-                                        false,
-                                        chip.name,
-                                        chip.color,
-                                        chip.hue
-                                    ).then((newChip) => {
-                                        if (!newChip) return;
-                                        chip.name = newChip.name;
-                                        chip.color = newChip.color;
-                                        chip.hue = newChip.hue;
-                                        publish("chips");
+                                case "settings": {
+                                    const close = createChipInputForm({
+                                        title: "Edit Chip",
+                                        submitButtonText: "Submit",
+                                        textValue: chip.name,
+                                        hueValue: chip.hue,
+
+                                        onSubmit: ({ name, color, hue }) => {
+                                            chip.name = name;
+                                            chip.color = color;
+                                            chip.hue = hue;
+                                            publish("chips");
+                                            close();
+                                        },
+                                        verifyText: (name) => {
+                                            if (name === chip.name) return true;
+                                            // make sure name is not already taken
+                                            return !state.chips.find(
+                                                (chip) => chip.name === name
+                                            );
+                                        },
                                     });
+
                                     break;
+                                }
                                 case "edit":
                                     setState({
                                         editedChip: update,
