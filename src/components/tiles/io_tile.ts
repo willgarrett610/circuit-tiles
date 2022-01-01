@@ -41,6 +41,7 @@ export default abstract class IOTile extends GraphicsTile {
                     value: this.id,
                     placeholder: "Chip name",
                     verify: (value) => {
+                        if (value === this.id) return true;
                         return (
                             state.currentChipGrid !== undefined &&
                             !Object.values(
