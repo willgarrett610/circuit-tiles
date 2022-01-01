@@ -1,7 +1,6 @@
 import { css } from "@emotion/css";
-import { ComponentType } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
-import { buildMenu } from ".";
+import { buildMenu, MenuComponent } from ".";
 
 type TextInputProps = {
     title: string;
@@ -23,9 +22,9 @@ type TextInputProps = {
  * @param props.verify
  * @param props.onSubmit
  * @param props.onCancel
- * @returns returns function to close pop up
+ * @returns returns function to close menu
  */
-export function getTextInput(props: TextInputProps) {
+export function createTextInput(props: TextInputProps) {
     const close: () => void = buildMenu(TextInput, {
         onCancel: () => close(),
         ...props,
@@ -33,7 +32,7 @@ export function getTextInput(props: TextInputProps) {
     return close;
 }
 
-export const TextInput: ComponentType<TextInputProps> = ({
+export const TextInput: MenuComponent<TextInputProps> = ({
     title = "",
     label = "",
     placeholder = "",

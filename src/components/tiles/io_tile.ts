@@ -3,7 +3,7 @@ import * as PIXI from "pixi.js";
 
 import CircuitLocation from "../../logic/circuit_location";
 import LogicNode from "../../logic/node";
-import { getTextInput } from "../../menus/text_input";
+import { createTextInput } from "../../menus/text_input";
 import state from "../../state";
 import { CMouseEvent } from "../../utils";
 import { displayContextMenu } from "../../utils/context_menu";
@@ -35,7 +35,7 @@ export default abstract class IOTile extends GraphicsTile {
         if (this.forGraphicOnly) return;
         displayContextMenu(e.pageX, e.pageY, "ioTile").then((name) => {
             if (name === "rename") {
-                const close = getTextInput({
+                const close = createTextInput({
                     title: "Rename",
                     label: "Enter new name",
                     value: this.id,

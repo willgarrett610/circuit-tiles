@@ -2,6 +2,11 @@ import { JSX, render, ComponentType, ComponentClass, VNode } from "preact";
 import { css } from "@emotion/css";
 import state, { setState, subscribe } from "../state";
 import { useEffect, useState } from "preact/hooks";
+import { createChipInputForm } from "./create_chip";
+
+export type MenuComponent<T> =
+    | ComponentType<T & { close: () => void }>
+    | ComponentClass<T & { close: () => void }, unknown>;
 
 /**
  * builds a function to display menus
@@ -11,16 +16,16 @@ import { useEffect, useState } from "preact/hooks";
  * @returns returns function to close menu
  */
 export function buildMenu<T extends object>(
-    MenuComponent: ComponentType<T> | ComponentClass<T, unknown>,
+    MenuComponent: MenuComponent<T>,
     props: T
 ) {
-    const builtComponent = <MenuComponent {...props} />;
+    const builtComponent = <MenuComponent close={close} {...props} />;
     setState({
         openMenus: [...state.openMenus, builtComponent],
         interactive: false,
     });
 
-    /** closes the pop up */
+    /** closes the menu */
     function close() {
         setState({
             openMenus: state.openMenus.filter(
@@ -42,13 +47,13 @@ export function buildMenu<T extends object>(
  * @returns returns function to close menu
  */
 export function buildPopUp<T extends object>(
-    PopUpComponent: ComponentType<T> | ComponentClass<T, unknown>,
+    PopUpComponent: MenuComponent<T>,
     props: T,
     autoClose = true
 ) {
     const builtComponent = (
         <Overlay onClick={() => autoClose && close()}>
-            <PopUpComponent {...props} />
+            <PopUpComponent close={close} {...props} />
         </Overlay>
     );
     setState({
@@ -74,6 +79,17 @@ export function setupMenus() {
     const attachLocation = document.getElementById("pop-ups");
     if (attachLocation) {
         render(<App />, attachLocation);
+
+        setTimeout(() => {
+            const close = createChipInputForm({
+                hueValue: 180,
+                onSubmit: (data) => {
+                    console.log(data);
+                    close();
+                },
+                verifyText: (text) => text.length > 4,
+            });
+        }, 100);
     }
 }
 
