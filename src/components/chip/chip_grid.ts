@@ -1,3 +1,4 @@
+import { gridManager } from "../..";
 import state, { setState, update } from "../../state";
 import Grid from "../grid/grid";
 import ChipInputTile from "../tiles/chip_input_tile";
@@ -20,8 +21,8 @@ export default class ChipGrid {
     constructor(chip: Chip) {
         this.chip = chip;
         this.grids = {
-            chip: new Grid(100, chip.tiles),
-            structure: new Grid(100, chip.structure),
+            chip: new Grid(gridManager, 100, chip.tiles),
+            structure: new Grid(gridManager, 100, chip.structure),
         };
 
         this.grids.chip.addHandler("postAddTile", (tile) => {

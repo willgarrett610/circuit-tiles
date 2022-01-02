@@ -3,20 +3,31 @@ import state, { subscribe } from "../../state";
 import { onKeyDown, onResize, onScroll } from "../../utils";
 import ChipGridMode from "../../utils/chip_grid_mode";
 import Grid from "./grid";
+import { HistoryManager } from "./history_manager";
+import { ModeManager } from "./mode_manager";
+import { TileManager } from "./tile_manager";
 
 /** grid manager */
 export default class GridManager extends PIXI.Container {
     mainGrid: Grid;
 
     inChipGrid = state.chipEditor;
+    historyManager: HistoryManager;
+    tileManager: TileManager;
+    modeManager: ModeManager;
 
     /**
      * constructs grid manager
      */
     constructor() {
         super();
-        this.mainGrid = new Grid(100);
+
+        this.mainGrid = new Grid(this, 100);
         this.addChild(this.mainGrid);
+
+        this.historyManager = new HistoryManager(this);
+        this.tileManager = new TileManager(this);
+        this.modeManager = new ModeManager(this);
 
         onResize(() => {
             const grid = this.getGrid();

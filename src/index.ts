@@ -10,6 +10,8 @@ import { setupMenus } from "./menus";
 
 PIXI.utils.skipHello();
 
+export const gridManager = new GridManager();
+
 /**
  * Setups up the application
  */
@@ -34,8 +36,6 @@ const main = async () => {
     setupMenus();
 
     app.renderer.backgroundColor = config.colors.background;
-
-    const gridManager = new GridManager();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).gridManager = gridManager;
