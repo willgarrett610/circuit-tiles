@@ -537,6 +537,7 @@ const initGUI = (app: PIXI.Application) => {
                                 close();
                             },
                             verifyText: (name) => {
+                                if (name.length === 0) return false;
                                 // make sure name is not already taken
                                 return !state.chips.find(
                                     (chip) => chip.name === name
@@ -615,6 +616,7 @@ const initGUI = (app: PIXI.Application) => {
                                         },
                                         verifyText: (name) => {
                                             if (name === chip.name) return true;
+                                            if (name.length === 0) return false;
                                             // make sure name is not already taken
                                             return !state.chips.find(
                                                 (chip) => chip.name === name

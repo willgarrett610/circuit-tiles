@@ -430,6 +430,7 @@ export default class Grid extends PIXI.Container {
             tile.setConnection("down", false);
             tile.setConnection("left", false);
             tile.setConnection("right", false);
+            tile.updateContainer?.();
             this.tempHistory[this.tempHistory.length - 1].postTile =
                 tile.clone();
 
@@ -690,7 +691,7 @@ export default class Grid extends PIXI.Container {
                     this.removeTile(...locationToTuple(gridPoint));
             } else if (state.editMode === EditMode.CURSOR) {
                 // do nothing
-            } else {
+            } else if (state.editMode === EditMode.TILE) {
                 this.currentInteraction = Interaction.PLACING;
 
                 const gridPoints = this.gridPointsBetween(
@@ -746,7 +747,7 @@ export default class Grid extends PIXI.Container {
             this.removeChild(this.prevHighlightTileGraphic);
         if (
             state.selectedTileIndex !== -1 &&
-            EditMode.TILE === state.editMode &&
+            state.editMode === EditMode.TILE &&
             this.getTile(...locationToTuple(gridPos)) === undefined
         ) {
             const tempTile = new state.selectableTiles[
@@ -796,9 +797,9 @@ export default class Grid extends PIXI.Container {
                 this.currentInteraction = Interaction.REMOVING;
                 this.removeTile(...gridPoint);
             } else if (state.editMode === EditMode.CURSOR) {
-                if (this.currentInteraction === Interaction.NONE)
-                    this.rotateTile(...gridPoint);
-                this.currentInteraction = Interaction.PLACING;
+                // if (this.currentInteraction === Interaction.NONE)
+                //     this.rotateTile(...gridPoint);
+                // this.currentInteraction = Interaction.PLACING;
             } else if (state.selectedTileIndex !== -1) {
                 if (this.currentInteraction === Interaction.NONE)
                     this.rotateTile(...gridPoint);
