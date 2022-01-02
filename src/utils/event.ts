@@ -1,3 +1,5 @@
+import * as PIXI from "pixi.js";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Handles the resize event
