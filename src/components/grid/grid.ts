@@ -11,6 +11,8 @@ import { EditMode } from "../../utils/edit_mode";
 import Graph from "../../logic/graph";
 import { GridAction } from "../../utils/action";
 import { gridManager } from "../..";
+import { performAction } from "../../action/history_manager";
+import { setTile } from "../../action/tile_actions";
 
 interface GridHandlers {
     postAddTile: ((payload: Tile) => void)[];
@@ -220,12 +222,12 @@ export default class Grid extends PIXI.Container {
             }
             prevTile.updateContainer?.();
         } else if (!editedNewTile) {
-            gridManager.historyManager.tempHistory.push({
-                action: GridAction.ADD,
-                prevTile: undefined,
-                postTile: newTile.clone(),
-                location: { x: newTile.x, y: newTile.y },
-            });
+            // gridManager.historyManager.tempHistory.push({
+            //     action: GridAction.ADD,
+            //     prevTile: undefined,
+            //     postTile: newTile.clone(),
+            //     location: { x: newTile.x, y: newTile.y },
+            // });
         }
 
         newTile.updateContainer?.();
@@ -302,7 +304,7 @@ export default class Grid extends PIXI.Container {
 
         const tileObj = new tile(x, y);
 
-        this.setTile(x, y, tileObj);
+        performAction(setTile, { x, y, tile: tileObj, grid: this });
 
         const tileGraphics: PIXI.Container = tileObj.getContainer(this.size);
         this.addChild(tileGraphics);

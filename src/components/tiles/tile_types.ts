@@ -8,9 +8,13 @@ import NotTile from "./not_tile";
 import { Tile } from "./tile";
 import WireTile from "./wire_tile";
 
+export type TileConstructor = {
+    new (x: number, y: number): Tile;
+};
+
 export interface TileType {
     name: string;
-    tile: { new (x: number, y: number): Tile };
+    tile: TileConstructor;
 }
 
 const tileTypes = [
