@@ -41,6 +41,7 @@ export default abstract class IOTile extends GraphicsTile {
                     value: this.id,
                     placeholder: "Chip name",
                     verify: (value) => {
+                        value = value.trim();
                         if (value === this.id) return true;
                         return (
                             state.currentChipGrid !== undefined &&
@@ -55,15 +56,9 @@ export default abstract class IOTile extends GraphicsTile {
                     },
                     onSubmit: (value) => {
                         if (!state.currentChipGrid) return;
-                        if (
-                            Object.values(
-                                state.currentChipGrid?.chip.tiles
-                            ).find(
-                                (v) => v instanceof this.type && v.id === value
-                            )
-                        ) {
-                            console.log("Name already taken");
-                        }
+
+                        value = value.trim();
+
                         const inputTileE = (
                             state.currentChipGrid?.chip[this.chipTileKey] as any
                         ).find(
