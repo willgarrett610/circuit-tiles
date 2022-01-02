@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
 import { subscribe } from "../../../state";
+import { onResize } from "../../../utils";
 
 export enum GUIComponentState {
     DEFAULT,
@@ -24,6 +25,9 @@ export class GUIComponent extends PIXI.Container {
     onRightClick?(e: PIXI.interaction.InteractionEvent): void;
     onStateChange?(newState: GUIComponentState): void;
     state: GUIComponentState = GUIComponentState.DEFAULT;
+
+    xLambda?: () => number;
+    yLambda?: () => number;
 
     /**
      * construct gui components
@@ -105,6 +109,15 @@ export class GUIComponent extends PIXI.Container {
 
         subscribe("interactive", (value) => {
             this.interactive = value;
+        });
+
+        onResize(() => {
+            if (this.xLambda) {
+                this.x = this.xLambda();
+            }
+            if (this.yLambda) {
+                this.y = this.yLambda();
+            }
         });
     }
 

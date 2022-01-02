@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as PIXI from "pixi.js";
-import { onScroll } from "../../../utils";
+import { onResize, onScroll } from "../../../utils";
 import { clamp } from "../../../utils/math";
 import { GUIComponent } from "./gui_component";
 import Layout from "../layout/layout";
@@ -22,6 +22,10 @@ export default class GUIWindow extends PIXI.Container {
     borderColor = 0x000000;
     private border: PIXI.Graphics;
     layout?: Layout;
+
+    xLambda?: () => number;
+    yLambda?: () => number;
+    sizeLambda?: () => [w: number, h: number];
 
     /**
      * construct gui window
@@ -134,7 +138,17 @@ export default class GUIWindow extends PIXI.Container {
             this.interactive = value;
         });
 
-        // this.draw();
+        onResize(() => {
+            if (this.xLambda) {
+                this.x = this.xLambda();
+            }
+            if (this.yLambda) {
+                this.y = this.yLambda();
+            }
+            if (this.sizeLambda) {
+                this.setSize(...this.sizeLambda());
+            }
+        });
     }
 
     /**
