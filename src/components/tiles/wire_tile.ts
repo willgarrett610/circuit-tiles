@@ -9,6 +9,7 @@ export default class WireTile extends GraphicsTile {
     label = "Wire";
 
     isWire = true;
+    rotatable = false;
 
     connectionTemplate = {
         up: ConnectionType.BOTH,
