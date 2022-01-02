@@ -639,6 +639,10 @@ const initGUI = (app: PIXI.Application) => {
                                     setStateProp("chips", (chips) => {
                                         chips.splice(chips.indexOf(chip), 1);
                                     });
+                                    setState({
+                                        currentChipGrid: undefined,
+                                        chipEditor: false,
+                                    });
                                     break;
                                 case "duplicate":
                                     setStateProp("chips", (chips) => {
