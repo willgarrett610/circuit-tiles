@@ -3,16 +3,10 @@ import * as PIXI from "pixi.js";
 import { gridManager } from "../..";
 import config from "../../config";
 import state, { subscribe } from "../../state";
-import {
-    height,
-    locationToPair,
-    locationToTuple,
-    mouseDown,
-    pressedKeys,
-    width,
-} from "../../utils";
+import { height, locationToPair, locationToTuple, width } from "../../utils";
 import { Interaction } from "../../utils/action";
 import { EditMode } from "../../utils/edit_mode";
+import { mouseDown, pressedKeys } from "../../utils/event";
 import { Tile } from "../tiles/tile";
 import Grid from "./grid";
 
@@ -175,9 +169,7 @@ export default class InteractiveGrid extends Grid {
                     Interaction.REMOVING;
                 this.removeTile(...gridPoint);
             } else if (state.editMode === EditMode.CURSOR) {
-                // if (this.currentInteraction === Interaction.NONE)
-                //     this.rotateTile(...gridPoint);
-                // this.currentInteraction = Interaction.PLACING;
+                // do nothing
             } else if (
                 state.editMode === EditMode.TILE &&
                 state.selectedTileIndex !== -1

@@ -1,9 +1,10 @@
 import * as PIXI from "pixi.js";
-import { generateRoundedRectContainer, height, width } from ".";
+import { height, width } from ".";
 
 import { GUIComponent } from "../components/gui/component/gui_component";
 import GUIWindow from "../components/gui/component/gui_window";
 import config from "../config";
+import { generateRoundedRectContainer } from "./graphics";
 
 export const contextMenus = {
     tileSelection: {

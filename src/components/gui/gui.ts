@@ -1,12 +1,13 @@
 import * as PIXI from "pixi.js";
 
-import { dimensions, onResize } from "../../utils";
+import { dimensions } from "../../utils";
 
 import MenuBar from "./menus/menu_bar";
 import GridModeIndicator from "./menus/grid_mode_indicator";
 import TileSelector from "./menus/tile_selector";
 import ToolSelector from "./menus/tool_selector";
 import ChipSelector from "./menus/chip_selector";
+import { onResize } from "../../utils/event";
 
 /**
  * Sets up application GUI

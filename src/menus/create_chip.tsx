@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { buildMenu, MenuComponent } from ".";
-import { hslToHex } from "../utils";
+import { hslToHex } from "../utils/graphics";
 
 type ChipFormProps = {
     title?: string;

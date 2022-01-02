@@ -2,7 +2,7 @@ import { Direction, Rotation } from "../../utils/directions";
 import * as PIXI from "pixi.js";
 import config from "../../config";
 import LogicNode from "../../logic/node";
-import { CMouseEvent, onContextMenu } from "../../utils";
+import { CMouseEvent, onContextMenu } from "../../utils/event";
 export enum ConnectionType {
     BOTH,
     INPUT,

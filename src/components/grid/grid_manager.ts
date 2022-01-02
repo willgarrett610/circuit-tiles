@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
 import state, { subscribe } from "../../state";
-import { onKeyDown, onResize, onScroll } from "../../utils";
 import ChipGridMode from "../../utils/chip_grid_mode";
+import { onKeyDown, onResize, onScroll } from "../../utils/event";
 import { HistoryManager } from "./history_manager";
 import InteractiveGrid from "./interactive_grid";
 import { ModeManager } from "./mode_manager";
