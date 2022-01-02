@@ -9,10 +9,12 @@ import state, {
     publish,
     multiSubscribe,
 } from "../../../state";
-import { hslToHex, CMouseEvent, height } from "../../../utils";
+import { height } from "../../../utils";
 import ChipGridMode from "../../../utils/chip_grid_mode";
 import { displayContextMenu } from "../../../utils/context_menu";
 import { EditMode } from "../../../utils/edit_mode";
+import { CMouseEvent } from "../../../utils/event";
+import { hslToHex } from "../../../utils/graphics";
 import { Chip } from "../../chip/chip";
 import ChipGrid from "../../chip/chip_grid";
 import { getSprite } from "../../sprites/sprite_loader";

@@ -2,8 +2,9 @@ import * as PIXI from "pixi.js";
 
 import config from "../../../config";
 import { subscribe, setState } from "../../../state";
-import { generateRoundedRectContainer, width } from "../../../utils";
+import { width } from "../../../utils";
 import ChipGridMode from "../../../utils/chip_grid_mode";
+import { generateRoundedRectContainer } from "../../../utils/graphics";
 import { GUIComponent } from "../component/gui_component";
 import GUIWindow from "../component/gui_window";
 

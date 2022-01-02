@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 import { subscribe } from "../../../state";
-import { onResize } from "../../../utils";
+import { onResize } from "../../../utils/event";
 
 export enum GUIComponentState {
     DEFAULT,
