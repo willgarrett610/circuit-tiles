@@ -26,9 +26,6 @@ export class Chip {
             | undefined;
     } = {};
 
-    inputIndex: number = 1;
-    outputIndex: number = 1;
-
     /**
      * Chip constructor
      *
@@ -121,10 +118,20 @@ export class Chip {
                 tile.id = state.selectableTiles[state.selectedTileIndex].name;
             } else {
                 if (tile instanceof ChipInputTile) {
-                    tile.id = "IN" + this.inputIndex++;
+                    let i = 1;
+                    let newId: string;
+                    do {
+                        newId = "IN" + i++;
+                    } while (this.inputTiles.find((x) => x.name === newId));
+                    tile.id = newId;
                     this.inputTiles.push({ name: tile.id, tile: tile });
                 } else if (tile instanceof ChipOutputTile) {
-                    tile.id = "OUT" + this.outputIndex++;
+                    let i = 1;
+                    let newId: string;
+                    do {
+                        newId = "OUT" + i++;
+                    } while (this.outputTiles.find((x) => x.name === newId));
+                    tile.id = newId;
                     this.outputTiles.push({ name: tile.id, tile: tile });
                 }
             }
@@ -142,6 +149,15 @@ export class Chip {
             this.inputTiles = this.inputTiles.filter((x) => x.tile !== tile);
         } else if (tile instanceof ChipOutputTile) {
             this.outputTiles = this.outputTiles.filter((x) => x.tile !== tile);
+        } else return;
+        const key = Object.keys(this.structure).find(
+            (x) => this.structure[x]?.id === tile.id
+        );
+        if (key) {
+            const split = key.split(",");
+            const x = parseInt(split[0]);
+            const y = parseInt(split[1]);
+            state.currentChipGrid?.grids.structure.removeTile(x, y);
         }
     }
 
@@ -194,8 +210,6 @@ export class Chip {
      */
     clone() {
         const newChip = new Chip(this.name, this.color, this.hue);
-        newChip.inputIndex = this.inputIndex;
-        newChip.outputIndex = this.outputIndex;
         newChip.tiles = mapObject(this.tiles, (tile) => tile?.clone());
         newChip.structure = mapObject(
             this.structure,
