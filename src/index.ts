@@ -5,7 +5,6 @@ import initGUI from "./components/gui/gui";
 
 import GridManager from "./components/grid/grid_manager";
 import { loadSprites } from "./components/sprites/sprite_loader";
-import { setState, subscribe } from "./state";
 import { initContextMenu } from "./utils/context_menu";
 import { setupMenus } from "./menus";
 
@@ -34,18 +33,6 @@ const main = async () => {
 
     setupMenus();
 
-    const chipCreation = document.getElementById("chip_creation");
-    if (chipCreation) {
-        document.body.removeChild(chipCreation);
-        document.body.appendChild(chipCreation);
-    }
-
-    const textInputForm = document.getElementById("text_input_modal");
-    if (textInputForm) {
-        document.body.removeChild(textInputForm);
-        document.body.appendChild(textInputForm);
-    }
-
     app.renderer.backgroundColor = config.colors.background;
 
     const gridManager = new GridManager();
@@ -65,63 +52,6 @@ const main = async () => {
     window.addEventListener("wheel", (e: WheelEvent) => {
         handleEvent(e, app);
     });
-
-    // Set up chip creation color preview
-    const nameInput = document.getElementById(
-        "chip_name_input"
-    ) as HTMLInputElement;
-    const hueInput = document.getElementById(
-        "chip_hue_input"
-    ) as HTMLInputElement;
-    const huePreview = document.getElementById("chip_color_prev");
-
-    if (hueInput && huePreview) {
-        hueInput.addEventListener("input", () => {
-            const hue = parseInt(hueInput.value);
-            huePreview.style.backgroundColor = `hsl(${hue}, 50%, 40%)`;
-        });
-    }
-
-    const chipCreationForm = document.getElementById("chip_creation");
-    if (chipCreationForm) {
-        subscribe("chipCreation", (value) => {
-            if (value.open) {
-                nameInput.value = "";
-                hueInput.value = "0";
-                if (huePreview)
-                    huePreview.style.backgroundColor = "hsl(0, 50%, 40%)";
-                chipCreationForm.style.display = "block";
-                setState({ interactive: false });
-            } else {
-                chipCreationForm.style.display = "none";
-                setState({ interactive: true });
-            }
-        });
-    }
-
-    const textInputTitle = document.getElementById(
-        "text_input_title"
-    ) as HTMLElement;
-    const textInputName = document.getElementById(
-        "text_input_name"
-    ) as HTMLElement;
-    const textInput = document.getElementById("text_input") as HTMLInputElement;
-
-    if (textInputForm) {
-        subscribe("textInput", (value) => {
-            if (value.open) {
-                textInputForm.style.display = "block";
-                textInputTitle.innerText = value.title;
-                textInputName.innerText = value.name + ":";
-                textInput.value = value.value;
-
-                setState({ interactive: false });
-            } else {
-                textInputForm.style.display = "none";
-                setState({ interactive: true });
-            }
-        });
-    }
 };
 
 main();
