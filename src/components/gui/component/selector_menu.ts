@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
 
 import config from "../../../config";
-import { CMouseEvent, onContextMenu } from "../../../utils";
+import { CMouseEvent, onContextMenu } from "../../../utils/event";
 import LineWrapLayout from "../layout/line_wrap_layout";
 import ButtonGroup from "./button_group";
 import GUIWindow from "./gui_window";

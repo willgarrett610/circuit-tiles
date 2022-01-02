@@ -1,5 +1,4 @@
 import * as PIXI from "pixi.js";
-import { handleEvent } from "./utils";
 import config from "./config";
 import initGUI from "./components/gui/gui";
 
@@ -7,6 +6,7 @@ import GridManager from "./components/grid/grid_manager";
 import { loadSprites } from "./components/sprites/sprite_loader";
 import { initContextMenu } from "./utils/context_menu";
 import { setupMenus } from "./menus";
+import { handleEvent } from "./utils/event";
 
 PIXI.utils.skipHello();
 

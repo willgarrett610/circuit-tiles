@@ -1,13 +1,6 @@
 import * as PIXI from "pixi.js";
 
-import {
-    CMouseEvent,
-    dimensions,
-    generateRoundedRectContainer,
-    hslToHex,
-    onResize,
-    width,
-} from "../../utils";
+import { dimensions, width } from "../../utils";
 import GUIWindow from "./component/gui_window";
 import getTileTypes, { TileType } from "../tiles/tile_types";
 import ButtonGroup from "./component/button_group";
@@ -32,6 +25,8 @@ import StructureTile from "../tiles/structure_tile";
 import { displayContextMenu } from "../../utils/context_menu";
 import { createChipInputForm } from "../../menus/create_chip";
 import { Chip } from "../chip/chip";
+import { generateRoundedRectContainer, hslToHex } from "../../utils/graphics";
+import { CMouseEvent, onResize } from "../../utils/event";
 
 const createToolBtn = (spriteKey: string): GUIComponent => {
     const toolHover = new PIXI.Graphics();

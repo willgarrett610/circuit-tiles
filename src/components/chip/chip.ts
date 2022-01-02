@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import state from "../../state";
-import { mapObject } from "../../utils";
 import ChipGridMode from "../../utils/chip_grid_mode";
 import { Direction } from "../../utils/directions";
+import { mapObject } from "../../utils/objects";
 import ChipInputTile from "../tiles/chip_input_tile";
 import ChipOutputTile from "../tiles/chip_output_tile";
 import StructureTile from "../tiles/structure_tile";
