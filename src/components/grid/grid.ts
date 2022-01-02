@@ -800,7 +800,10 @@ export default class Grid extends PIXI.Container {
                 // if (this.currentInteraction === Interaction.NONE)
                 //     this.rotateTile(...gridPoint);
                 // this.currentInteraction = Interaction.PLACING;
-            } else if (state.selectedTileIndex !== -1) {
+            } else if (
+                state.editMode === EditMode.TILE &&
+                state.selectedTileIndex !== -1
+            ) {
                 if (this.currentInteraction === Interaction.NONE)
                     this.rotateTile(...gridPoint);
                 this.currentInteraction = Interaction.PLACING;
