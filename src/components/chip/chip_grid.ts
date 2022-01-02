@@ -1,6 +1,5 @@
-import { gridManager } from "../..";
 import state, { setState, update } from "../../state";
-import Grid from "../grid/grid";
+import InteractiveGrid from "../grid/interactive_grid";
 import ChipInputTile from "../tiles/chip_input_tile";
 import ChipOutputTile from "../tiles/chip_output_tile";
 import { Chip } from "./chip";
@@ -9,8 +8,8 @@ import { Chip } from "./chip";
 export default class ChipGrid {
     chip: Chip;
     grids: {
-        chip: Grid;
-        structure: Grid;
+        chip: InteractiveGrid;
+        structure: InteractiveGrid;
     };
 
     /**
@@ -21,8 +20,8 @@ export default class ChipGrid {
     constructor(chip: Chip) {
         this.chip = chip;
         this.grids = {
-            chip: new Grid(gridManager, 100, chip.tiles),
-            structure: new Grid(gridManager, 100, chip.structure),
+            chip: new InteractiveGrid(100, chip.tiles),
+            structure: new InteractiveGrid(100, chip.structure),
         };
 
         this.grids.chip.addHandler("postAddTile", (tile) => {
@@ -48,29 +47,12 @@ export default class ChipGrid {
                 editedChip: update,
             });
         });
+
         this.grids.structure.addHandler("postRemoveTile", () => {
             setState({
                 isStructured: this.chip.isStructured(),
                 editedChip: update,
             });
         });
-    }
-
-    /** reloads in the tiles for chip and structure grids */
-    reload() {
-        this.reloadChipGrid();
-        this.reloadStructureGrid();
-    }
-
-    /** reloads in the tiles for chip grid */
-    reloadChipGrid() {
-        this.grids.chip.tiles = this.chip.tiles;
-        this.grids.chip.generateTileGraphics();
-    }
-
-    /** reloads in the tiles for structure grid */
-    reloadStructureGrid() {
-        this.grids.structure.tiles = this.chip.structure;
-        this.grids.structure.generateTileGraphics();
     }
 }

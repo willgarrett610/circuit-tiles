@@ -64,10 +64,9 @@ export class HistoryManager {
                                     this.gridManager.getGrid().size
                                 )
                             );
-                        this.gridManager.tileManager.dispatchHandler(
-                            "postRemoveTile",
-                            refTile
-                        );
+                        this.gridManager
+                            .getGrid()
+                            .dispatchHandler("postRemoveTile", refTile);
                     }
                     this.gridManager
                         .getGrid()
@@ -109,10 +108,9 @@ export class HistoryManager {
                             this.gridManager.getGrid().size
                         );
                         this.gridManager.getGrid().addChild(tileGraphics);
-                        this.gridManager.tileManager.dispatchHandler(
-                            "postAddTile",
-                            tile
-                        );
+                        this.gridManager
+                            .getGrid()
+                            .dispatchHandler("postAddTile", tile);
                     }
 
                     this.gridManager
@@ -126,7 +124,7 @@ export class HistoryManager {
 
         this.history.splice(this.history.length - 2, 1);
 
-        this.gridManager.tileManager.dispatchHandler("postUndo", actions);
+        this.gridManager.getGrid().dispatchHandler("postUndo", actions);
     };
 
     redo = async () => {
@@ -153,10 +151,9 @@ export class HistoryManager {
                                     this.gridManager.getGrid().size
                                 )
                             );
-                        this.gridManager.tileManager.dispatchHandler(
-                            "postRemoveTile",
-                            refTile
-                        );
+                        this.gridManager
+                            .getGrid()
+                            .dispatchHandler("postRemoveTile", refTile);
                     }
                     this.gridManager
                         .getGrid()
@@ -200,10 +197,9 @@ export class HistoryManager {
                             );
                         this.gridManager.getGrid().addChild(tileGraphics);
 
-                        this.gridManager.tileManager.dispatchHandler(
-                            "postAddTile",
-                            postTile
-                        );
+                        this.gridManager
+                            .getGrid()
+                            .dispatchHandler("postAddTile", postTile);
                     }
 
                     this.gridManager
@@ -215,7 +211,7 @@ export class HistoryManager {
             }
         }
 
-        this.gridManager.tileManager.dispatchHandler("postRedo", actions);
+        this.gridManager.getGrid().dispatchHandler("postRedo", actions);
     };
 
     cleanHistory = () => {

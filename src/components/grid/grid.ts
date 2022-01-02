@@ -1,89 +1,65 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as PIXI from "pixi.js";
-import {
-    dimensions,
-    height,
-    locationToPair,
-    locationToTuple,
-    mouseDown,
-    pressedKeys,
-    width,
-} from "../../utils";
+import { dimensions } from "../../utils";
 import { clamp } from "../../utils/math";
 import config from "../../config";
-import { Tile } from "../tiles/tile";
-import { Direction } from "../../utils/directions";
+import { ConnectionType, Tile } from "../tiles/tile";
+import { Direction, rotateClockWise } from "../../utils/directions";
 import "../../utils/compute_logic";
-import { Interaction } from "../../utils/action";
-import state, { subscribe } from "../../state";
+import state from "../../state";
 import { EditMode } from "../../utils/edit_mode";
 import Graph from "../../logic/graph";
-import GridManager from "./grid_manager";
+import { GridAction } from "../../utils/action";
+import { gridManager } from "../..";
 
-// interface GridHandlers {
-//     postAddTile: ((tile: Tile) => void)[];
-//     postRemoveTile: ((tile: Tile) => void)[];
-//     postEditTile: ((tile: Tile) => void)[];
-//     postUndo: ((
-//         actions: {
-//             action: GridAction;
-//             prevTile: Tile | undefined;
-//             postTile: Tile | undefined;
-//             location: {
-//                 x: number;
-//                 y: number;
-//             };
-//         }[]
-//     ) => void)[];
-//     postRedo: ((
-//         actions: {
-//             action: GridAction;
-//             prevTile: Tile | undefined;
-//             postTile: Tile | undefined;
-//             location: {
-//                 x: number;
-//                 y: number;
-//             };
-//         }[]
-//     ) => void)[];
-// }
+interface GridHandlers {
+    postAddTile: ((payload: Tile) => void)[];
+    postRemoveTile: ((payload: Tile) => void)[];
+    postEditTile: ((payload: Tile) => void)[];
+    postUndo: ((
+        payload: {
+            action: GridAction;
+            prevTile: Tile | undefined;
+            postTile: Tile | undefined;
+            location: {
+                x: number;
+                y: number;
+            };
+        }[]
+    ) => void)[];
+    postRedo: ((
+        payload: {
+            action: GridAction;
+            prevTile: Tile | undefined;
+            postTile: Tile | undefined;
+            location: {
+                x: number;
+                y: number;
+            };
+        }[]
+    ) => void)[];
+}
 
 /** Grid class */
 export default class Grid extends PIXI.Container {
-    gridManager: GridManager;
-
     startingSize: number;
     size: number;
     tiles: { [key: string]: Tile | undefined } = {};
-
-    // history: {
-    //     action: GridAction;
-    //     prevTile: Tile | undefined;
-    //     postTile: Tile | undefined;
-    //     location: { x: number; y: number };
-    // }[][] = [[]];
-    // tempHistory: {
-    //     action: GridAction;
-    //     prevTile: Tile | undefined;
-    //     postTile: Tile | undefined;
-    //     location: { x: number; y: number };
-    // }[] = [];
-    // undoHistory: {
-    //     action: GridAction;
-    //     prevTile: Tile | undefined;
-    //     postTile: Tile | undefined;
-    //     location: { x: number; y: number };
-    // }[][] = [];
-
-    mousePos: [x: number, y: number] = [0, 0];
-    prevMousePos: [x: number, y: number] = [0, 0];
 
     lineGraphics: PIXI.Graphics;
     hlTile: PIXI.Graphics;
     selectionGraphics: PIXI.Graphics;
 
-    interactive = true;
     sortableChildren = true;
     zIndex = 1000;
+
+    handlers: GridHandlers = {
+        postAddTile: [],
+        postRemoveTile: [],
+        postEditTile: [],
+        postUndo: [],
+        postRedo: [],
+    };
 
     dragData: {
         isDragging: boolean;
@@ -101,49 +77,14 @@ export default class Grid extends PIXI.Container {
         endLocation: { grid: undefined, screen: undefined },
     };
 
-    // currentInteraction: Interaction = Interaction.NONE;
-
-    // handlers: GridHandlers = {
-    //     postAddTile: [],
-    //     postRemoveTile: [],
-    //     postEditTile: [],
-    //     postUndo: [],
-    //     postRedo: [],
-    // };
-
-    // addHandler = <T extends keyof GridHandlers>(
-    //     handlerName: T,
-    //     handler: GridHandlers[T][number]
-    // ) => {
-    //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    //     this.handlers[handlerName].push(handler as any);
-    // };
-
-    // dispatchHandler = <T extends keyof GridHandlers>(
-    //     handlerName: T,
-    //     ...args: Parameters<GridHandlers[T][number]>
-    // ) => {
-    //     for (const handler of this.handlers[handlerName]) {
-    //         // eslint-disable-next-line prefer-spread, @typescript-eslint/no-explicit-any
-    //         (handler as any).apply(null, args as any);
-    //     }
-    // };
-
     /**
      * Constructs grid
      *
-     * @param gridManager
      * @param size pixel size of grid tile
      * @param tiles initial tiles
      */
-    constructor(
-        gridManager: GridManager,
-        size: number,
-        tiles?: { [key: string]: Tile | undefined }
-    ) {
+    constructor(size: number, tiles?: { [key: string]: Tile | undefined }) {
         super();
-
-        this.gridManager = gridManager;
 
         this.startingSize = size;
         this.size = size;
@@ -163,16 +104,6 @@ export default class Grid extends PIXI.Container {
         this.addChild(this.hlTile);
 
         this.renderGrid();
-
-        subscribe("interactive", (value) => {
-            this.interactive = value;
-        });
-
-        subscribe("editMode", (value) => {
-            if (value !== EditMode.CURSOR) {
-                this.selectionGraphics.clear();
-            }
-        });
     }
 
     /**
@@ -207,402 +138,303 @@ export default class Grid extends PIXI.Container {
         delete this.tiles[`${x},${y}`];
     }
 
-    // /**
-    //  * Connects tiles together
-    //  *
-    //  * @param newTile
-    //  * @param prevTile
-    //  * @param direction direction from newTile to prevTile
-    //  * @param editedNewTile
-    //  * @param forced if the connection should be forced
-    //  */
-    // connectTiles(
-    //     newTile: Tile,
-    //     prevTile: Tile | undefined,
-    //     direction: Direction | undefined,
-    //     editedNewTile: boolean,
-    //     forced = false
-    // ) {
-    //     if (
-    //         newTile !== undefined &&
-    //         prevTile !== undefined &&
-    //         direction !== undefined
-    //     ) {
-    //         const oppositeDirection = Direction.toLower(
-    //             Direction.getOpposite(direction)
-    //         );
-    //         const directDirection = Direction.toLower(direction);
+    addHandler = <T extends keyof GridHandlers>(
+        handlerName: T,
+        callback: GridHandlers[T][number]
+    ) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        this.handlers[handlerName].push(callback as any);
+    };
 
-    //         const canConnect =
-    //             newTile.getConnectionTemplate()[directDirection] !==
-    //                 ConnectionType.BLOCKED &&
-    //             prevTile.getConnectionTemplate()[oppositeDirection] !==
-    //                 ConnectionType.BLOCKED &&
-    //             (forced || newTile.isWire || prevTile.isWire);
+    dispatchHandler = <T extends keyof GridHandlers>(
+        handlerName: T,
+        payload: Parameters<GridHandlers[T][number]>[0]
+    ) => {
+        for (const handler of this.handlers[handlerName]) {
+            handler(payload as any);
+        }
+    };
 
-    //         if (!prevTile.getConnections()[oppositeDirection] && canConnect) {
-    //             this.tempHistory.push({
-    //                 action: GridAction.EDIT,
-    //                 prevTile: prevTile.clone(),
-    //                 postTile: undefined,
-    //                 location: { x: prevTile.x, y: prevTile.y },
-    //             });
+    /**
+     * Connects tiles together
+     *
+     * @param newTile
+     * @param prevTile
+     * @param direction direction from newTile to prevTile
+     * @param editedNewTile
+     * @param forced if the connection should be forced
+     */
+    connectTiles(
+        newTile: Tile,
+        prevTile: Tile | undefined,
+        direction: Direction | undefined,
+        editedNewTile: boolean,
+        forced = false
+    ) {
+        if (
+            newTile !== undefined &&
+            prevTile !== undefined &&
+            direction !== undefined
+        ) {
+            const oppositeDirection = Direction.toLower(
+                Direction.getOpposite(direction)
+            );
+            const directDirection = Direction.toLower(direction);
 
-    //             prevTile.setConnection(oppositeDirection, true);
-    //             this.tempHistory[this.tempHistory.length - 1].postTile =
-    //                 prevTile.clone();
-    //         }
-    //         if (
-    //             !newTile.getConnections()[directDirection] &&
-    //             (canConnect || !editedNewTile)
-    //         ) {
-    //             this.tempHistory.push({
-    //                 action: editedNewTile ? GridAction.EDIT : GridAction.ADD,
-    //                 prevTile: editedNewTile ? newTile.clone() : undefined,
-    //                 postTile: undefined,
-    //                 location: { x: newTile.x, y: newTile.y },
-    //             });
+            const canConnect =
+                newTile.getConnectionTemplate()[directDirection] !==
+                    ConnectionType.BLOCKED &&
+                prevTile.getConnectionTemplate()[oppositeDirection] !==
+                    ConnectionType.BLOCKED &&
+                (forced || newTile.isWire || prevTile.isWire);
 
-    //             if (canConnect) newTile.setConnection(directDirection, true);
+            if (!prevTile.getConnections()[oppositeDirection] && canConnect) {
+                gridManager.historyManager.tempHistory.push({
+                    action: GridAction.EDIT,
+                    prevTile: prevTile.clone(),
+                    postTile: undefined,
+                    location: { x: prevTile.x, y: prevTile.y },
+                });
 
-    //             this.tempHistory[this.tempHistory.length - 1].postTile =
-    //                 newTile.clone();
-    //         }
-    //         prevTile.updateContainer?.();
-    //     } else if (!editedNewTile) {
-    //         this.tempHistory.push({
-    //             action: GridAction.ADD,
-    //             prevTile: undefined,
-    //             postTile: newTile.clone(),
-    //             location: { x: newTile.x, y: newTile.y },
-    //         });
-    //     }
+                prevTile.setConnection(oppositeDirection, true);
+                gridManager.historyManager.tempHistory[
+                    gridManager.historyManager.tempHistory.length - 1
+                ].postTile = prevTile.clone();
+            }
+            if (
+                !newTile.getConnections()[directDirection] &&
+                (canConnect || !editedNewTile)
+            ) {
+                gridManager.historyManager.tempHistory.push({
+                    action: editedNewTile ? GridAction.EDIT : GridAction.ADD,
+                    prevTile: editedNewTile ? newTile.clone() : undefined,
+                    postTile: undefined,
+                    location: { x: newTile.x, y: newTile.y },
+                });
 
-    //     newTile.updateContainer?.();
-    // }
+                if (canConnect) newTile.setConnection(directDirection, true);
 
-    // /**
-    //  * handles forced connections of tiles
-    //  *
-    //  * @param tile tile to attempt to force connect
-    //  */
-    // handleForceConnection(tile: Tile) {
-    //     for (const key in tile.getConnectionForce()) {
-    //         const forceDirectionKey = key as "up" | "right" | "down" | "left";
-    //         const force = tile.getConnectionForce()[forceDirectionKey];
-    //         const forceDirection = Direction.fromString(forceDirectionKey);
-    //         if (force) {
-    //             const forceTile = this.getTile(
-    //                 tile.x + Direction.getOffset(forceDirection)[0],
-    //                 tile.y + Direction.getOffset(forceDirection)[1]
-    //             );
-    //             if (forceTile) {
-    //                 this.connectTiles(
-    //                     tile,
-    //                     forceTile,
-    //                     forceDirection,
-    //                     true,
-    //                     true
-    //                 );
-    //             }
-    //         }
-    //     }
+                gridManager.historyManager.tempHistory[
+                    gridManager.historyManager.tempHistory.length - 1
+                ].postTile = newTile.clone();
+            }
+            prevTile.updateContainer?.();
+        } else if (!editedNewTile) {
+            gridManager.historyManager.tempHistory.push({
+                action: GridAction.ADD,
+                prevTile: undefined,
+                postTile: newTile.clone(),
+                location: { x: newTile.x, y: newTile.y },
+            });
+        }
 
-    //     for (const direction of Direction.values()) {
-    //         const adjacentTile = this.getTile(
-    //             tile.x + Direction.getOffset(direction)[0],
-    //             tile.y + Direction.getOffset(direction)[1]
-    //         );
-    //         if (adjacentTile) {
-    //             if (
-    //                 adjacentTile.getConnectionForce()[
-    //                     Direction.toLower(Direction.getOpposite(direction))
-    //                 ]
-    //             ) {
-    //                 this.connectTiles(tile, adjacentTile, direction, true);
-    //             }
-    //         }
-    //     }
-    // }
+        newTile.updateContainer?.();
+    }
 
-    // /**
-    //  * add tile to grid
-    //  *
-    //  * @param x x location of tile
-    //  * @param y y location of tile
-    //  * @param tile tile to add
-    //  * @param prevTile last tile added
-    //  * @param direction direction of placement
-    //  * @returns tile if add was successful, undefined otherwise
-    //  */
-    // addTile<T extends Tile>(
-    //     x: number,
-    //     y: number,
-    //     tile: {
-    //         new (x: number, y: number): T;
-    //     },
-    //     prevTile: Tile | undefined,
-    //     direction: Direction | undefined
-    // ): Tile | undefined {
-    //     const tileAtLocation = this.getTile(x, y);
-    //     if (tileAtLocation) {
-    //         this.connectTiles(tileAtLocation, prevTile, direction, true);
-    //         return tileAtLocation;
-    //     }
+    /**
+     * handles forced connections of tiles
+     *
+     * @param tile tile to attempt to force connect
+     */
+    handleForceConnection(tile: Tile) {
+        for (const key in tile.getConnectionForce()) {
+            const forceDirectionKey = key as "up" | "right" | "down" | "left";
+            const force = tile.getConnectionForce()[forceDirectionKey];
+            const forceDirection = Direction.fromString(forceDirectionKey);
+            if (force) {
+                const forceTile = this.getTile(
+                    tile.x + Direction.getOffset(forceDirection)[0],
+                    tile.y + Direction.getOffset(forceDirection)[1]
+                );
+                if (forceTile) {
+                    this.connectTiles(
+                        tile,
+                        forceTile,
+                        forceDirection,
+                        true,
+                        true
+                    );
+                }
+            }
+        }
 
-    //     const tileObj = new tile(x, y);
+        for (const direction of Direction.values()) {
+            const adjacentTile = this.getTile(
+                tile.x + Direction.getOffset(direction)[0],
+                tile.y + Direction.getOffset(direction)[1]
+            );
+            if (adjacentTile) {
+                if (
+                    adjacentTile.getConnectionForce()[
+                        Direction.toLower(Direction.getOpposite(direction))
+                    ]
+                ) {
+                    this.connectTiles(tile, adjacentTile, direction, true);
+                }
+            }
+        }
+    }
 
-    //     this.setTile(x, y, tileObj);
+    /**
+     * add tile to grid
+     *
+     * @param x x location of tile
+     * @param y y location of tile
+     * @param tile tile to add
+     * @param prevTile last tile added
+     * @param direction direction of placement
+     * @returns tile if add was successful, undefined otherwise
+     */
+    addTile<T extends Tile>(
+        x: number,
+        y: number,
+        tile: {
+            new (x: number, y: number): T;
+        },
+        prevTile: Tile | undefined,
+        direction: Direction | undefined
+    ): Tile | undefined {
+        const tileAtLocation = this.getTile(x, y);
+        if (tileAtLocation) {
+            this.connectTiles(tileAtLocation, prevTile, direction, true);
+            return tileAtLocation;
+        }
 
-    //     const tileGraphics: PIXI.Container = tileObj.getContainer(this.size);
-    //     this.addChild(tileGraphics);
+        const tileObj = new tile(x, y);
 
-    //     this.connectTiles(tileObj, prevTile, direction, false);
+        this.setTile(x, y, tileObj);
 
-    //     this.handleForceConnection(tileObj);
+        const tileGraphics: PIXI.Container = tileObj.getContainer(this.size);
+        this.addChild(tileGraphics);
 
-    //     this.dispatchHandler("postAddTile", tileObj);
+        this.connectTiles(tileObj, prevTile, direction, false);
 
-    //     return tileObj;
-    // }
+        this.handleForceConnection(tileObj);
 
-    // /**
-    //  * Removes tile at location
-    //  *
-    //  * @param x x coordinate
-    //  * @param y y coordinate
-    //  * @returns success of deletion
-    //  */
-    // removeTile(x: number, y: number) {
-    //     const tile = this.getTile(x, y);
-    //     if (!tile) return false;
-    //     this.tempHistory.push({
-    //         action: GridAction.REMOVE,
-    //         prevTile: tile.clone(),
-    //         postTile: undefined,
-    //         location: { x: tile.x, y: tile.y },
-    //     });
-    //     this.removeChild(tile.getContainer(this.size));
-    //     this.deleteTile(x, y);
-    //     const removalSpots: {
-    //         offset: number[];
-    //         side: "up" | "right" | "down" | "left";
-    //     }[] = [
-    //         { offset: [-1, 0], side: "right" },
-    //         { offset: [1, 0], side: "left" },
-    //         { offset: [0, -1], side: "down" },
-    //         { offset: [0, 1], side: "up" },
-    //     ];
-    //     for (const removalSpot of removalSpots) {
-    //         const adjacentTile = this.getTile(
-    //             x + removalSpot.offset[0],
-    //             y + removalSpot.offset[1]
-    //         );
+        this.dispatchHandler("postAddTile", tileObj);
 
-    //         if (
-    //             adjacentTile !== undefined &&
-    //             adjacentTile.getConnections()[removalSpot.side]
-    //         ) {
-    //             this.tempHistory.push({
-    //                 action: GridAction.EDIT,
-    //                 prevTile: adjacentTile.clone(),
-    //                 postTile: undefined,
-    //                 location: { x: adjacentTile.x, y: adjacentTile.y },
-    //             });
-    //             adjacentTile.setConnection(removalSpot.side, false);
-    //             this.tempHistory[this.tempHistory.length - 1].postTile =
-    //                 adjacentTile.clone();
-    //             adjacentTile.updateContainer?.();
-    //         }
-    //     }
-    //     this.dispatchHandler("postRemoveTile", tile);
-    //     return true;
-    // }
+        return tileObj;
+    }
 
-    // /**
-    //  * Rotates tiles clockwise
-    //  *
-    //  * @param x x coordinate
-    //  * @param y y coordinate
-    //  */
-    // rotateTile(x: number, y: number) {
-    //     const tile = this.getTile(x, y);
-    //     if (tile && tile.breakOnRotate) {
-    //         this.tempHistory.push({
-    //             action: GridAction.EDIT,
-    //             prevTile: tile.clone(),
-    //             postTile: undefined,
-    //             location: { x, y },
-    //         });
-    //         if (tile.rotatable)
-    //             tile.direction = rotateClockWise(tile.direction);
-    //         tile.setConnection("up", false);
-    //         tile.setConnection("down", false);
-    //         tile.setConnection("left", false);
-    //         tile.setConnection("right", false);
-    //         tile.updateContainer?.();
-    //         this.tempHistory[this.tempHistory.length - 1].postTile =
-    //             tile.clone();
+    /**
+     * Removes tile at location
+     *
+     * @param x x coordinate
+     * @param y y coordinate
+     * @returns success of deletion
+     */
+    removeTile(x: number, y: number) {
+        const tile = this.getTile(x, y);
+        if (!tile) return false;
+        gridManager.historyManager.tempHistory.push({
+            action: GridAction.REMOVE,
+            prevTile: tile.clone(),
+            postTile: undefined,
+            location: { x: tile.x, y: tile.y },
+        });
+        this.removeChild(tile.getContainer(this.size));
+        this.deleteTile(x, y);
+        const removalSpots: {
+            offset: number[];
+            side: "up" | "right" | "down" | "left";
+        }[] = [
+            { offset: [-1, 0], side: "right" },
+            { offset: [1, 0], side: "left" },
+            { offset: [0, -1], side: "down" },
+            { offset: [0, 1], side: "up" },
+        ];
+        for (const removalSpot of removalSpots) {
+            const adjacentTile = this.getTile(
+                x + removalSpot.offset[0],
+                y + removalSpot.offset[1]
+            );
 
-    //         const removalSpots: {
-    //             offset: number[];
-    //             side: "up" | "right" | "down" | "left";
-    //         }[] = [
-    //             { offset: [-1, 0], side: "right" },
-    //             { offset: [1, 0], side: "left" },
-    //             { offset: [0, -1], side: "down" },
-    //             { offset: [0, 1], side: "up" },
-    //         ];
-    //         for (const removalSpot of removalSpots) {
-    //             const adjacentTile = this.getTile(
-    //                 x + removalSpot.offset[0],
-    //                 y + removalSpot.offset[1]
-    //             );
+            if (
+                adjacentTile !== undefined &&
+                adjacentTile.getConnections()[removalSpot.side]
+            ) {
+                gridManager.historyManager.tempHistory.push({
+                    action: GridAction.EDIT,
+                    prevTile: adjacentTile.clone(),
+                    postTile: undefined,
+                    location: { x: adjacentTile.x, y: adjacentTile.y },
+                });
+                adjacentTile.setConnection(removalSpot.side, false);
+                gridManager.historyManager.tempHistory[
+                    gridManager.historyManager.tempHistory.length - 1
+                ].postTile = adjacentTile.clone();
+                adjacentTile.updateContainer?.();
+            }
+        }
+        this.dispatchHandler("postRemoveTile", tile);
+        return true;
+    }
 
-    //             if (
-    //                 adjacentTile !== undefined &&
-    //                 adjacentTile.getConnections()[removalSpot.side]
-    //             ) {
-    //                 this.tempHistory.push({
-    //                     action: GridAction.EDIT,
-    //                     prevTile: adjacentTile.clone(),
-    //                     postTile: undefined,
-    //                     location: {
-    //                         x: adjacentTile.x,
-    //                         y: adjacentTile.y,
-    //                     },
-    //                 });
-    //                 adjacentTile.setConnection(removalSpot.side, false);
-    //                 this.tempHistory[this.tempHistory.length - 1].postTile =
-    //                     adjacentTile.clone();
-    //                 adjacentTile.updateContainer?.();
-    //             }
-    //         }
+    /**
+     * Rotates tiles clockwise
+     *
+     * @param x x coordinate
+     * @param y y coordinate
+     */
+    rotateTile(x: number, y: number) {
+        const tile = this.getTile(x, y);
+        if (tile && tile.breakOnRotate) {
+            gridManager.historyManager.tempHistory.push({
+                action: GridAction.EDIT,
+                prevTile: tile.clone(),
+                postTile: undefined,
+                location: { x, y },
+            });
+            if (tile.rotatable)
+                tile.direction = rotateClockWise(tile.direction);
+            tile.setConnection("up", false);
+            tile.setConnection("down", false);
+            tile.setConnection("left", false);
+            tile.setConnection("right", false);
+            tile.updateContainer?.();
+            gridManager.historyManager.tempHistory[
+                gridManager.historyManager.tempHistory.length - 1
+            ].postTile = tile.clone();
 
-    //         this.handleForceConnection(tile);
-    //     }
-    // }
+            const removalSpots: {
+                offset: number[];
+                side: "up" | "right" | "down" | "left";
+            }[] = [
+                { offset: [-1, 0], side: "right" },
+                { offset: [1, 0], side: "left" },
+                { offset: [0, -1], side: "down" },
+                { offset: [0, 1], side: "up" },
+            ];
+            for (const removalSpot of removalSpots) {
+                const adjacentTile = this.getTile(
+                    x + removalSpot.offset[0],
+                    y + removalSpot.offset[1]
+                );
 
-    // currentHistory = () => {
-    //     return this.history[this.history.length - 1];
-    // };
+                if (
+                    adjacentTile !== undefined &&
+                    adjacentTile.getConnections()[removalSpot.side]
+                ) {
+                    gridManager.historyManager.tempHistory.push({
+                        action: GridAction.EDIT,
+                        prevTile: adjacentTile.clone(),
+                        postTile: undefined,
+                        location: {
+                            x: adjacentTile.x,
+                            y: adjacentTile.y,
+                        },
+                    });
+                    adjacentTile.setConnection(removalSpot.side, false);
+                    gridManager.historyManager.tempHistory[
+                        gridManager.historyManager.tempHistory.length - 1
+                    ].postTile = adjacentTile.clone();
+                    adjacentTile.updateContainer?.();
+                }
+            }
 
-    // newHistory = () => {
-    //     this.history.push([]);
-    // };
-
-    // undo = async () => {
-    //     this.finishInteraction();
-    //     if (this.history.length < 2) return;
-    //     const actions = this.history[this.history.length - 2];
-    //     this.undoHistory.push(actions);
-
-    //     for (const { action, prevTile: tile, location } of [
-    //         ...actions,
-    //     ].reverse()) {
-    //         const refTile = this.getTile(location.x, location.y);
-    //         switch (action) {
-    //             case GridAction.ADD: {
-    //                 if (refTile) {
-    //                     this.removeChild(refTile.getContainer(this.size));
-    //                     this.dispatchHandler("postRemoveTile", refTile);
-    //                 }
-    //                 this.deleteTile(location.x, location.y);
-
-    //                 break;
-    //             }
-    //             case GridAction.EDIT: {
-    //                 if (tile) {
-    //                     if (refTile)
-    //                         this.removeChild(refTile.getContainer(this.size));
-    //                     this.setTile(location.x, location.y, tile);
-    //                     const tileGraphics: PIXI.Container = tile.getContainer(
-    //                         this.size
-    //                     );
-    //                     this.addChild(tileGraphics);
-    //                 }
-    //                 this.getTile(location.x, location.y)?.updateContainer?.();
-
-    //                 break;
-    //             }
-    //             case GridAction.REMOVE: {
-    //                 if (tile) {
-    //                     this.setTile(location.x, location.y, tile);
-    //                     const tileGraphics: PIXI.Container = tile.getContainer(
-    //                         this.size
-    //                     );
-    //                     this.addChild(tileGraphics);
-    //                     this.dispatchHandler("postAddTile", tile);
-    //                 }
-
-    //                 this.getTile(location.x, location.y)?.updateContainer?.();
-    //                 break;
-    //             }
-    //         }
-    //     }
-
-    //     this.history.splice(this.history.length - 2, 1);
-
-    //     this.dispatchHandler("postUndo", actions);
-    // };
-
-    // redo = async () => {
-    //     this.finishInteraction();
-    //     if (this.undoHistory.length === 0) return;
-
-    //     const actions = this.undoHistory.pop();
-    //     if (!actions) return;
-
-    //     this.currentHistory().push(...actions);
-    //     this.newHistory();
-
-    //     for (const { action, postTile, location } of actions) {
-    //         const refTile = this.getTile(location.x, location.y);
-    //         switch (action) {
-    //             case GridAction.REMOVE: {
-    //                 if (refTile) {
-    //                     this.removeChild(refTile.getContainer(this.size));
-    //                     this.dispatchHandler("postRemoveTile", refTile);
-    //                 }
-    //                 this.deleteTile(location.x, location.y);
-    //                 break;
-    //             }
-    //             case GridAction.EDIT: {
-    //                 if (postTile) {
-    //                     if (refTile)
-    //                         this.removeChild(refTile.getContainer(this.size));
-    //                     this.setTile(location.x, location.y, postTile);
-    //                     const tileGraphics: PIXI.Container =
-    //                         postTile.getContainer(this.size);
-    //                     this.addChild(tileGraphics);
-    //                 }
-    //                 this.getTile(location.x, location.y)?.updateContainer?.();
-
-    //                 break;
-    //             }
-    //             case GridAction.ADD: {
-    //                 if (postTile) {
-    //                     this.setTile(location.x, location.y, postTile);
-    //                     const tileGraphics: PIXI.Container =
-    //                         postTile.getContainer(this.size);
-    //                     this.addChild(tileGraphics);
-
-    //                     this.dispatchHandler("postAddTile", postTile);
-    //                 }
-
-    //                 this.getTile(location.x, location.y)?.updateContainer?.();
-    //                 break;
-    //             }
-    //         }
-    //     }
-
-    //     this.dispatchHandler("postRedo", actions);
-    // };
-
-    // cleanHistory = () => {
-    //     if (this.history[this.history.length - 1].length === 0)
-    //         this.history.pop();
-    // };
+            this.handleForceConnection(tile);
+        }
+    }
 
     zoom = (x: number, y: number, delta: number) => {
         let mult = config.zoomCoeff * delta;
@@ -619,289 +451,6 @@ export default class Grid extends PIXI.Container {
         this.y += (newPos.y - prevPos.y) * this.size;
 
         this.update();
-    };
-
-    scroll = (e: WheelEvent) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if ((e as any).wheelDeltaY === 0) return;
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const delta = (e as any).wheelDeltaY > 1 ? 1 : -1;
-
-        this.zoom(e.pageX, e.pageY, delta);
-    };
-
-    mouseup = (event: PIXI.interaction.InteractionEvent) => {
-        const e = event.data.originalEvent as PointerEvent;
-        const mousePos: [x: number, y: number] = [e.pageX, e.pageY];
-
-        this.dragData.isDragging = false;
-        this.dragData.endLocation.screen = locationToPair(mousePos);
-        this.dragData.endLocation.grid = this.screenToGrid(...mousePos, true);
-
-        this.renderSelection();
-    };
-
-    mousedown = (event: PIXI.interaction.InteractionEvent) => {
-        const e = event.data.originalEvent as PointerEvent;
-        const mousePos: [x: number, y: number] = [e.pageX, e.pageY];
-
-        this.dragData.isDragging = true;
-        this.dragData.startLocation.screen = locationToPair(mousePos);
-        this.dragData.startLocation.grid = this.screenToGrid(...mousePos, true);
-        this.dragData.endLocation.screen = locationToPair(mousePos);
-        this.dragData.endLocation.grid = this.screenToGrid(...mousePos, true);
-
-        this.renderSelection();
-    };
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mousemove = (event: PIXI.interaction.InteractionEvent) => {
-        const e = event.data.originalEvent as PointerEvent;
-        this.prevMousePos = [...this.mousePos];
-        this.mousePos = [e.pageX, e.pageY];
-        if (mouseDown.left) {
-            this.dragData.endLocation.screen = locationToPair(this.mousePos);
-
-            this.dragData.endLocation.grid = this.screenToGrid(
-                ...this.mousePos,
-                true
-            );
-
-            if (
-                e.shiftKey ||
-                pressedKeys["Space"] ||
-                state.editMode === EditMode.PAN
-            ) {
-                const prevGridPos = this.screenToGrid(
-                    ...this.prevMousePos,
-                    false,
-                    true
-                );
-                const newGridPos = this.screenToGrid(
-                    ...this.mousePos,
-                    false,
-                    true
-                );
-                this.x += newGridPos.x - prevGridPos.x;
-                this.y += newGridPos.y - prevGridPos.y;
-            } else if (state.editMode === EditMode.ERASER) {
-                this.gridManager.modeManager.currentInteraction =
-                    Interaction.REMOVING;
-
-                const gridPoints = this.gridPointsBetween(
-                    ...locationToTuple(
-                        this.screenToGrid(...this.prevMousePos, true)
-                    ),
-                    ...locationToTuple(
-                        this.screenToGrid(...this.mousePos, true)
-                    )
-                );
-
-                for (const gridPoint of gridPoints)
-                    this.gridManager.tileManager.removeTile(
-                        ...locationToTuple(gridPoint)
-                    );
-            } else if (state.editMode === EditMode.CURSOR) {
-                // do nothing
-            } else if (state.editMode === EditMode.TILE) {
-                this.gridManager.modeManager.currentInteraction =
-                    Interaction.PLACING;
-
-                const gridPoints = this.gridPointsBetween(
-                    ...locationToTuple(
-                        this.screenToGrid(...this.prevMousePos, true)
-                    ),
-                    ...locationToTuple(
-                        this.screenToGrid(...this.mousePos, true)
-                    )
-                );
-
-                let prevTile: Tile | undefined = undefined;
-                for (let i = 0; i < gridPoints.length; i++) {
-                    const gridPoint = gridPoints[i];
-
-                    const newTile: Tile | undefined =
-                        this.gridManager.tileManager.addTile(
-                            ...locationToTuple(gridPoint),
-                            state.selectableTiles[state.selectedTileIndex].tile,
-                            prevTile,
-                            gridPoint.direction
-                        );
-
-                    prevTile = newTile;
-                }
-            }
-            this.update();
-        }
-
-        this.updateHighlightTile();
-    };
-
-    // finishInteraction = () => {
-    //     if (this.currentInteraction !== Interaction.NONE) {
-    //         this.currentInteraction = Interaction.NONE;
-    //         if (this.history.length > 0) {
-    //             this.currentHistory().push(...this.tempHistory);
-    //             this.cleanHistory();
-    //         }
-    //         this.newHistory();
-    //         this.undoHistory = [];
-    //         this.tempHistory = [];
-    //     }
-    // };
-
-    prevHighlightTileGraphic: PIXI.Container | undefined;
-    locationText = new PIXI.Text("");
-
-    updateHighlightTile = () => {
-        const gridScreenPos = this.screenToGrid(...this.mousePos, true, true);
-        const gridPos = this.screenToGrid(...this.mousePos, true);
-
-        if (this.prevHighlightTileGraphic)
-            this.removeChild(this.prevHighlightTileGraphic);
-        if (
-            state.selectedTileIndex !== -1 &&
-            state.editMode === EditMode.TILE &&
-            this.getTile(...locationToTuple(gridPos)) === undefined
-        ) {
-            const tempTile = new state.selectableTiles[
-                state.selectedTileIndex
-            ].tile(...locationToTuple(gridPos));
-            tempTile.forGraphicOnly = true;
-            const tileGraphics: PIXI.Container = tempTile.getContainer(
-                this.size
-            );
-            tileGraphics.alpha = 0.5;
-            this.addChild(tileGraphics);
-            this.prevHighlightTileGraphic = tileGraphics;
-            tempTile.updateContainer?.();
-            tempTile.update(this.size);
-        }
-
-        this.hlTile.clear();
-        this.hlTile.beginFill(config.colors.highlightTile);
-        this.hlTile.lineStyle(0);
-        this.hlTile.drawRect(
-            gridScreenPos.x,
-            gridScreenPos.y,
-            this.size,
-            this.size
-        );
-
-        if (config.debugMode) {
-            this.addChild(this.locationText);
-            this.locationText.zIndex = 201;
-            this.locationText.text = locationToTuple(gridPos).join();
-            this.locationText.position.set(gridScreenPos.x, gridScreenPos.y);
-        }
-    };
-
-    click = (event: PIXI.interaction.InteractionEvent) => {
-        if (
-            event.data.button === 0 &&
-            !event.data.originalEvent.shiftKey &&
-            !pressedKeys["Space"] &&
-            state.editMode !== EditMode.PAN
-        ) {
-            const gridPoint = locationToTuple(
-                this.screenToGrid(...this.mousePos, true)
-            );
-
-            if (state.editMode === EditMode.ERASER) {
-                this.gridManager.modeManager.currentInteraction =
-                    Interaction.REMOVING;
-                this.gridManager.tileManager.removeTile(...gridPoint);
-            } else if (state.editMode === EditMode.CURSOR) {
-                // if (this.currentInteraction === Interaction.NONE)
-                //     this.rotateTile(...gridPoint);
-                // this.currentInteraction = Interaction.PLACING;
-            } else if (
-                state.editMode === EditMode.TILE &&
-                state.selectedTileIndex !== -1
-            ) {
-                if (
-                    this.gridManager.modeManager.currentInteraction ===
-                    Interaction.NONE
-                )
-                    this.gridManager.tileManager.rotateTile(...gridPoint);
-                this.gridManager.modeManager.currentInteraction =
-                    Interaction.PLACING;
-                this.gridManager.tileManager.addTile(
-                    ...gridPoint,
-                    state.selectableTiles[state.selectedTileIndex].tile,
-                    undefined,
-                    undefined
-                );
-            }
-
-            this.update();
-        }
-
-        this.gridManager.modeManager.finishInteraction();
-    };
-
-    keyActionCooldownTime = 250;
-    lastKeyActionTime = 0;
-
-    keyDown = (e: KeyboardEvent) => {
-        const currTime = Date.now();
-        if (currTime - this.lastKeyActionTime < this.keyActionCooldownTime)
-            return;
-        if (e.ctrlKey && e.code === "KeyZ") {
-            e.preventDefault();
-            this.lastKeyActionTime = currTime;
-            if (e.shiftKey) {
-                this.gridManager.historyManager.redo();
-            } else {
-                this.gridManager.historyManager.undo();
-            }
-            e.stopPropagation();
-        }
-
-        this.gridManager.modeManager.editModeOnKeyDown(e.code);
-
-        if (!e.ctrlKey && !e.shiftKey) {
-            if (e.code === "Equal") {
-                e.preventDefault();
-
-                this.zoom(width() / 2, height() / 2, 1);
-            }
-
-            if (e.code === "Minus") {
-                e.preventDefault();
-
-                this.zoom(width() / 2, height() / 2, -1);
-            }
-
-            if (e.code === "Digit0") {
-                e.preventDefault();
-
-                const prevPos = this.screenToGrid(
-                    this.width / 2,
-                    this.height / 2
-                );
-
-                this.size = this.startingSize;
-
-                const newPos = this.screenToGrid(
-                    this.width / 2,
-                    this.height / 2
-                );
-
-                this.x += (newPos.x - prevPos.x) * this.size;
-                this.y += (newPos.y - prevPos.y) * this.size;
-
-                this.update();
-            }
-        }
-
-        if (!e.ctrlKey && !e.shiftKey && e.code === "KeyH") {
-            e.preventDefault();
-            this.x = 0;
-            this.y = 0;
-            this.update();
-        }
     };
 
     /** renders out grid */
@@ -1027,12 +576,14 @@ export default class Grid extends PIXI.Container {
         }
     }
 
-    update = () => {
+    /**
+     * Update the grids graphics
+     */
+    update() {
         this.renderGrid();
         this.renderTiles();
         this.renderSelection();
-        this.updateHighlightTile();
-    };
+    }
 
     convertToGraph = () => {
         return Graph.genFromTiles(this.tiles);

@@ -2,18 +2,16 @@ import * as PIXI from "pixi.js";
 import state, { subscribe } from "../../state";
 import { onKeyDown, onResize, onScroll } from "../../utils";
 import ChipGridMode from "../../utils/chip_grid_mode";
-import Grid from "./grid";
 import { HistoryManager } from "./history_manager";
+import InteractiveGrid from "./interactive_grid";
 import { ModeManager } from "./mode_manager";
-import { TileManager } from "./tile_manager";
 
 /** grid manager */
 export default class GridManager extends PIXI.Container {
-    mainGrid: Grid;
+    mainGrid: InteractiveGrid;
 
     inChipGrid = state.chipEditor;
     historyManager: HistoryManager;
-    tileManager: TileManager;
     modeManager: ModeManager;
 
     /**
@@ -22,11 +20,10 @@ export default class GridManager extends PIXI.Container {
     constructor() {
         super();
 
-        this.mainGrid = new Grid(this, 100);
+        this.mainGrid = new InteractiveGrid(100);
         this.addChild(this.mainGrid);
 
         this.historyManager = new HistoryManager(this);
-        this.tileManager = new TileManager(this);
         this.modeManager = new ModeManager(this);
 
         onResize(() => {
