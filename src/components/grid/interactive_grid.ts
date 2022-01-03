@@ -58,6 +58,7 @@ export default class InteractiveGrid extends Grid {
     }
 
     scroll = (e: WheelEvent) => {
+        console.log(e);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if ((e as any).wheelDeltaY === 0) return;
 

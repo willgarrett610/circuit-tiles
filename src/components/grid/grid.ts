@@ -558,6 +558,11 @@ export default class Grid extends PIXI.Container {
      * Update the grids graphics
      */
     update() {
+        console.log("update");
+        this.backgroundGraphics.x = -this.x;
+        this.backgroundGraphics.y = -this.y;
+        this.backgroundGraphics.width = width();
+        this.backgroundGraphics.height = height();
         this.renderGrid();
         this.renderTiles();
         this.renderSelection();

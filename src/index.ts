@@ -1,5 +1,4 @@
 import * as PIXI from "pixi.js";
-import config from "./config";
 import initGUI from "./components/gui/gui";
 
 import GridManager from "./components/grid/grid_manager";
@@ -34,8 +33,6 @@ const main = async () => {
     document.body.appendChild(app.view);
 
     setupMenus();
-
-    app.renderer.backgroundColor = config.colors.background;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).gridManager = gridManager;
