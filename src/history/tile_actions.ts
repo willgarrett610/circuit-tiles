@@ -78,14 +78,17 @@ export const deleteTile: Action<DeleteTilePayload, Tile> = {
         if (tile) {
             const prevTile = tile?.clone();
             grid.removeChild(tile?.getContainer(grid.size));
-            grid.deleteTile(x, y);
             grid.dispatchHandler("postRemoveTile", tile);
+            grid.deleteTile(x, y);
             return prevTile;
         }
     },
     undo: ({ payload: { x, y, grid }, prevValue }) => {
         if (prevValue) {
+            const tile = grid.getTile(x, y);
+            if (tile) grid.removeChild(tile.getContainer(grid.size));
             grid.setTile(x, y, prevValue);
+            grid.addChild(prevValue.getContainer(grid.size));
             grid.dispatchHandler("postAddTile", prevValue);
         }
     },

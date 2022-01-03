@@ -1,10 +1,6 @@
 import * as PIXI from "pixi.js";
 
 import { gridManager } from "../..";
-import {
-    beginInteraction,
-    endInteraction,
-} from "../../history/history_manager";
 import config from "../../config";
 import state, { subscribe } from "../../state";
 import { height, locationToPair, locationToTuple, width } from "../../utils";
@@ -69,7 +65,7 @@ export default class InteractiveGrid extends Grid {
         this.dragData.isDragging = false;
         this.dragData.endLocation.screen = locationToPair(mousePos);
         this.dragData.endLocation.grid = this.screenToGrid(...mousePos, true);
-        endInteraction();
+        this.historyManager.endInteraction();
 
         this.renderSelection();
     };
@@ -83,7 +79,7 @@ export default class InteractiveGrid extends Grid {
         this.dragData.startLocation.grid = this.screenToGrid(...mousePos, true);
         this.dragData.endLocation.screen = locationToPair(mousePos);
         this.dragData.endLocation.grid = this.screenToGrid(...mousePos, true);
-        beginInteraction();
+        this.historyManager.beginInteraction();
 
         this.renderSelection();
     };
@@ -229,7 +225,6 @@ export default class InteractiveGrid extends Grid {
 
         for (const structureTile of structureTiles) {
             if (!structureTile) continue;
-            console.log(structureTile);
             const tileLocation = sub(
                 add(location, [structureTile.x, structureTile.y]),
                 offset
@@ -353,7 +348,6 @@ export default class InteractiveGrid extends Grid {
     };
 
     updateChipOutline = () => {
-        console.log("update chip outline");
         // check if the tile has a tile on each side, if it doesn't on a side put a line there,
         // if there is a missing tile on two sides that are next to each other put a corner square
 
@@ -363,8 +357,6 @@ export default class InteractiveGrid extends Grid {
         );
         const chip = state.chips[state.selectedTileIndex];
         if (!chip) return;
-
-        console.log("has chip");
 
         let valid = true;
         const structure = chip.structure;
@@ -392,10 +384,10 @@ export default class InteractiveGrid extends Grid {
 
         for (const structureTile of structureTiles) {
             if (!structureTile) continue;
-            const tileLocation = sub(
-                add(gridPos, [structureTile.x, structureTile.y]),
-                structureOffset
-            ) as [number, number];
+            // const tileLocation = sub(
+            //     add(gridPos, [structureTile.x, structureTile.y]),
+            //     structureOffset
+            // ) as [number, number];
 
             for (const direction of Direction.values()) {
                 const directionOffset = Direction.getOffset(direction);
@@ -467,7 +459,6 @@ export default class InteractiveGrid extends Grid {
                     false
                 );
 
-                console.log(direction);
                 this.chipOutlineGraphics.lineStyle(2, color);
                 switch (direction) {
                     case Direction.UP: {

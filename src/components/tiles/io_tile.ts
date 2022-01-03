@@ -129,6 +129,14 @@ export default abstract class IOTile extends GraphicsTile {
     }
 
     /**
+     * update container
+     */
+    updateContainer(): void {
+        super.updateContainer();
+        this.generateText();
+    }
+
+    /**
      * Create a clone of this tile
      *
      * @param tile Tile

@@ -10,13 +10,8 @@ import state from "../../state";
 import { EditMode } from "../../utils/edit_mode";
 import Graph from "../../logic/graph";
 import { GridAction } from "../../utils/action";
-import {
-    beginInteraction,
-    endInteraction,
-    isInteracting,
-    performAction,
-} from "../../history/history_manager";
 import { deleteTile, editTile, setTile } from "../../history/tile_actions";
+import HistoryManager from "../../history/history_manager";
 
 interface GridHandlers {
     postAddTile: ((payload: Tile) => void)[];
@@ -56,6 +51,8 @@ export default class Grid extends PIXI.Container {
     hlTile: PIXI.Graphics;
     selectionGraphics: PIXI.Graphics;
 
+    historyManager: HistoryManager;
+
     sortableChildren = true;
     zIndex = 1000;
 
@@ -94,6 +91,8 @@ export default class Grid extends PIXI.Container {
 
         this.startingSize = size;
         this.size = size;
+
+        this.historyManager = new HistoryManager();
 
         this.lineGraphics = new PIXI.Graphics();
         this.lineGraphics.zIndex = 1000;
@@ -195,7 +194,7 @@ export default class Grid extends PIXI.Container {
         if (!fromTile.getConnections()[oppositeDirection] && canConnect) {
             const newFromTile = fromTile.clone();
             newFromTile.setConnection(oppositeDirection, true);
-            performAction(editTile, {
+            this.historyManager.performAction(editTile, {
                 x: newFromTile.x,
                 y: newFromTile.y,
                 tile: newFromTile,
@@ -208,7 +207,7 @@ export default class Grid extends PIXI.Container {
         if (!toTile.getConnections()[directDirection] && canConnect) {
             const newToTile = toTile.clone();
             newToTile.setConnection(directDirection, true);
-            performAction(editTile, {
+            this.historyManager.performAction(editTile, {
                 x: newToTile.x,
                 y: newToTile.y,
                 tile: newToTile,
@@ -287,17 +286,22 @@ export default class Grid extends PIXI.Container {
 
         const tileObj = new tile(x, y);
 
-        const interacting = isInteracting();
-        if (!interacting) beginInteraction();
+        const interacting = this.historyManager.isInteracting();
+        if (!interacting) this.historyManager.beginInteraction();
 
-        performAction(setTile, { x, y, tile: tileObj, grid: this });
+        this.historyManager.performAction(setTile, {
+            x,
+            y,
+            tile: tileObj,
+            grid: this,
+        });
 
         if (prevTile && direction !== undefined)
             this.connectTiles(tileObj, prevTile, direction);
 
         this.handleForceConnection(x, y);
 
-        if (!interacting) endInteraction();
+        if (!interacting) this.historyManager.endInteraction();
 
         return this.getTile(x, y) as Tile;
     }
@@ -313,7 +317,7 @@ export default class Grid extends PIXI.Container {
         const tile = this.getTile(x, y);
         if (!tile) return false;
 
-        performAction(deleteTile, { x, y, grid: this });
+        this.historyManager.performAction(deleteTile, { x, y, grid: this });
 
         const removalSpots: {
             offset: number[];
@@ -336,10 +340,10 @@ export default class Grid extends PIXI.Container {
             ) {
                 const newTile = adjacentTile.clone();
                 newTile.setConnection(removalSpot.side, false);
-                performAction(editTile, {
+                this.historyManager.performAction(editTile, {
                     x: newTile.x,
                     y: newTile.y,
-                    tile: adjacentTile,
+                    tile: newTile,
                     grid: this,
                 });
             }
@@ -363,7 +367,7 @@ export default class Grid extends PIXI.Container {
             newTile.setConnection("down", false);
             newTile.setConnection("left", false);
             newTile.setConnection("right", false);
-            performAction(editTile, {
+            this.historyManager.performAction(editTile, {
                 x,
                 y,
                 tile: newTile,
@@ -391,7 +395,7 @@ export default class Grid extends PIXI.Container {
                 ) {
                     const newAdjacentTile = adjacentTile.clone();
                     newAdjacentTile.setConnection(removalSpot.side, false);
-                    performAction(editTile, {
+                    this.historyManager.performAction(editTile, {
                         x: newAdjacentTile.x,
                         y: newAdjacentTile.y,
                         tile: newAdjacentTile,

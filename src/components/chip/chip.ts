@@ -146,9 +146,13 @@ export class Chip {
      */
     tileRemoved(tile: Tile) {
         if (tile instanceof ChipInputTile) {
-            this.inputTiles = this.inputTiles.filter((x) => x.tile !== tile);
+            this.inputTiles = this.inputTiles.filter(
+                (x) => x.tile.id !== tile.id
+            );
         } else if (tile instanceof ChipOutputTile) {
-            this.outputTiles = this.outputTiles.filter((x) => x.tile !== tile);
+            this.outputTiles = this.outputTiles.filter(
+                (x) => x.tile.id !== tile.id
+            );
         } else return;
         const key = Object.keys(this.structure).find(
             (x) => this.structure[x]?.id === tile.id
