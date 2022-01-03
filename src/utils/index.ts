@@ -46,6 +46,8 @@ export function sleep(ms: number): Promise<void> {
 export function locationToTuple(location: {
     x: number;
     y: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any;
 }): [x: number, y: number] {
     return [location.x, location.y];
 }

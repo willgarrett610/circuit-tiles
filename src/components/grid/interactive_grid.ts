@@ -5,8 +5,11 @@ import config from "../../config";
 import state, { subscribe } from "../../state";
 import { height, locationToPair, locationToTuple, width } from "../../utils";
 import { Interaction } from "../../utils/action";
+import { Direction } from "../../utils/directions";
 import { EditMode } from "../../utils/edit_mode";
 import { mouseDown, pressedKeys } from "../../utils/event";
+import { add, sub } from "../../utils/math";
+import { Chip } from "../chip/chip";
 import { Tile } from "../tiles/tile";
 import Grid from "./grid";
 
@@ -18,6 +21,8 @@ export default class InteractiveGrid extends Grid {
     prevMousePos: [x: number, y: number] = [0, 0];
 
     interactive = true;
+
+    chipOutlineGraphics: PIXI.Graphics;
 
     /**
      * Constructs grid
@@ -37,6 +42,10 @@ export default class InteractiveGrid extends Grid {
                 this.selectionGraphics.clear();
             }
         });
+
+        this.chipOutlineGraphics = new PIXI.Graphics();
+        this.chipOutlineGraphics.zIndex = 2000;
+        this.addChild(this.chipOutlineGraphics);
     }
 
     scroll = (e: WheelEvent) => {
@@ -151,6 +160,7 @@ export default class InteractiveGrid extends Grid {
         }
 
         this.updateHighlightTile();
+        this.updateChipOutline();
     };
 
     click = (event: PIXI.interaction.InteractionEvent) => {
@@ -187,6 +197,13 @@ export default class InteractiveGrid extends Grid {
                     undefined,
                     undefined
                 );
+            } else if (
+                state.editMode === EditMode.CHIP &&
+                state.selectedTileIndex !== -1 &&
+                state.chips[state.selectedTileIndex]
+            ) {
+                const chip = state.chips[state.selectedTileIndex];
+                this.placeChip(chip, gridPoint);
             }
 
             this.update();
@@ -194,6 +211,33 @@ export default class InteractiveGrid extends Grid {
 
         gridManager.modeManager.finishInteraction();
     };
+
+    /**
+     * places a chip on the grid at a specified location
+     *
+     * @param chip
+     * @param location
+     */
+    placeChip(chip: Chip, location: [number, number]) {
+        const structure = chip.structure;
+        const structureTiles = Object.values(structure);
+        const offset = chip.getTopLeftStructure();
+
+        for (const structureTile of structureTiles) {
+            if (!structureTile) continue;
+            console.log(structureTile);
+            const tileLocation = sub(
+                add(location, [structureTile.x, structureTile.y]),
+                offset
+            ) as [number, number];
+            this.addTile(
+                ...tileLocation,
+                structureTile.type,
+                undefined,
+                undefined
+            );
+        }
+    }
 
     keyActionCooldownTime = 250;
     lastKeyActionTime = 0;
@@ -304,8 +348,167 @@ export default class InteractiveGrid extends Grid {
         }
     };
 
+    updateChipOutline = () => {
+        console.log("update chip outline");
+        // check if the tile has a tile on each side, if it doesn't on a side put a line there,
+        // if there is a missing tile on two sides that are next to each other put a corner square
+
+        if (state.editMode !== EditMode.CHIP) return;
+        const gridPos = locationToTuple(
+            this.screenToGrid(...this.mousePos, true)
+        );
+        const chip = state.chips[state.selectedTileIndex];
+        if (!chip) return;
+
+        console.log("has chip");
+
+        let valid = true;
+        const structure = chip.structure;
+        const structureTiles = Object.values(structure);
+        const structureOffset = chip.getTopLeftStructure();
+
+        for (const structureTile of structureTiles) {
+            if (!structureTile) continue;
+            const tileLocation = sub(
+                add(gridPos, [structureTile.x, structureTile.y]),
+                structureOffset
+            ) as [number, number];
+            const tileAtLocation = this.getTile(...tileLocation);
+
+            // there was a tile in the way
+            if (tileAtLocation) {
+                valid = false;
+                // TODO: add indicator that tile is there (shade the tile red)
+            }
+        }
+
+        // TODO: make good colors in config
+        const color = valid ? chip.color : config.colors.chipInvalidPlacement;
+        this.chipOutlineGraphics.clear();
+
+        for (const structureTile of structureTiles) {
+            if (!structureTile) continue;
+            const tileLocation = sub(
+                add(gridPos, [structureTile.x, structureTile.y]),
+                structureOffset
+            ) as [number, number];
+
+            for (const direction of Direction.values()) {
+                const directionOffset = Direction.getOffset(direction);
+
+                const tileLocation = sub(
+                    add(gridPos, [structureTile.x, structureTile.y]),
+                    structureOffset
+                ) as [number, number];
+                const tileAtLocation = this.getTile(...tileLocation);
+
+                if (valid) {
+                    this.chipOutlineGraphics.beginFill(chip.color, 0.3);
+                } else {
+                    if (tileAtLocation) {
+                        this.chipOutlineGraphics.beginFill(
+                            config.colors.chipInvalidPlacement,
+                            0.3
+                        );
+                    } else {
+                        this.chipOutlineGraphics.beginFill(chip.color, 0.3);
+                    }
+                }
+                this.chipOutlineGraphics.lineStyle(undefined);
+                this.chipOutlineGraphics.drawRect(
+                    ...locationToTuple(
+                        this.gridToScreen(
+                            tileLocation[0],
+                            tileLocation[1],
+                            true,
+                            false
+                        )
+                    ),
+                    this.size,
+                    this.size
+                );
+
+                const adjacentTileLocation = add(
+                    [structureTile.x, structureTile.y],
+                    directionOffset
+                ) as [number, number];
+                const adjacentTile = chip.getStructureTile(
+                    ...adjacentTileLocation
+                );
+
+                if (adjacentTile) continue;
+
+                const topLeft = this.gridToScreen(
+                    tileLocation[0],
+                    tileLocation[1],
+                    true,
+                    false
+                );
+                const topRight = this.gridToScreen(
+                    tileLocation[0] + 1,
+                    tileLocation[1],
+                    true,
+                    false
+                );
+                const bottomLeft = this.gridToScreen(
+                    tileLocation[0],
+                    tileLocation[1] + 1,
+                    true,
+                    false
+                );
+                const bottomRight = this.gridToScreen(
+                    tileLocation[0] + 1,
+                    tileLocation[1] + 1,
+                    true,
+                    false
+                );
+
+                console.log(direction);
+                this.chipOutlineGraphics.lineStyle(2, color);
+                switch (direction) {
+                    case Direction.UP: {
+                        this.chipOutlineGraphics.moveTo(topLeft.x, topLeft.y);
+                        this.chipOutlineGraphics.lineTo(topRight.x, topRight.y);
+
+                        break;
+                    }
+                    case Direction.DOWN: {
+                        this.chipOutlineGraphics.moveTo(
+                            bottomLeft.x,
+                            bottomLeft.y
+                        );
+                        this.chipOutlineGraphics.lineTo(
+                            bottomRight.x,
+                            bottomRight.y
+                        );
+                        break;
+                    }
+                    case Direction.LEFT: {
+                        this.chipOutlineGraphics.moveTo(topLeft.x, topLeft.y);
+                        this.chipOutlineGraphics.lineTo(
+                            bottomLeft.x,
+                            bottomLeft.y
+                        );
+
+                        break;
+                    }
+                    case Direction.RIGHT: {
+                        this.chipOutlineGraphics.moveTo(topRight.x, topRight.y);
+                        this.chipOutlineGraphics.lineTo(
+                            bottomRight.x,
+                            bottomRight.y
+                        );
+
+                        break;
+                    }
+                }
+            }
+        }
+    };
+
     update = () => {
         super.update();
         this.updateHighlightTile();
+        this.updateChipOutline();
     };
 }

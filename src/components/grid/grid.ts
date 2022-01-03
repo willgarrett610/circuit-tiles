@@ -104,6 +104,7 @@ export default class Grid extends PIXI.Container {
 
         this.addChild(this.lineGraphics);
         this.addChild(this.hlTile);
+        this.addChild(this.selectionGraphics);
 
         this.renderGrid();
     }
@@ -516,8 +517,6 @@ export default class Grid extends PIXI.Container {
             this.dragData.startLocation.grid &&
             this.dragData.endLocation.grid
         ) {
-            this.addChild(this.selectionGraphics);
-
             const minX = Math.min(
                 this.dragData.startLocation.grid.x,
                 this.dragData.endLocation.grid.x
@@ -657,17 +656,28 @@ export default class Grid extends PIXI.Container {
      *
      * @param x X in grid space
      * @param y Y in grid space
-     * @param floored whether to floor the coordinates
+     * @param floored whether to floor the coordinates (default true)
+     * @param offset whether to offset the coordinates (default true)
      * @returns Coordinates in screen space
      */
-    gridToScreen = (x: number, y: number, floored = true) =>
-        floored
+    gridToScreen = (x: number, y: number, floored = true, offset = true) =>
+        offset
+            ? floored
+                ? {
+                      x: Math.floor(x) * this.size + this.x,
+                      y: Math.floor(y) * this.size + this.y,
+                  }
+                : {
+                      x: x * this.size + this.x,
+                      y: y * this.size + this.y,
+                  }
+            : floored
             ? {
-                  x: Math.floor(x) * this.size + this.x,
-                  y: Math.floor(y) * this.size + this.y,
+                  x: Math.floor(x) * this.size,
+                  y: Math.floor(y) * this.size,
               }
             : {
-                  x: x * this.size + this.x,
-                  y: y * this.size + this.y,
+                  x: x * this.size,
+                  y: y * this.size,
               };
 }

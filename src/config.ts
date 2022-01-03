@@ -28,6 +28,7 @@ const config = {
         contextMenu: 0x18191c,
         contextMenuHighlight: 0x47484e,
         disabledTileX: 0x000000,
+        chipInvalidPlacement: 0x450000,
     },
     zoomCoeff: 1.15,
     lineColor: 0x222222,
