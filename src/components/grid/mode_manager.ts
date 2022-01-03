@@ -1,4 +1,5 @@
-import { setState } from "../../state";
+import { setEditMode } from "../../history/edit_mode_action";
+import { performAction } from "../../history/history_manager";
 import { Interaction } from "../../utils/action";
 import { EditMode } from "../../utils/edit_mode";
 import GridManager from "./grid_manager";
@@ -36,19 +37,19 @@ export class ModeManager {
     editModeOnKeyDown = (key: string) => {
         switch (key) {
             case "KeyX":
-                setState({ editMode: EditMode.ERASER });
+                performAction(setEditMode, EditMode.ERASER);
                 break;
             case "KeyT":
-                setState({ editMode: EditMode.TILE });
+                performAction(setEditMode, EditMode.TILE);
                 break;
             case "KeyC":
-                setState({ editMode: EditMode.CHIP });
+                performAction(setEditMode, EditMode.CHIP);
                 break;
             case "KeyP":
-                setState({ editMode: EditMode.PAN });
+                performAction(setEditMode, EditMode.PAN);
                 break;
             case "KeyS":
-                setState({ editMode: EditMode.CURSOR });
+                performAction(setEditMode, EditMode.CURSOR);
                 break;
         }
     };
