@@ -228,10 +228,12 @@ export default class InteractiveGrid extends Grid {
      * @param location
      */
     placeChip(chip: Chip, location: [number, number]) {
+        if (!this.isValidChipPlacement(location, chip)) return;
         const structure = chip.structure;
         const structureTiles = Object.values(structure);
         const offset = chip.getTopLeftStructure();
 
+        this.historyManager.beginInteraction();
         for (const structureTile of structureTiles) {
             if (!structureTile) continue;
             const tileLocation = sub(
@@ -245,6 +247,33 @@ export default class InteractiveGrid extends Grid {
                 undefined
             );
         }
+        this.historyManager.endInteraction();
+    }
+
+    /**
+     * checks if a chip can be placed at a location
+     *
+     * @param location location to check
+     * @param chip chip to be placed
+     * @returns true if chip can be placed
+     */
+    isValidChipPlacement(location: [number, number], chip: Chip) {
+        const structureOffset = chip.getTopLeftStructure();
+        for (const structureTile of Object.values(chip.structure)) {
+            if (!structureTile) continue;
+            const tileLocation = sub(
+                add(location, [structureTile.x, structureTile.y]),
+                structureOffset
+            ) as [number, number];
+            const tileAtLocation = this.getTile(...tileLocation);
+
+            // there was a tile in the way
+            if (tileAtLocation) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     keyActionCooldownTime = 250;
@@ -348,6 +377,13 @@ export default class InteractiveGrid extends Grid {
     locationText = new PIXI.Text("");
 
     updateHighlightTile = () => {
+        if (state.editMode === EditMode.CHIP) {
+            if (this.prevHighlightTileGraphic)
+                this.removeChild(this.prevHighlightTileGraphic);
+            this.hlTile.clear();
+            return;
+        }
+
         const gridScreenPos = this.screenToGrid(...this.mousePos, true, true);
         const gridPos = this.screenToGrid(...this.mousePos, true);
 
@@ -401,25 +437,10 @@ export default class InteractiveGrid extends Grid {
         const chip = state.chips[state.selectedTileIndex];
         if (!chip) return;
 
-        let valid = true;
+        const valid = this.isValidChipPlacement(gridPos, chip);
         const structure = chip.structure;
         const structureTiles = Object.values(structure);
         const structureOffset = chip.getTopLeftStructure();
-
-        for (const structureTile of structureTiles) {
-            if (!structureTile) continue;
-            const tileLocation = sub(
-                add(gridPos, [structureTile.x, structureTile.y]),
-                structureOffset
-            ) as [number, number];
-            const tileAtLocation = this.getTile(...tileLocation);
-
-            // there was a tile in the way
-            if (tileAtLocation) {
-                valid = false;
-                // TODO: add indicator that tile is there (shade the tile red)
-            }
-        }
 
         // TODO: make good colors in config
         const color = valid ? chip.color : config.colors.chipInvalidPlacement;
