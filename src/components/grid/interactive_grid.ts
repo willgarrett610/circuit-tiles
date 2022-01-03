@@ -249,6 +249,7 @@ export default class InteractiveGrid extends Grid {
      * @returns true if chip can be placed
      */
     isValidChipPlacement(location: [number, number], chip: Chip) {
+        if (!chip.isStructured()) return false;
         const structureOffset = chip.getTopLeftStructure();
         for (const structureTile of Object.values(chip.structure)) {
             if (!structureTile) continue;
@@ -387,7 +388,13 @@ export default class InteractiveGrid extends Grid {
         // check if the tile has a tile on each side, if it doesn't on a side put a line there,
         // if there is a missing tile on two sides that are next to each other put a corner square
 
-        if (state.editMode !== EditMode.CHIP) return;
+        if (
+            state.editMode !== EditMode.CHIP ||
+            !state.chips?.[state.selectedTileIndex]?.isStructured?.()
+        ) {
+            this.chipOutlineGraphics.clear();
+            return;
+        }
         const gridPos = locationToTuple(
             this.screenToGrid(...this.mousePos, true)
         );
