@@ -1,5 +1,4 @@
-import { setEditMode } from "../../history/edit_mode_action";
-import { performAction } from "../../history/history_manager";
+import { setState } from "../../state";
 import { Interaction } from "../../utils/action";
 import { EditMode } from "../../utils/edit_mode";
 import GridManager from "./grid_manager";
@@ -19,37 +18,22 @@ export class ModeManager {
 
     currentInteraction: Interaction = Interaction.NONE;
 
-    finishInteraction = () => {
-        if (this.currentInteraction !== Interaction.NONE) {
-            this.currentInteraction = Interaction.NONE;
-            if (this.gridManager.historyManager.history.length > 0) {
-                this.gridManager.historyManager
-                    .currentHistory()
-                    .push(...this.gridManager.historyManager.tempHistory);
-                this.gridManager.historyManager.cleanHistory();
-            }
-            this.gridManager.historyManager.newHistory();
-            this.gridManager.historyManager.undoHistory = [];
-            this.gridManager.historyManager.tempHistory = [];
-        }
-    };
-
     editModeOnKeyDown = (key: string) => {
         switch (key) {
             case "KeyX":
-                performAction(setEditMode, EditMode.ERASER);
+                setState({ editMode: EditMode.ERASER });
                 break;
             case "KeyT":
-                performAction(setEditMode, EditMode.TILE);
+                setState({ editMode: EditMode.TILE });
                 break;
             case "KeyC":
-                performAction(setEditMode, EditMode.CHIP);
+                setState({ editMode: EditMode.CHIP });
                 break;
             case "KeyP":
-                performAction(setEditMode, EditMode.PAN);
+                setState({ editMode: EditMode.PAN });
                 break;
             case "KeyS":
-                performAction(setEditMode, EditMode.CURSOR);
+                setState({ editMode: EditMode.CURSOR });
                 break;
         }
     };

@@ -197,8 +197,6 @@ export default class InteractiveGrid extends Grid {
 
             this.update();
         }
-
-        gridManager.modeManager.finishInteraction();
     };
 
     keyActionCooldownTime = 250;

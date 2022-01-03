@@ -70,7 +70,6 @@ export function undo() {
         }
         undoHistory.push(actions);
     }
-    console.log({ history });
 }
 
 /**

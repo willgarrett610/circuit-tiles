@@ -1,9 +1,7 @@
 import * as PIXI from "pixi.js";
-import { setEditMode } from "../../../history/edit_mode_action";
-import { performAction } from "../../../history/history_manager";
 
 import config from "../../../config";
-import state, { subscribe } from "../../../state";
+import state, { setState, subscribe } from "../../../state";
 import { height } from "../../../utils";
 import { EditMode } from "../../../utils/edit_mode";
 import { getSprite } from "../../sprites/sprite_loader";
@@ -75,9 +73,6 @@ export default class ToolSelector extends GUIWindow {
         btnGroup.addButton(chipsTool);
 
         btnGroup.onSelectionChange = (i) => {
-            console.log({ i, prev: state.editMode });
-            if (state.editMode === i) return;
-
             tileSelector.visible = false;
             chipSelector.visible = false;
             // state.editMode = i;
@@ -91,7 +86,7 @@ export default class ToolSelector extends GUIWindow {
                     chipSelector.visible = true;
                     break;
             }
-            performAction(setEditMode, i);
+            if (i !== state.editMode) setState({ editMode: i });
         };
 
         btnGroup.setSelected(EditMode.TILE);
