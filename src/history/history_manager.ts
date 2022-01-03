@@ -46,6 +46,7 @@ export default class HistoryManager {
         if (!redo) {
             this.undoHistory = [];
         }
+        // (window as any).gridHistory = this.history;
     }
 
     /**
