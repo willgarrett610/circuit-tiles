@@ -12,6 +12,7 @@ import Graph from "../../logic/graph";
 import { GridAction } from "../../utils/action";
 import { deleteTile, editTile, setTile } from "../../history/tile_actions";
 import HistoryManager from "../../history/history_manager";
+import { PlacedChip } from "../chip/placed_chip";
 
 interface GridHandlers {
     postAddTile: ((payload: Tile) => void)[];
@@ -46,11 +47,13 @@ export default class Grid extends PIXI.Container {
     startingSize: number;
     size: number;
     tiles: { [key: string]: Tile | undefined } = {};
+    chips: PlacedChip[] = [];
 
     backgroundGraphics: PIXI.Graphics;
     lineGraphics: PIXI.Graphics;
     hlTile: PIXI.Graphics;
     selectionGraphics: PIXI.Graphics;
+    chipOutlines: PIXI.Container;
 
     historyManager: HistoryManager;
 
@@ -109,6 +112,8 @@ export default class Grid extends PIXI.Container {
         this.selectionGraphics = new PIXI.Graphics();
         this.selectionGraphics.zIndex = 2000;
         this.selectionGraphics.alpha = 0.2;
+        this.chipOutlines = new PIXI.Container();
+        this.chipOutlines.zIndex = 100;
 
         if (tiles) this.tiles = tiles;
 
@@ -116,6 +121,7 @@ export default class Grid extends PIXI.Container {
         this.addChild(this.lineGraphics);
         this.addChild(this.hlTile);
         this.addChild(this.selectionGraphics);
+        // this.addChild(this.chipOutlines);
 
         this.renderGrid();
     }
@@ -533,10 +539,25 @@ export default class Grid extends PIXI.Container {
             if (tile) tile.update(this.size);
     }
 
+    /** render all the chip outlines */
+    renderChipOutlines() {
+        // TODO: make this more efficient
+        // this.chipOutlines.removeChildren();
+        for (const chip of this.chips)
+            this.chipOutlines.addChild(chip.buildOutlineGraphic(this));
+    }
+
     /** Removes all children that are tile containers */
     removeTileGraphics() {
+        // TODO: make better
         for (const child of this.children) {
-            if (child !== this.lineGraphics && child !== this.hlTile) {
+            if (
+                child !== this.lineGraphics &&
+                child !== this.hlTile &&
+                child !== this.selectionGraphics &&
+                child !== this.chipOutlines &&
+                child !== this.backgroundGraphics
+            ) {
                 this.removeChild(child);
             }
         }
@@ -560,6 +581,7 @@ export default class Grid extends PIXI.Container {
     update() {
         this.renderGrid();
         this.renderTiles();
+        this.renderChipOutlines();
         this.renderSelection();
     }
 
