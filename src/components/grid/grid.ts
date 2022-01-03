@@ -113,7 +113,7 @@ export default class Grid extends PIXI.Container {
         this.selectionGraphics.zIndex = 2000;
         this.selectionGraphics.alpha = 0.2;
         this.chipOutlines = new PIXI.Container();
-        this.chipOutlines.zIndex = 100;
+        this.chipOutlines.zIndex = 1500;
 
         if (tiles) this.tiles = tiles;
 
@@ -121,7 +121,7 @@ export default class Grid extends PIXI.Container {
         this.addChild(this.lineGraphics);
         this.addChild(this.hlTile);
         this.addChild(this.selectionGraphics);
-        // this.addChild(this.chipOutlines);
+        this.addChild(this.chipOutlines);
 
         this.renderGrid();
     }
@@ -542,9 +542,11 @@ export default class Grid extends PIXI.Container {
     /** render all the chip outlines */
     renderChipOutlines() {
         // TODO: make this more efficient
-        // this.chipOutlines.removeChildren();
-        for (const chip of this.chips)
+        this.chipOutlines.removeChildren();
+        for (const chip of this.chips) {
+            console.log({ chip });
             this.chipOutlines.addChild(chip.buildOutlineGraphic(this));
+        }
     }
 
     /** Removes all children that are tile containers */

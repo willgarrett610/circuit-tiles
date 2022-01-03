@@ -137,7 +137,6 @@ export class PlacedChip {
                     case Direction.UP: {
                         graphic.moveTo(topLeft.x, topLeft.y);
                         graphic.lineTo(topRight.x, topRight.y);
-
                         break;
                     }
                     case Direction.DOWN: {
@@ -148,13 +147,11 @@ export class PlacedChip {
                     case Direction.LEFT: {
                         graphic.moveTo(topLeft.x, topLeft.y);
                         graphic.lineTo(bottomLeft.x, bottomLeft.y);
-
                         break;
                     }
                     case Direction.RIGHT: {
                         graphic.moveTo(topRight.x, topRight.y);
                         graphic.lineTo(bottomRight.x, bottomRight.y);
-
                         break;
                     }
                 }
