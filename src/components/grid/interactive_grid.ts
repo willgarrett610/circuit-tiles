@@ -40,6 +40,15 @@ export default class InteractiveGrid extends Grid {
         subscribe("editMode", (value) => {
             if (value !== EditMode.CURSOR) {
                 this.selectionGraphics.clear();
+            } else {
+                this.dragData.startLocation = {
+                    grid: undefined,
+                    screen: undefined,
+                };
+                this.dragData.endLocation = {
+                    grid: undefined,
+                    screen: undefined,
+                };
             }
         });
 
@@ -90,13 +99,6 @@ export default class InteractiveGrid extends Grid {
         this.prevMousePos = [...this.mousePos];
         this.mousePos = [e.pageX, e.pageY];
         if (mouseDown.left) {
-            this.dragData.endLocation.screen = locationToPair(this.mousePos);
-
-            this.dragData.endLocation.grid = this.screenToGrid(
-                ...this.mousePos,
-                true
-            );
-
             if (
                 e.shiftKey ||
                 pressedKeys["Space"] ||
@@ -130,7 +132,14 @@ export default class InteractiveGrid extends Grid {
                 for (const gridPoint of gridPoints)
                     this.removeTile(...locationToTuple(gridPoint));
             } else if (state.editMode === EditMode.CURSOR) {
-                // do nothing
+                this.dragData.endLocation.screen = locationToPair(
+                    this.mousePos
+                );
+
+                this.dragData.endLocation.grid = this.screenToGrid(
+                    ...this.mousePos,
+                    true
+                );
             } else if (state.editMode === EditMode.TILE) {
                 gridManager.modeManager.currentInteraction =
                     Interaction.PLACING;
@@ -320,6 +329,40 @@ export default class InteractiveGrid extends Grid {
                 this.y += (newPos.y - prevPos.y) * this.size;
 
                 this.update();
+            }
+
+            if (e.code === "Delete") {
+                if (
+                    state.editMode === EditMode.CURSOR &&
+                    this.dragData.startLocation.grid &&
+                    this.dragData.endLocation.grid
+                ) {
+                    const minX = Math.min(
+                        this.dragData.startLocation.grid.x,
+                        this.dragData.endLocation.grid.x
+                    );
+                    const minY = Math.min(
+                        this.dragData.startLocation.grid.y,
+                        this.dragData.endLocation.grid.y
+                    );
+
+                    const maxX = Math.max(
+                        this.dragData.startLocation.grid.x,
+                        this.dragData.endLocation.grid.x
+                    );
+                    const maxY = Math.max(
+                        this.dragData.startLocation.grid.y,
+                        this.dragData.endLocation.grid.y
+                    );
+
+                    this.historyManager.beginInteraction();
+                    for (let x = minX; x <= maxX; x++) {
+                        for (let y = minY; y <= maxY; y++) {
+                            this.removeTile(x, y);
+                        }
+                    }
+                    this.historyManager.endInteraction();
+                }
             }
         }
 
