@@ -205,6 +205,28 @@ export class Chip {
     }
 
     /**
+     * get top left tile location of structure
+     *
+     * @returns top left tile location of structure
+     */
+    getTopLeftStructure() {
+        const structureTiles = Object.values(this.structure);
+
+        if (structureTiles.length === 0) return [0, 0];
+
+        let minX = Infinity;
+        let minY = Infinity;
+
+        for (const tile of structureTiles) {
+            if (!tile) continue;
+            if (tile.x < minX) minX = tile.x;
+            if (tile.y < minY) minY = tile.y;
+        }
+
+        return [minX, minY];
+    }
+
+    /**
      * Clone chip
      *
      * @returns cloned chip

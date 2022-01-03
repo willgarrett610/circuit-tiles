@@ -41,3 +41,54 @@ export function map(
         return map(clamp(x, inMin, inMax), inMin, inMax, outMin, outMax, false);
     return ((x - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
 }
+
+/**
+ * adds multiple fixed length number arrays together
+ *
+ * @param arrays array of numbers
+ * @returns array of numbers
+ */
+export function add(...arrays: number[][]) {
+    const result = arrays[0].map((x, i) => {
+        let sum = x;
+        for (let j = 1; j < arrays.length; j++) {
+            sum += arrays[j][i];
+        }
+        return sum;
+    });
+    return result;
+}
+
+/**
+ * subtracts multiple fixed length number arrays from each other
+ *
+ * @param arrays array of numbers
+ * @returns array of numbers
+ */
+export function sub(...arrays: number[][]) {
+    const result = arrays[0].map((x, i) => {
+        let sum = x;
+        for (let j = 1; j < arrays.length; j++) {
+            sum -= arrays[j][i];
+        }
+        return sum;
+    });
+    return result;
+}
+
+/**
+ * multiplies multiple fixed length number arrays
+ *
+ * @param arrays array of numbers
+ * @returns array of numbers
+ */
+export function mult(arrays: number[][]) {
+    const result = arrays[0].map((x, i) => {
+        let product = x;
+        for (let j = 1; j < arrays.length; j++) {
+            product *= arrays[j][i];
+        }
+        return product;
+    });
+    return result;
+}
