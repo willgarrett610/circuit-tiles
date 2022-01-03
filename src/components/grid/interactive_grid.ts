@@ -5,11 +5,14 @@ import config from "../../config";
 import state, { subscribe } from "../../state";
 import { height, locationToPair, locationToTuple, width } from "../../utils";
 import { Interaction } from "../../utils/action";
-import { Direction } from "../../utils/directions";
+import { Direction, Rotation } from "../../utils/directions";
 import { EditMode } from "../../utils/edit_mode";
 import { mouseDown, pressedKeys } from "../../utils/event";
 import { add, sub } from "../../utils/math";
 import { Chip } from "../chip/chip";
+import { PlacedChip } from "../chip/placed_chip";
+import IOTile from "../tiles/io_tile";
+import StructureTile from "../tiles/structure_tile";
 import { Tile } from "../tiles/tile";
 import Grid from "./grid";
 
@@ -234,7 +237,15 @@ export default class InteractiveGrid extends Grid {
         if (!this.isValidChipPlacement(location, chip)) return;
         const structure = chip.structure;
         const structureTiles = Object.values(structure);
-        const offset = chip.getTopLeftStructure();
+        const offset = chip.getTopLeftStructure() as [number, number];
+
+        const placedChip = new PlacedChip(
+            locationToPair(offset),
+            Rotation.NORMAL,
+            chip
+        );
+
+        this.chips.push(placedChip);
 
         this.historyManager.beginInteraction();
         for (const structureTile of structureTiles) {
@@ -243,12 +254,18 @@ export default class InteractiveGrid extends Grid {
                 add(location, [structureTile.x, structureTile.y]),
                 offset
             ) as [number, number];
-            this.addTile(
+            const placedTile = this.addTile(
                 ...tileLocation,
                 structureTile.type,
                 undefined,
                 undefined
             );
+
+            if (placedTile)
+                placedChip.setTile(
+                    ...tileLocation,
+                    placedTile as IOTile | StructureTile
+                );
         }
         this.historyManager.endInteraction();
     }
@@ -452,24 +469,19 @@ export default class InteractiveGrid extends Grid {
         const structureTiles = Object.values(structure);
         const structureOffset = chip.getTopLeftStructure();
 
-        // TODO: make good colors in config
         const color = valid ? chip.color : config.colors.chipInvalidPlacement;
         this.chipOutlineGraphics.clear();
 
         for (const structureTile of structureTiles) {
             if (!structureTile) continue;
-            // const tileLocation = sub(
-            //     add(gridPos, [structureTile.x, structureTile.y]),
-            //     structureOffset
-            // ) as [number, number];
+            const tileLocation = sub(
+                add(gridPos, [structureTile.x, structureTile.y]),
+                structureOffset
+            ) as [number, number];
 
             for (const direction of Direction.values()) {
                 const directionOffset = Direction.getOffset(direction);
 
-                const tileLocation = sub(
-                    add(gridPos, [structureTile.x, structureTile.y]),
-                    structureOffset
-                ) as [number, number];
                 const tileAtLocation = this.getTile(...tileLocation);
 
                 if (valid) {
@@ -538,7 +550,6 @@ export default class InteractiveGrid extends Grid {
                     case Direction.UP: {
                         this.chipOutlineGraphics.moveTo(topLeft.x, topLeft.y);
                         this.chipOutlineGraphics.lineTo(topRight.x, topRight.y);
-
                         break;
                     }
                     case Direction.DOWN: {
