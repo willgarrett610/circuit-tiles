@@ -171,6 +171,8 @@ export default class InteractiveGrid extends Grid {
                 }
             }
             this.update();
+        } else if (this.historyManager.interacting) {
+            this.historyManager.endInteraction();
         }
 
         this.updateHighlightTile();
