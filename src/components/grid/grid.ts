@@ -10,9 +10,13 @@ import state from "../../state";
 import { EditMode } from "../../utils/edit_mode";
 import Graph from "../../logic/graph";
 import { GridAction } from "../../utils/action";
-import { gridManager } from "../..";
-import { performAction } from "../../action/history_manager";
-import { setTile } from "../../action/tile_actions";
+import {
+    beginInteraction,
+    endInteraction,
+    isInteracting,
+    performAction,
+} from "../../history/history_manager";
+import { deleteTile, editTile, setTile } from "../../history/tile_actions";
 
 interface GridHandlers {
     postAddTile: ((payload: Tile) => void)[];
@@ -161,85 +165,68 @@ export default class Grid extends PIXI.Container {
     /**
      * Connects tiles together
      *
-     * @param newTile
-     * @param prevTile
+     * @param toTile tile to connect to
+     * @param fromTile tile to connect from
      * @param direction direction from newTile to prevTile
-     * @param editedNewTile
      * @param forced if the connection should be forced
      */
     connectTiles(
-        newTile: Tile,
-        prevTile: Tile | undefined,
-        direction: Direction | undefined,
-        editedNewTile: boolean,
+        toTile: Tile,
+        fromTile: Tile,
+        direction: Direction,
         forced = false
     ) {
-        if (
-            newTile !== undefined &&
-            prevTile !== undefined &&
-            direction !== undefined
-        ) {
-            const oppositeDirection = Direction.toLower(
-                Direction.getOpposite(direction)
-            );
-            const directDirection = Direction.toLower(direction);
+        // Get direction of connection
+        const oppositeDirection = Direction.toLower(
+            Direction.getOpposite(direction)
+        );
+        const directDirection = Direction.toLower(direction);
 
-            const canConnect =
-                newTile.getConnectionTemplate()[directDirection] !==
-                    ConnectionType.BLOCKED &&
-                prevTile.getConnectionTemplate()[oppositeDirection] !==
-                    ConnectionType.BLOCKED &&
-                (forced || newTile.isWire || prevTile.isWire);
+        // Determine whether the tiles can be connected
+        const canConnect =
+            toTile.getConnectionTemplate()[directDirection] !==
+                ConnectionType.BLOCKED &&
+            fromTile.getConnectionTemplate()[oppositeDirection] !==
+                ConnectionType.BLOCKED &&
+            (forced || toTile.isWire || fromTile.isWire);
 
-            if (!prevTile.getConnections()[oppositeDirection] && canConnect) {
-                gridManager.historyManager.tempHistory.push({
-                    action: GridAction.EDIT,
-                    prevTile: prevTile.clone(),
-                    postTile: undefined,
-                    location: { x: prevTile.x, y: prevTile.y },
-                });
-
-                prevTile.setConnection(oppositeDirection, true);
-                gridManager.historyManager.tempHistory[
-                    gridManager.historyManager.tempHistory.length - 1
-                ].postTile = prevTile.clone();
-            }
-            if (
-                !newTile.getConnections()[directDirection] &&
-                (canConnect || !editedNewTile)
-            ) {
-                gridManager.historyManager.tempHistory.push({
-                    action: editedNewTile ? GridAction.EDIT : GridAction.ADD,
-                    prevTile: editedNewTile ? newTile.clone() : undefined,
-                    postTile: undefined,
-                    location: { x: newTile.x, y: newTile.y },
-                });
-
-                if (canConnect) newTile.setConnection(directDirection, true);
-
-                gridManager.historyManager.tempHistory[
-                    gridManager.historyManager.tempHistory.length - 1
-                ].postTile = newTile.clone();
-            }
-            prevTile.updateContainer?.();
-        } else if (!editedNewTile) {
-            // gridManager.historyManager.tempHistory.push({
-            //     action: GridAction.ADD,
-            //     prevTile: undefined,
-            //     postTile: newTile.clone(),
-            //     location: { x: newTile.x, y: newTile.y },
-            // });
+        // If the tiles can be connected and the previous tile is not already connected,
+        // connect the previous tile
+        if (!fromTile.getConnections()[oppositeDirection] && canConnect) {
+            const newFromTile = fromTile.clone();
+            newFromTile.setConnection(oppositeDirection, true);
+            performAction(editTile, {
+                x: newFromTile.x,
+                y: newFromTile.y,
+                tile: newFromTile,
+                grid: this,
+            });
         }
 
-        newTile.updateContainer?.();
+        // If the new tile is not already connected and the tiles can be connected or we are placing a new tile
+        // connect the new tile
+        if (!toTile.getConnections()[directDirection] && canConnect) {
+            const newToTile = toTile.clone();
+            newToTile.setConnection(directDirection, true);
+            performAction(editTile, {
+                x: newToTile.x,
+                y: newToTile.y,
+                tile: newToTile,
+                grid: this,
+            });
+        }
     }
 
     /**
      * handles forced connections of tiles
      *
-     * @param tile tile to attempt to force connect
+     * @param x x coordinate
+     * @param y y coordinate
      */
-    handleForceConnection(tile: Tile) {
+    handleForceConnection(x: number, y: number) {
+        const tile = this.getTile(x, y);
+        if (!tile) return;
+
         for (const key in tile.getConnectionForce()) {
             const forceDirectionKey = key as "up" | "right" | "down" | "left";
             const force = tile.getConnectionForce()[forceDirectionKey];
@@ -250,13 +237,7 @@ export default class Grid extends PIXI.Container {
                     tile.y + Direction.getOffset(forceDirection)[1]
                 );
                 if (forceTile) {
-                    this.connectTiles(
-                        tile,
-                        forceTile,
-                        forceDirection,
-                        true,
-                        true
-                    );
+                    this.connectTiles(tile, forceTile, forceDirection, true);
                 }
             }
         }
@@ -272,7 +253,7 @@ export default class Grid extends PIXI.Container {
                         Direction.toLower(Direction.getOpposite(direction))
                     ]
                 ) {
-                    this.connectTiles(tile, adjacentTile, direction, true);
+                    this.connectTiles(tile, adjacentTile, direction);
                 }
             }
         }
@@ -299,24 +280,26 @@ export default class Grid extends PIXI.Container {
     ): Tile | undefined {
         const tileAtLocation = this.getTile(x, y);
         if (tileAtLocation) {
-            this.connectTiles(tileAtLocation, prevTile, direction, true);
+            if (direction !== undefined && prevTile)
+                this.connectTiles(tileAtLocation, prevTile, direction);
             return tileAtLocation;
         }
 
         const tileObj = new tile(x, y);
 
+        const interacting = isInteracting();
+        if (!interacting) beginInteraction();
+
         performAction(setTile, { x, y, tile: tileObj, grid: this });
 
-        const tileGraphics: PIXI.Container = tileObj.getContainer(this.size);
-        this.addChild(tileGraphics);
+        if (prevTile && direction !== undefined)
+            this.connectTiles(tileObj, prevTile, direction);
 
-        this.connectTiles(tileObj, prevTile, direction, false);
+        this.handleForceConnection(x, y);
 
-        this.handleForceConnection(tileObj);
+        if (!interacting) endInteraction();
 
-        this.dispatchHandler("postAddTile", tileObj);
-
-        return tileObj;
+        return this.getTile(x, y) as Tile;
     }
 
     /**
@@ -329,14 +312,9 @@ export default class Grid extends PIXI.Container {
     removeTile(x: number, y: number) {
         const tile = this.getTile(x, y);
         if (!tile) return false;
-        gridManager.historyManager.tempHistory.push({
-            action: GridAction.REMOVE,
-            prevTile: tile.clone(),
-            postTile: undefined,
-            location: { x: tile.x, y: tile.y },
-        });
-        this.removeChild(tile.getContainer(this.size));
-        this.deleteTile(x, y);
+
+        performAction(deleteTile, { x, y, grid: this });
+
         const removalSpots: {
             offset: number[];
             side: "up" | "right" | "down" | "left";
@@ -356,20 +334,16 @@ export default class Grid extends PIXI.Container {
                 adjacentTile !== undefined &&
                 adjacentTile.getConnections()[removalSpot.side]
             ) {
-                gridManager.historyManager.tempHistory.push({
-                    action: GridAction.EDIT,
-                    prevTile: adjacentTile.clone(),
-                    postTile: undefined,
-                    location: { x: adjacentTile.x, y: adjacentTile.y },
+                const newTile = adjacentTile.clone();
+                newTile.setConnection(removalSpot.side, false);
+                performAction(editTile, {
+                    x: newTile.x,
+                    y: newTile.y,
+                    tile: adjacentTile,
+                    grid: this,
                 });
-                adjacentTile.setConnection(removalSpot.side, false);
-                gridManager.historyManager.tempHistory[
-                    gridManager.historyManager.tempHistory.length - 1
-                ].postTile = adjacentTile.clone();
-                adjacentTile.updateContainer?.();
             }
         }
-        this.dispatchHandler("postRemoveTile", tile);
         return true;
     }
 
@@ -382,22 +356,19 @@ export default class Grid extends PIXI.Container {
     rotateTile(x: number, y: number) {
         const tile = this.getTile(x, y);
         if (tile && tile.breakOnRotate) {
-            gridManager.historyManager.tempHistory.push({
-                action: GridAction.EDIT,
-                prevTile: tile.clone(),
-                postTile: undefined,
-                location: { x, y },
+            const newTile = tile.clone();
+            if (newTile.rotatable)
+                newTile.direction = rotateClockWise(tile.direction);
+            newTile.setConnection("up", false);
+            newTile.setConnection("down", false);
+            newTile.setConnection("left", false);
+            newTile.setConnection("right", false);
+            performAction(editTile, {
+                x,
+                y,
+                tile: newTile,
+                grid: this,
             });
-            if (tile.rotatable)
-                tile.direction = rotateClockWise(tile.direction);
-            tile.setConnection("up", false);
-            tile.setConnection("down", false);
-            tile.setConnection("left", false);
-            tile.setConnection("right", false);
-            tile.updateContainer?.();
-            gridManager.historyManager.tempHistory[
-                gridManager.historyManager.tempHistory.length - 1
-            ].postTile = tile.clone();
 
             const removalSpots: {
                 offset: number[];
@@ -418,24 +389,18 @@ export default class Grid extends PIXI.Container {
                     adjacentTile !== undefined &&
                     adjacentTile.getConnections()[removalSpot.side]
                 ) {
-                    gridManager.historyManager.tempHistory.push({
-                        action: GridAction.EDIT,
-                        prevTile: adjacentTile.clone(),
-                        postTile: undefined,
-                        location: {
-                            x: adjacentTile.x,
-                            y: adjacentTile.y,
-                        },
+                    const newAdjacentTile = adjacentTile.clone();
+                    newAdjacentTile.setConnection(removalSpot.side, false);
+                    performAction(editTile, {
+                        x: newAdjacentTile.x,
+                        y: newAdjacentTile.y,
+                        tile: newAdjacentTile,
+                        grid: this,
                     });
-                    adjacentTile.setConnection(removalSpot.side, false);
-                    gridManager.historyManager.tempHistory[
-                        gridManager.historyManager.tempHistory.length - 1
-                    ].postTile = adjacentTile.clone();
-                    adjacentTile.updateContainer?.();
                 }
             }
 
-            this.handleForceConnection(tile);
+            this.handleForceConnection(tile.x, tile.y);
         }
     }
 

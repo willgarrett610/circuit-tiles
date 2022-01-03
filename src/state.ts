@@ -39,7 +39,7 @@ export const update: Updater = undefined;
 
 const state: State = {
     chipEditor: false,
-    editMode: EditMode.TILE,
+    editMode: 0,
     chips: [],
     interactive: true,
     chipCreation: {

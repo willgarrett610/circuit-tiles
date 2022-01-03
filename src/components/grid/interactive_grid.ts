@@ -1,6 +1,10 @@
 import * as PIXI from "pixi.js";
 
 import { gridManager } from "../..";
+import {
+    beginInteraction,
+    endInteraction,
+} from "../../history/history_manager";
 import config from "../../config";
 import state, { subscribe } from "../../state";
 import { height, locationToPair, locationToTuple, width } from "../../utils";
@@ -65,6 +69,7 @@ export default class InteractiveGrid extends Grid {
         this.dragData.isDragging = false;
         this.dragData.endLocation.screen = locationToPair(mousePos);
         this.dragData.endLocation.grid = this.screenToGrid(...mousePos, true);
+        endInteraction();
 
         this.renderSelection();
     };
@@ -78,6 +83,7 @@ export default class InteractiveGrid extends Grid {
         this.dragData.startLocation.grid = this.screenToGrid(...mousePos, true);
         this.dragData.endLocation.screen = locationToPair(mousePos);
         this.dragData.endLocation.grid = this.screenToGrid(...mousePos, true);
+        beginInteraction();
 
         this.renderSelection();
     };
@@ -250,9 +256,9 @@ export default class InteractiveGrid extends Grid {
             e.preventDefault();
             this.lastKeyActionTime = currTime;
             if (e.shiftKey) {
-                gridManager.historyManager.redo();
+                // gridManager.historyManager.redo();
             } else {
-                gridManager.historyManager.undo();
+                // gridManager.historyManager.undo();
             }
             e.stopPropagation();
         }

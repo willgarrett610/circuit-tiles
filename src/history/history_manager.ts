@@ -54,7 +54,7 @@ export function beginInteraction() {
  */
 export function endInteraction() {
     interacting = false;
-    history.push(interactionHistory);
+    if (interactionHistory.length > 0) history.push(interactionHistory);
     interactionHistory = [];
 }
 
@@ -64,11 +64,13 @@ export function endInteraction() {
 export function undo() {
     const actions = history.pop();
     if (actions) {
-        for (const action of actions) {
-            action.action.undo(action);
+        for (let i = actions.length - 1; i >= 0; i--) {
+            const action = actions[i];
+            actions[i].action.undo(action);
         }
         undoHistory.push(actions);
     }
+    console.log({ history });
 }
 
 /**
@@ -83,6 +85,14 @@ export function redo() {
         }
         endInteraction();
     }
+}
+
+/**
+ *
+ * @returns True if there is an interaction happening
+ */
+export function isInteracting() {
+    return interacting;
 }
 
 window.addEventListener("keydown", (event) => {
