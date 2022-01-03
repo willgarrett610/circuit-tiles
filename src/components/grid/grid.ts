@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as PIXI from "pixi.js";
-import { dimensions } from "../../utils";
+import { dimensions, height, width } from "../../utils";
 import { clamp } from "../../utils/math";
 import config from "../../config";
 import { ConnectionType, Tile } from "../tiles/tile";
@@ -47,6 +47,7 @@ export default class Grid extends PIXI.Container {
     size: number;
     tiles: { [key: string]: Tile | undefined } = {};
 
+    backgroundGraphics: PIXI.Graphics;
     lineGraphics: PIXI.Graphics;
     hlTile: PIXI.Graphics;
     selectionGraphics: PIXI.Graphics;
@@ -94,6 +95,12 @@ export default class Grid extends PIXI.Container {
 
         this.historyManager = new HistoryManager();
 
+        this.backgroundGraphics = new PIXI.Graphics();
+        this.backgroundGraphics.zIndex = 0;
+        this.backgroundGraphics.beginFill(config.colors.background);
+        this.backgroundGraphics.drawRect(0, 0, width(), height());
+        this.backgroundGraphics.endFill();
+
         this.lineGraphics = new PIXI.Graphics();
         this.lineGraphics.zIndex = 1000;
         this.hlTile = new PIXI.Graphics();
@@ -105,6 +112,7 @@ export default class Grid extends PIXI.Container {
 
         if (tiles) this.tiles = tiles;
 
+        this.addChild(this.backgroundGraphics);
         this.addChild(this.lineGraphics);
         this.addChild(this.hlTile);
         this.addChild(this.selectionGraphics);
