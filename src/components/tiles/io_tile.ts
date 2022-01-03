@@ -9,12 +9,12 @@ import { displayContextMenu } from "../../utils/context_menu";
 import { CMouseEvent } from "../../utils/event";
 import ChipInputTile from "./chip_input_tile";
 import ChipOutputTile from "./chip_output_tile";
-import { GraphicsTile } from "./tile";
+import ChipTile from "./chip_tile";
 
 /**
  * Generic io tile
  */
-export default abstract class IOTile extends GraphicsTile {
+export default abstract class IOTile extends ChipTile {
     static chipTile = true;
 
     abstract type: typeof ChipInputTile | typeof ChipOutputTile;

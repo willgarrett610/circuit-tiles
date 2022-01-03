@@ -2,17 +2,18 @@ import * as PIXI from "pixi.js";
 
 import { gridManager } from "../..";
 import config from "../../config";
+import { setChip } from "../../history/chip_actions";
 import state, { subscribe } from "../../state";
 import { height, locationToPair, locationToTuple, width } from "../../utils";
 import { Interaction } from "../../utils/action";
+import ChipGridMode from "../../utils/chip_grid_mode";
 import { Direction, Rotation } from "../../utils/directions";
 import { EditMode } from "../../utils/edit_mode";
 import { mouseDown, pressedKeys } from "../../utils/event";
 import { add, sub } from "../../utils/math";
 import { Chip } from "../chip/chip";
 import { PlacedChip } from "../chip/placed_chip";
-import IOTile from "../tiles/io_tile";
-import StructureTile from "../tiles/structure_tile";
+import ChipTile from "../tiles/chip_tile";
 import { Tile } from "../tiles/tile";
 import Grid from "./grid";
 
@@ -61,7 +62,6 @@ export default class InteractiveGrid extends Grid {
     }
 
     scroll = (e: WheelEvent) => {
-        console.log(e);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if ((e as any).wheelDeltaY === 0) return;
 
@@ -239,15 +239,20 @@ export default class InteractiveGrid extends Grid {
         const structureTiles = Object.values(structure);
         const offset = chip.getTopLeftStructure() as [number, number];
 
+        this.historyManager.beginInteraction();
         const placedChip = new PlacedChip(
             locationToPair(offset),
             Rotation.NORMAL,
             chip
         );
 
-        this.chips.push(placedChip);
+        this.historyManager.performAction(setChip, {
+            grid: this,
+            chip: placedChip,
+        });
 
-        this.historyManager.beginInteraction();
+        // this.chips.push(placedChip);
+
         for (const structureTile of structureTiles) {
             if (!structureTile) continue;
             const tileLocation = sub(
@@ -259,13 +264,12 @@ export default class InteractiveGrid extends Grid {
                 structureTile.type,
                 undefined,
                 undefined
-            );
+            ) as ChipTile | undefined;
 
-            if (placedTile)
-                placedChip.setTile(
-                    ...tileLocation,
-                    placedTile as IOTile | StructureTile
-                );
+            if (placedTile) {
+                placedTile.chip = placedChip;
+                placedChip.setTile(...tileLocation, placedTile);
+            }
         }
         this.historyManager.endInteraction();
     }
@@ -278,7 +282,12 @@ export default class InteractiveGrid extends Grid {
      * @returns true if chip can be placed
      */
     isValidChipPlacement(location: [number, number], chip: Chip) {
-        if (!chip.isStructured()) return false;
+        if (
+            (state.chipEditor &&
+                state.chipGridMode === ChipGridMode.STRUCTURING) ||
+            !chip.isStructured()
+        )
+            return false;
         const structureOffset = chip.getTopLeftStructure();
         for (const structureTile of Object.values(chip.structure)) {
             if (!structureTile) continue;
@@ -453,6 +462,8 @@ export default class InteractiveGrid extends Grid {
 
         if (
             state.editMode !== EditMode.CHIP ||
+            (state.chipEditor &&
+                state.chipGridMode === ChipGridMode.STRUCTURING) ||
             !state.chips?.[state.selectedTileIndex]?.isStructured?.()
         ) {
             this.chipOutlineGraphics.clear();
@@ -485,7 +496,7 @@ export default class InteractiveGrid extends Grid {
                 const tileAtLocation = this.getTile(...tileLocation);
 
                 if (valid) {
-                    this.chipOutlineGraphics.beginFill(chip.color, 0.3);
+                    this.chipOutlineGraphics.beginFill(chip.color, 0.2);
                 } else {
                     if (tileAtLocation) {
                         this.chipOutlineGraphics.beginFill(
@@ -493,7 +504,7 @@ export default class InteractiveGrid extends Grid {
                             0.3
                         );
                     } else {
-                        this.chipOutlineGraphics.beginFill(chip.color, 0.3);
+                        this.chipOutlineGraphics.beginFill(chip.color, 0.2);
                     }
                 }
                 this.chipOutlineGraphics.lineStyle(undefined);
@@ -545,7 +556,7 @@ export default class InteractiveGrid extends Grid {
                     false
                 );
 
-                this.chipOutlineGraphics.lineStyle(2, color);
+                this.chipOutlineGraphics.lineStyle(2, color, 0.5);
                 switch (direction) {
                     case Direction.UP: {
                         this.chipOutlineGraphics.moveTo(topLeft.x, topLeft.y);

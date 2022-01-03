@@ -3,7 +3,6 @@
 import { gridManager } from "..";
 
 export interface Action<T, U = void> {
-    type: string;
     do(payload: T): U | void;
     undo(actionPayload: ActionPayload<T, U>): void;
 }

@@ -13,11 +13,15 @@ import { GridAction } from "../../utils/action";
 import { deleteTile, editTile, setTile } from "../../history/tile_actions";
 import HistoryManager from "../../history/history_manager";
 import { PlacedChip } from "../chip/placed_chip";
+import ChipTile from "../tiles/chip_tile";
+import { deleteChip } from "../../history/chip_actions";
 
 interface GridHandlers {
     postAddTile: ((payload: Tile) => void)[];
     postRemoveTile: ((payload: Tile) => void)[];
     postEditTile: ((payload: Tile) => void)[];
+    postAddChip: ((payload: PlacedChip) => void)[];
+    postRemoveChip: ((payload: PlacedChip) => void)[];
     postUndo: ((
         payload: {
             action: GridAction;
@@ -64,6 +68,8 @@ export default class Grid extends PIXI.Container {
         postAddTile: [],
         postRemoveTile: [],
         postEditTile: [],
+        postAddChip: [],
+        postRemoveChip: [],
         postUndo: [],
         postRedo: [],
     };
@@ -325,11 +331,26 @@ export default class Grid extends PIXI.Container {
      *
      * @param x x coordinate
      * @param y y coordinate
+     * @param removeChip whether you are moving a chip (you do no need to handle this)
      * @returns success of deletion
      */
-    removeTile(x: number, y: number) {
+    removeTile(x: number, y: number, removeChip = false) {
         const tile = this.getTile(x, y);
         if (!tile) return false;
+
+        if (!removeChip && tile instanceof ChipTile && tile.chip) {
+            const interacting = this.historyManager.isInteracting();
+            if (!interacting) this.historyManager.beginInteraction();
+            this.historyManager.performAction(deleteChip, {
+                grid: this,
+                chip: tile.chip,
+            });
+
+            for (const chipTile of Object.values(tile.chip.tiles)) {
+                if (chipTile) this.removeTile(chipTile.x, chipTile.y, true);
+            }
+            if (!interacting) this.historyManager.endInteraction();
+        }
 
         this.historyManager.performAction(deleteTile, { x, y, grid: this });
 
@@ -544,7 +565,6 @@ export default class Grid extends PIXI.Container {
         // TODO: make this more efficient
         this.chipOutlines.removeChildren();
         for (const chip of this.chips) {
-            console.log({ chip });
             this.chipOutlines.addChild(chip.buildOutlineGraphic(this));
         }
     }
@@ -581,7 +601,6 @@ export default class Grid extends PIXI.Container {
      * Update the grids graphics
      */
     update() {
-        console.log("update");
         this.backgroundGraphics.x = -this.x;
         this.backgroundGraphics.y = -this.y;
         this.backgroundGraphics.width = width();

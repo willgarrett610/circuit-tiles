@@ -1,8 +1,9 @@
 import config from "../../config";
-import { ConnectionType, GraphicsTile } from "./tile";
+import ChipTile from "./chip_tile";
+import { ConnectionType } from "./tile";
 
 /** chip input tile */
-export default class StructureTile extends GraphicsTile {
+export default class StructureTile extends ChipTile {
     static chipTile = true;
 
     type = StructureTile;

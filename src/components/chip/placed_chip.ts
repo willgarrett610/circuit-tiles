@@ -3,8 +3,7 @@ import { locationToTuple } from "../../utils";
 import { Direction, Rotation } from "../../utils/directions";
 import { add } from "../../utils/math";
 import Grid from "../grid/grid";
-import IOTile from "../tiles/io_tile";
-import StructureTile from "../tiles/structure_tile";
+import ChipTile from "../tiles/chip_tile";
 import { Chip } from "./chip";
 
 /**
@@ -14,7 +13,7 @@ export class PlacedChip {
     location: { x: number; y: number };
     rotation: Rotation;
     chip: Chip;
-    tiles: { [key: string]: IOTile | StructureTile | undefined } = {};
+    tiles: { [key: string]: ChipTile | undefined } = {};
 
     /**
      * construct placed chip
@@ -53,7 +52,7 @@ export class PlacedChip {
      * @param y y coordinate
      * @param tile
      */
-    setTile(x: number, y: number, tile: IOTile | StructureTile) {
+    setTile(x: number, y: number, tile: ChipTile) {
         this.tiles[`${x},${y}`] = tile;
     }
 

@@ -10,7 +10,6 @@ interface PlaceTilePayload {
 }
 
 export const setTile: Action<PlaceTilePayload> = {
-    type: "SET_TILE",
     do: (payload) => {
         const newTile = payload.tile;
         payload.grid.setTile(payload.x, payload.y, newTile);
@@ -35,7 +34,6 @@ interface EditTilePayload {
 }
 
 export const editTile: Action<EditTilePayload, Tile> = {
-    type: "EDIT_TILE",
     do: ({ x, y, tile, grid }) => {
         const refTile = grid.getTile(x, y);
 
@@ -72,7 +70,6 @@ interface DeleteTilePayload {
 }
 
 export const deleteTile: Action<DeleteTilePayload, Tile> = {
-    type: "DELETE_TILE",
     do: ({ x, y, grid }) => {
         const tile = grid.getTile(x, y);
         if (tile) {
