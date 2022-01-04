@@ -135,13 +135,4 @@ export default abstract class IOTile extends ChipTile {
         super.updateContainer();
         this.generateText();
     }
-
-    /**
-     * Create a clone of this tile
-     *
-     * @param tile Tile
-     */
-    createClone(tile: IOTile): void {
-        this.id = tile.id;
-    }
 }
