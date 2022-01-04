@@ -5,6 +5,7 @@ import { TileType } from "./components/tiles/tile_types";
 import ChipGridMode from "./utils/chip_grid_mode";
 import { EditMode } from "./utils/edit_mode";
 import { JSX } from "preact";
+import { Rotation } from "./utils/directions";
 
 interface State {
     /** if the chip editor is open regardless of chip grid mode */
@@ -29,6 +30,8 @@ interface State {
     selectedTileIndex: number;
     /** possible selectable tiles */
     selectableTiles: TileType[];
+    /** for when you are placing chips */
+    chipPlacementRotation: Rotation;
     /** currently show pop-ups */
     openMenus: JSX.Element[];
 }
@@ -59,6 +62,7 @@ const state: State = {
     chipGridMode: ChipGridMode.EDITING,
     selectedTileIndex: -1,
     selectableTiles: [],
+    chipPlacementRotation: Rotation.NORMAL,
     openMenus: [],
 };
 
