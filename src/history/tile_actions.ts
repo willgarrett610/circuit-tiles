@@ -1,4 +1,5 @@
 import Grid from "../components/grid/grid";
+import IOTile from "../components/tiles/io_tile";
 import { Tile } from "../components/tiles/tile";
 import { Action } from "./history_manager";
 
@@ -14,6 +15,7 @@ export const setTile: Action<PlaceTilePayload> = {
         const newTile = payload.tile;
         payload.grid.setTile(payload.x, payload.y, newTile);
         payload.grid.addChild(newTile.getContainer(payload.grid.size));
+        if (newTile instanceof IOTile) newTile.generateText();
         payload.grid.dispatchHandler("postAddTile", newTile);
     },
     undo: ({ payload }) => {
@@ -42,7 +44,6 @@ export const editTile: Action<EditTilePayload, Tile> = {
             const newTile = tile.clone();
             grid.setTile(x, y, newTile);
             grid.addChild(newTile.getContainer(grid.size));
-
             newTile.updateContainer?.();
 
             return refTile;
@@ -86,6 +87,7 @@ export const deleteTile: Action<DeleteTilePayload, Tile> = {
             if (tile) grid.removeChild(tile.getContainer(grid.size));
             grid.setTile(x, y, prevValue);
             grid.addChild(prevValue.getContainer(grid.size));
+            if (prevValue instanceof IOTile) prevValue.generateText();
             grid.dispatchHandler("postAddTile", prevValue);
         }
     },

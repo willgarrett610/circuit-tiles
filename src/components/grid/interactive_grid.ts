@@ -19,6 +19,7 @@ import { add, sub } from "../../utils/math";
 import { Chip } from "../chip/chip";
 import { PlacedChip } from "../chip/placed_chip";
 import ChipTile from "../tiles/chip_tile";
+import IOTile from "../tiles/io_tile";
 import { Tile } from "../tiles/tile";
 import Grid from "./grid";
 
@@ -292,8 +293,12 @@ export default class InteractiveGrid extends Grid {
             ) as ChipTile | undefined;
 
             if (placedTile) {
+                placedTile.id = structureTile.id;
                 placedTile.chip = placedChip;
                 placedChip.setTile(...tileLocation, placedTile);
+                if (placedTile instanceof IOTile) {
+                    placedTile.generateText();
+                }
             }
         }
         this.historyManager.endInteraction();
