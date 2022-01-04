@@ -29,7 +29,7 @@ export default class ChipInputTile extends IOTile {
         this.extraInputTile = tile;
         if (this.extraInputTile && this.container) {
             const extraContainer = this.extraInputTile.getContainer(
-                this.container.width * 0.8 * this.container.scale.x
+                (this.container.width * 0.7) / this.container.scale.x
             );
             extraContainer.pivot.set(0, 0);
             extraContainer.x =
