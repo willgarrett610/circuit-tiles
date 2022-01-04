@@ -225,6 +225,8 @@ export default class InteractiveGrid extends Grid {
 
             this.update();
         }
+
+        gridManager.modeManager.finishInteraction();
     };
 
     /**

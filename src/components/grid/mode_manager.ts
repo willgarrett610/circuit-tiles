@@ -18,6 +18,12 @@ export class ModeManager {
 
     currentInteraction: Interaction = Interaction.NONE;
 
+    finishInteraction = () => {
+        if (this.currentInteraction !== Interaction.NONE) {
+            this.currentInteraction = Interaction.NONE;
+        }
+    };
+
     editModeOnKeyDown = (key: string) => {
         switch (key) {
             case "KeyX":
