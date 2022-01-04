@@ -164,8 +164,6 @@ export default class InteractiveGrid extends Grid {
                     )
                 );
 
-                console.log({ gridPoints });
-
                 let prevTile: Tile | undefined = undefined;
                 for (let i = 0; i < gridPoints.length; i++) {
                     const gridPoint = gridPoints[i];

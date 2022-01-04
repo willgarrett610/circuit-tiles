@@ -158,7 +158,6 @@ export class Chip {
             (x) => this.structure[x]?.id === tile.id
         );
         if (key) {
-            console.log(key);
             const split = key.split(",");
             const x = parseInt(split[0]);
             const y = parseInt(split[1]);

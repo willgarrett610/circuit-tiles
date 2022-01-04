@@ -220,15 +220,11 @@ export default class Grid extends PIXI.Container {
                 tile: newFromTile,
                 grid: this,
             });
-            console.log({ fromTile });
-            console.log({ newFromTile });
         }
 
         // If the new tile is not already connected and the tiles can be connected or we are placing a new tile
         // connect the new tile
         if (!toTile.getConnections()[directDirection] && canConnect) {
-            console.log("x", toTile.x);
-            console.log("y", toTile.y);
             const newToTile = toTile.clone();
             newToTile.setConnection(directDirection, true);
             this.historyManager.performAction(editTile, {
@@ -237,7 +233,6 @@ export default class Grid extends PIXI.Container {
                 tile: newToTile,
                 grid: this,
             });
-            console.log({ newToTile });
         }
     }
 
@@ -304,7 +299,6 @@ export default class Grid extends PIXI.Container {
         prevTile: Tile | undefined,
         direction: Direction | undefined
     ): Tile | undefined {
-        console.log(prevTile, direction);
         const tileAtLocation = this.getTile(x, y);
         if (tileAtLocation) {
             if (direction !== undefined && prevTile)
