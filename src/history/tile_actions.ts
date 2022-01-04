@@ -76,8 +76,8 @@ export const deleteTile: Action<DeleteTilePayload, Tile> = {
         if (tile) {
             const prevTile = tile?.clone();
             grid.removeChild(tile?.getContainer(grid.size));
-            grid.dispatchHandler("postRemoveTile", tile);
             grid.deleteTile(x, y);
+            grid.dispatchHandler("postRemoveTile", tile);
             return prevTile;
         }
     },

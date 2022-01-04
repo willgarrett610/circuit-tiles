@@ -15,6 +15,9 @@ import HistoryManager from "../../history/history_manager";
 import { PlacedChip } from "../chip/placed_chip";
 import ChipTile from "../tiles/chip_tile";
 import { deleteChip } from "../../history/chip_actions";
+import ChipInputTile from "../tiles/chip_input_tile";
+import ButtonTile from "../tiles/button_tile";
+import LeverTile from "../tiles/lever_tile";
 
 interface GridHandlers {
     postAddTile: ((payload: Tile) => void)[];
@@ -243,7 +246,7 @@ export default class Grid extends PIXI.Container {
      * @param y y coordinate
      */
     handleForceConnection(x: number, y: number) {
-        const tile = this.getTile(x, y);
+        let tile = this.getTile(x, y);
         if (!tile) return;
 
         for (const key in tile.getConnectionForce()) {
@@ -257,6 +260,7 @@ export default class Grid extends PIXI.Container {
                 );
                 if (forceTile) {
                     this.connectTiles(tile, forceTile, forceDirection, true);
+                    tile = this.getTile(x, y) as Tile;
                 }
             }
         }
@@ -273,6 +277,7 @@ export default class Grid extends PIXI.Container {
                     ]
                 ) {
                     this.connectTiles(tile, adjacentTile, direction);
+                    tile = this.getTile(x, y) as Tile;
                 }
             }
         }
@@ -299,9 +304,20 @@ export default class Grid extends PIXI.Container {
     ): Tile | undefined {
         const tileAtLocation = this.getTile(x, y);
         if (tileAtLocation) {
+            const extraTile = new tile(x, y);
+            if (
+                tileAtLocation instanceof ChipInputTile &&
+                !tileAtLocation.extraInputTile &&
+                (extraTile instanceof ButtonTile ||
+                    extraTile instanceof LeverTile) &&
+                !state.chipEditor
+            ) {
+                tileAtLocation.setExtraInputTile(extraTile);
+                tileAtLocation.updateContainer();
+            }
             if (direction !== undefined && prevTile)
                 this.connectTiles(tileAtLocation, prevTile, direction);
-            return tileAtLocation;
+            return this.getTile(tileAtLocation.x, tileAtLocation.y);
         }
 
         const tileObj = new tile(x, y);
@@ -396,18 +412,19 @@ export default class Grid extends PIXI.Container {
         const tile = this.getTile(x, y);
         if (tile && tile.breakOnRotate) {
             const newTile = tile.clone();
-            if (newTile.rotatable)
+            if (newTile.rotatable) {
                 newTile.direction = rotateClockWise(tile.direction);
-            newTile.setConnection("up", false);
-            newTile.setConnection("down", false);
-            newTile.setConnection("left", false);
-            newTile.setConnection("right", false);
-            this.historyManager.performAction(editTile, {
-                x,
-                y,
-                tile: newTile,
-                grid: this,
-            });
+                newTile.setConnection("up", false);
+                newTile.setConnection("down", false);
+                newTile.setConnection("left", false);
+                newTile.setConnection("right", false);
+                this.historyManager.performAction(editTile, {
+                    x,
+                    y,
+                    tile: newTile,
+                    grid: this,
+                });
+            }
 
             const removalSpots: {
                 offset: number[];

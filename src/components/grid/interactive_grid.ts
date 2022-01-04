@@ -216,6 +216,7 @@ export default class InteractiveGrid extends Grid {
                     this.rotateTile(...gridPoint);
                 gridManager.modeManager.currentInteraction =
                     Interaction.PLACING;
+
                 this.addTile(
                     ...gridPoint,
                     state.selectableTiles[state.selectedTileIndex].tile,
