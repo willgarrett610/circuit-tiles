@@ -18,7 +18,10 @@ import {
 import { add, sub } from "../../utils/math";
 import { Chip } from "../chip/chip";
 import { PlacedChip } from "../chip/placed_chip";
+import ButtonTile from "../tiles/button_tile";
+import ChipInputTile from "../tiles/chip_input_tile";
 import ChipTile from "../tiles/chip_tile";
+import LeverTile from "../tiles/lever_tile";
 import { Tile } from "../tiles/tile";
 import Grid from "./grid";
 
@@ -215,6 +218,23 @@ export default class InteractiveGrid extends Grid {
                     this.rotateTile(...gridPoint);
                 gridManager.modeManager.currentInteraction =
                     Interaction.PLACING;
+
+                const tileType = state.selectableTiles[state.selectedTileIndex];
+
+                const tile = this.getTile(...gridPoint);
+                if (
+                    tile instanceof ChipInputTile &&
+                    (tileType.name === "Button" || tileType.name === "Lever") &&
+                    !state.chipEditor
+                ) {
+                    tile.setExtraInputTile(
+                        new tileType.tile(...gridPoint) as
+                            | ButtonTile
+                            | LeverTile
+                    );
+                    tile.updateContainer();
+                }
+
                 this.addTile(
                     ...gridPoint,
                     state.selectableTiles[state.selectedTileIndex].tile,

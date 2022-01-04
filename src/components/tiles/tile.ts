@@ -269,10 +269,12 @@ export abstract class GraphicsTile extends Tile {
      * @returns container
      */
     generateContainer() {
+        const container = new PIXI.Container();
         this.graphics = new PIXI.Graphics();
         this.clearGraphics();
         this.drawGraphics();
-        return this.graphics;
+        container.addChild(this.graphics);
+        return container;
     }
 
     /** update container */

@@ -23,13 +23,6 @@ export default abstract class ChipTile extends GraphicsTile {
     id: string = "";
 
     /**
-     * update container
-     */
-    updateContainer(): void {
-        super.updateContainer();
-    }
-
-    /**
      * Create a clone of this tile
      *
      * @param tile Tile
