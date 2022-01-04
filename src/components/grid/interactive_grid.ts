@@ -3,13 +3,18 @@ import * as PIXI from "pixi.js";
 import { gridManager } from "../..";
 import config from "../../config";
 import { setChip } from "../../history/chip_actions";
-import state, { subscribe } from "../../state";
+import state, { setState, subscribe } from "../../state";
 import { height, locationToPair, locationToTuple, width } from "../../utils";
 import { Interaction } from "../../utils/action";
 import ChipGridMode from "../../utils/chip_grid_mode";
-import { Direction, Rotation } from "../../utils/directions";
+import { Direction, rotateClockWise, Rotation } from "../../utils/directions";
 import { EditMode } from "../../utils/edit_mode";
-import { mouseDown, pressedKeys } from "../../utils/event";
+import {
+    CMouseEvent,
+    mouseDown,
+    onContextMenu,
+    pressedKeys,
+} from "../../utils/event";
 import { add, sub } from "../../utils/math";
 import { Chip } from "../chip/chip";
 import { PlacedChip } from "../chip/placed_chip";
@@ -59,6 +64,8 @@ export default class InteractiveGrid extends Grid {
         this.chipOutlineGraphics = new PIXI.Graphics();
         this.chipOutlineGraphics.zIndex = 2000;
         this.addChild(this.chipOutlineGraphics);
+
+        onContextMenu(this, this.onContext);
     }
 
     scroll = (e: WheelEvent) => {
@@ -227,6 +234,22 @@ export default class InteractiveGrid extends Grid {
         }
 
         gridManager.modeManager.finishInteraction();
+    };
+
+    /**
+     * runs on right click
+     *
+     * @param _
+     */
+    onContext = (_: CMouseEvent) => {
+        if (state.editMode === EditMode.CHIP) {
+            setState({
+                chipPlacementRotation: rotateClockWise(
+                    state.chipPlacementRotation
+                ),
+            });
+            this.update();
+        }
     };
 
     /**
