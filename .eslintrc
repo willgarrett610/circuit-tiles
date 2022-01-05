@@ -1,4 +1,12 @@
 {
+    // "overrides": [
+    //     {
+    //         "files": ["*.ts", "*.tsx"], // Your TypeScript files extension
+    //         "parserOptions": {
+    //             "project": ["./tsconfig.json"] // Specify it only for TypeScript files
+    //         }
+    //     }
+    // ],
     "parser": "@typescript-eslint/parser",
     "plugins": ["@typescript-eslint", "prettier", "jsdoc"],
     "extends": [
@@ -16,6 +24,18 @@
         "@typescript-eslint/no-namespace": "off",
         "prefer-const": "warn",
         "eqeqeq": "warn",
+        // "@typescript-eslint/strict-boolean-expressions": [
+        //     "warn",
+        //     {
+        //         "allowNullableString": true,
+        //         "allowNullableNumber": false,
+        //         "allowNullableBoolean": true,
+        //         "allowNullableObject": true,
+        //         "allowSafe": true,
+        //         "allowAny": true
+        //     }
+        // ],
+        // "@typescript-eslint/no-unnecessary-condition": "off",
         "@typescript-eslint/no-unused-vars": [
             "warn",
             {

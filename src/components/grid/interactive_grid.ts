@@ -7,7 +7,13 @@ import state, { setState, subscribe } from "../../state";
 import { height, locationToPair, locationToTuple, width } from "../../utils";
 import { Interaction } from "../../utils/action";
 import ChipGridMode from "../../utils/chip_grid_mode";
-import { Direction, rotateClockWise, Rotation } from "../../utils/directions";
+import { displayContextMenu } from "../../utils/context_menu";
+import {
+    Direction,
+    rotateClockWise,
+    Rotation,
+    rotationToString,
+} from "../../utils/directions";
 import { EditMode } from "../../utils/edit_mode";
 import {
     CMouseEvent,
@@ -241,9 +247,48 @@ export default class InteractiveGrid extends Grid {
     /**
      * runs on right click
      *
-     * @param _
+     * @param e
      */
-    onContext = (_: CMouseEvent) => {
+    onContext = (e: CMouseEvent) => {
+        if (config.debugMode)
+            displayContextMenu(e.pageX, e.pageY, "debugTile").then((pick) => {
+                const gridPoint = locationToTuple(
+                    this.screenToGrid(...this.mousePos, true)
+                );
+                const tile = this.getTile(...gridPoint);
+                switch (pick) {
+                    case "all": {
+                        console.log(tile);
+                        break;
+                    }
+                    case "connections": {
+                        console.log(tile?.getConnections());
+                        break;
+                    }
+                    case "rotation": {
+                        console.log({
+                            rotatable: tile?.rotatable,
+                            rotation:
+                                tile?.direction +
+                                (tile?.direction !== undefined
+                                    ? " : " + rotationToString(tile.direction)
+                                    : ""),
+                        });
+                        break;
+                    }
+                    case "signal": {
+                        console.log({
+                            signal: tile?.signalActive,
+                        });
+                        break;
+                    }
+                    case "type": {
+                        console.log({ type: tile?.type });
+                        break;
+                    }
+                }
+            });
+
         if (state.editMode === EditMode.CHIP) {
             setState({
                 chipPlacementRotation: rotateClockWise(
@@ -438,15 +483,24 @@ export default class InteractiveGrid extends Grid {
     locationText = new PIXI.Text("");
 
     updateHighlightTile = () => {
+        const gridScreenPos = this.screenToGrid(...this.mousePos, true, true);
+        const gridPos = this.screenToGrid(...this.mousePos, true);
+
         if (state.editMode === EditMode.CHIP) {
             if (this.prevHighlightTileGraphic)
                 this.removeChild(this.prevHighlightTileGraphic);
             this.hlTile.clear();
+            if (config.debugMode) {
+                this.addChild(this.locationText);
+                this.locationText.zIndex = 201;
+                this.locationText.text = locationToTuple(gridPos).join();
+                this.locationText.position.set(
+                    gridScreenPos.x,
+                    gridScreenPos.y
+                );
+            }
             return;
         }
-
-        const gridScreenPos = this.screenToGrid(...this.mousePos, true, true);
-        const gridPos = this.screenToGrid(...this.mousePos, true);
 
         if (this.prevHighlightTileGraphic)
             this.removeChild(this.prevHighlightTileGraphic);

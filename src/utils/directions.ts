@@ -16,6 +16,18 @@ export const rotateCounterClockWise = (input: Rotation): Rotation => {
     return (input + 3) % 4;
 };
 
+export const rotationToString = (input: Rotation) => {
+    switch (input) {
+        case Rotation.NORMAL:
+            return "NORMAL";
+        case Rotation.CLOCKWISE:
+            return "CLOCKWISE";
+        case Rotation.HALF_TURN:
+            return "HALF_TURN";
+        case Rotation.COUNTER_CLOCKWISE:
+            return "COUNTER_CLOCKWISE";
+    }
+};
 /**
  * Direction Enum
  */

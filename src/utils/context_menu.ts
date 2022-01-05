@@ -23,6 +23,13 @@ export const contextMenus = {
         rename: "Rename",
         recolor: "Recolor",
     },
+    debugTile: {
+        all: "All",
+        connections: "Connections",
+        type: "Type",
+        rotation: "Rotation",
+        signal: "Signal",
+    },
 };
 
 let app: PIXI.Application | undefined;
