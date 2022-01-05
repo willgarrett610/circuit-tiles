@@ -304,6 +304,8 @@ export default class Grid extends PIXI.Container {
     ): Tile | undefined {
         const tileAtLocation = this.getTile(x, y);
         if (tileAtLocation) {
+            if (!this.historyManager.interacting)
+                this.historyManager.beginInteraction();
             const extraTile = new tile(x, y);
             if (
                 tileAtLocation instanceof ChipInputTile &&
@@ -312,12 +314,27 @@ export default class Grid extends PIXI.Container {
                     extraTile instanceof LeverTile) &&
                 !state.chipEditor
             ) {
-                tileAtLocation.setExtraInputTile(extraTile);
-                tileAtLocation.updateContainer();
+                const newTileAtLocation =
+                    tileAtLocation.clone() as ChipInputTile;
+                newTileAtLocation.setExtraInputTile(extraTile);
+                this.historyManager.performAction(editTile, {
+                    x,
+                    y,
+                    tile: newTileAtLocation,
+                    grid: this,
+                });
+                tileAtLocation.chip?.deleteTile(x, y);
+                tileAtLocation.chip?.setTile(x, y, newTileAtLocation);
             }
             if (direction !== undefined && prevTile)
-                this.connectTiles(tileAtLocation, prevTile, direction);
-            return this.getTile(tileAtLocation.x, tileAtLocation.y);
+                this.connectTiles(
+                    this.getTile(x, y) as Tile,
+                    prevTile,
+                    direction
+                );
+            if (!this.historyManager.interacting)
+                this.historyManager.endInteraction();
+            return this.getTile(x, y);
         }
 
         const tileObj = new tile(x, y);
@@ -366,6 +383,7 @@ export default class Grid extends PIXI.Container {
                 if (chipTile) this.removeTile(chipTile.x, chipTile.y, true);
             }
             if (!interacting) this.historyManager.endInteraction();
+            return;
         }
 
         this.historyManager.performAction(deleteTile, { x, y, grid: this });
@@ -414,10 +432,16 @@ export default class Grid extends PIXI.Container {
             const newTile = tile.clone();
             if (newTile.rotatable) {
                 newTile.direction = rotateClockWise(tile.direction);
+            }
+
+            if (newTile.hasConnections()) {
                 newTile.setConnection("up", false);
                 newTile.setConnection("down", false);
                 newTile.setConnection("left", false);
                 newTile.setConnection("right", false);
+            }
+
+            if (newTile.rotatable || tile.hasConnections()) {
                 this.historyManager.performAction(editTile, {
                     x,
                     y,

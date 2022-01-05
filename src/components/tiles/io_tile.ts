@@ -114,7 +114,7 @@ export default abstract class IOTile extends ChipTile {
 
             const idText = new PIXI.Text(this.id, {
                 fontFamily: "Arial",
-                fontSize: 20,
+                fontSize: 17,
                 fill: 0xffffff,
             });
             idText.anchor.set(0, 0);

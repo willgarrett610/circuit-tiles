@@ -140,6 +140,20 @@ export abstract class Tile {
         this.connections[this.getRotatedKey(enumDir)] = val;
     }
 
+    /**
+     * Whether the tile is connected to anything
+     *
+     * @returns whether the tile is connected to anything
+     */
+    hasConnections(): boolean {
+        return (
+            this.connections.up ||
+            this.connections.right ||
+            this.connections.down ||
+            this.connections.left
+        );
+    }
+
     canUse = () => true;
 
     /**
