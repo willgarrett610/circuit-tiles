@@ -119,11 +119,14 @@ export default class InteractiveGrid extends Grid {
         const e = event.data.originalEvent as PointerEvent;
         this.prevMousePos = [...this.mousePos];
         this.mousePos = [e.pageX, e.pageY];
-        if (mouseDown.left) {
+
+        if (mouseDown.left || mouseDown.middle) {
             if (
-                e.shiftKey ||
-                pressedKeys["Space"] ||
-                state.editMode === EditMode.PAN
+                (mouseDown.left &&
+                    (e.shiftKey ||
+                        pressedKeys["Space"] ||
+                        state.editMode === EditMode.PAN)) ||
+                mouseDown.middle
             ) {
                 const prevGridPos = this.screenToGrid(
                     ...this.prevMousePos,
@@ -137,55 +140,58 @@ export default class InteractiveGrid extends Grid {
                 );
                 this.x += newGridPos.x - prevGridPos.x;
                 this.y += newGridPos.y - prevGridPos.y;
-            } else if (state.editMode === EditMode.ERASER) {
-                gridManager.modeManager.currentInteraction =
-                    Interaction.REMOVING;
+            }
+            if (mouseDown.left) {
+                if (state.editMode === EditMode.ERASER) {
+                    gridManager.modeManager.currentInteraction =
+                        Interaction.REMOVING;
 
-                const gridPoints = this.gridPointsBetween(
-                    ...locationToTuple(
-                        this.screenToGrid(...this.prevMousePos, true)
-                    ),
-                    ...locationToTuple(
-                        this.screenToGrid(...this.mousePos, true)
-                    )
-                );
-
-                for (const gridPoint of gridPoints)
-                    this.removeTile(...locationToTuple(gridPoint));
-            } else if (state.editMode === EditMode.CURSOR) {
-                this.dragData.endLocation.screen = locationToPair(
-                    this.mousePos
-                );
-
-                this.dragData.endLocation.grid = this.screenToGrid(
-                    ...this.mousePos,
-                    true
-                );
-            } else if (state.editMode === EditMode.TILE) {
-                gridManager.modeManager.currentInteraction =
-                    Interaction.PLACING;
-
-                const gridPoints = this.gridPointsBetween(
-                    ...locationToTuple(
-                        this.screenToGrid(...this.prevMousePos, true)
-                    ),
-                    ...locationToTuple(
-                        this.screenToGrid(...this.mousePos, true)
-                    )
-                );
-
-                let prevTile: Tile | undefined = undefined;
-                for (let i = 0; i < gridPoints.length; i++) {
-                    const gridPoint = gridPoints[i];
-
-                    const newTile: Tile | undefined = this.addTile(
-                        ...locationToTuple(gridPoint),
-                        state.selectableTiles[state.selectedTileIndex],
-                        prevTile,
-                        gridPoint.direction
+                    const gridPoints = this.gridPointsBetween(
+                        ...locationToTuple(
+                            this.screenToGrid(...this.prevMousePos, true)
+                        ),
+                        ...locationToTuple(
+                            this.screenToGrid(...this.mousePos, true)
+                        )
                     );
 
-                    prevTile = newTile;
+                    for (const gridPoint of gridPoints)
+                        this.removeTile(...locationToTuple(gridPoint));
+                } else if (state.editMode === EditMode.CURSOR) {
+                    this.dragData.endLocation.screen = locationToPair(
+                        this.mousePos
+                    );
+
+                    this.dragData.endLocation.grid = this.screenToGrid(
+                        ...this.mousePos,
+                        true
+                    );
+                } else if (state.editMode === EditMode.TILE) {
+                    gridManager.modeManager.currentInteraction =
+                        Interaction.PLACING;
+
+                    const gridPoints = this.gridPointsBetween(
+                        ...locationToTuple(
+                            this.screenToGrid(...this.prevMousePos, true)
+                        ),
+                        ...locationToTuple(
+                            this.screenToGrid(...this.mousePos, true)
+                        )
+                    );
+
+                    let prevTile: Tile | undefined = undefined;
+                    for (let i = 0; i < gridPoints.length; i++) {
+                        const gridPoint = gridPoints[i];
+
+                        const newTile: Tile | undefined = this.addTile(
+                            ...locationToTuple(gridPoint),
+                            state.selectableTiles[state.selectedTileIndex],
+                            prevTile,
+                            gridPoint.direction
+                        );
+
+                        prevTile = newTile;
+                    }
                 }
             }
             this.update();
