@@ -498,20 +498,21 @@ export default class InteractiveGrid extends Grid {
         }
     };
 
-    prevHighlightTileGraphic: PIXI.Container | undefined;
+    prevHighlightTileGraphics: Array<PIXI.Container> = [];
     updateHighlightTile = () => {
         const gridScreenPos = this.screenToGrid(...this.mousePos, true, true);
         const gridPos = this.screenToGrid(...this.mousePos, true);
 
+        if (this.prevHighlightTileGraphics.length > 0) {
+            this.prevHighlightTileGraphics.forEach((x) => this.removeChild(x));
+            this.prevHighlightTileGraphics = [];
+        }
+
         if (state.editMode === EditMode.CHIP) {
-            if (this.prevHighlightTileGraphic)
-                this.removeChild(this.prevHighlightTileGraphic);
             this.hlTile.clear();
             return;
         }
 
-        if (this.prevHighlightTileGraphic)
-            this.removeChild(this.prevHighlightTileGraphic);
         if (
             state.selectedTileIndex !== -1 &&
             state.editMode === EditMode.TILE &&
@@ -528,7 +529,7 @@ export default class InteractiveGrid extends Grid {
             );
             tileGraphics.alpha = 0.5;
             this.addChild(tileGraphics);
-            this.prevHighlightTileGraphic = tileGraphics;
+            this.prevHighlightTileGraphics.push(tileGraphics);
             tempTile.updateContainer?.();
             tempTile.update(this.size);
         }
