@@ -266,6 +266,10 @@ export default class InteractiveGrid extends Grid {
                 );
                 const tile = this.getTile(...gridPoint);
                 switch (pick) {
+                    case "location": {
+                        console.log(gridPoint.join());
+                        break;
+                    }
                     case "all": {
                         console.log(tile);
                         break;
@@ -495,8 +499,6 @@ export default class InteractiveGrid extends Grid {
     };
 
     prevHighlightTileGraphic: PIXI.Container | undefined;
-    locationText = new PIXI.Text("");
-
     updateHighlightTile = () => {
         const gridScreenPos = this.screenToGrid(...this.mousePos, true, true);
         const gridPos = this.screenToGrid(...this.mousePos, true);
@@ -505,15 +507,6 @@ export default class InteractiveGrid extends Grid {
             if (this.prevHighlightTileGraphic)
                 this.removeChild(this.prevHighlightTileGraphic);
             this.hlTile.clear();
-            if (config.debugMode) {
-                this.addChild(this.locationText);
-                this.locationText.zIndex = 201;
-                this.locationText.text = locationToTuple(gridPos).join();
-                this.locationText.position.set(
-                    gridScreenPos.x,
-                    gridScreenPos.y
-                );
-            }
             return;
         }
 
@@ -549,13 +542,6 @@ export default class InteractiveGrid extends Grid {
             this.size,
             this.size
         );
-
-        if (config.debugMode) {
-            this.addChild(this.locationText);
-            this.locationText.zIndex = 201;
-            this.locationText.text = locationToTuple(gridPos).join();
-            this.locationText.position.set(gridScreenPos.x, gridScreenPos.y);
-        }
     };
 
     prevCloneChip?: {
