@@ -337,7 +337,6 @@ export default class InteractiveGrid extends Grid {
                 add(location, [structureTile.x, structureTile.y]),
                 offset
             ) as [number, number];
-            console.log({ structureTile });
             const placedTile = this.addTile(
                 ...tileLocation,
                 findType(structureTile.type) as TileType,
