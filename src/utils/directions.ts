@@ -6,6 +6,7 @@ export enum Rotation {
     CLOCKWISE = 1,
     HALF_TURN = 2,
     COUNTER_CLOCKWISE = 3,
+    FULL_TURN = 0,
 }
 
 export const rotateClockWise = (input: Rotation): Rotation => {

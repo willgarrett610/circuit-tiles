@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import state from "../../state";
 import ChipGridMode from "../../utils/chip_grid_mode";
-import { Direction } from "../../utils/directions";
+import { Direction, Rotation } from "../../utils/directions";
 import { mapObject } from "../../utils/objects";
 import ChipInputTile from "../tiles/chip_input_tile";
 import ChipOutputTile from "../tiles/chip_output_tile";
+import ChipTile from "../tiles/chip_tile";
+import IOTile from "../tiles/io_tile";
 import StructureTile from "../tiles/structure_tile";
 import { Tile } from "../tiles/tile";
 
@@ -19,12 +21,9 @@ export class Chip {
     inputTiles: { name: string; tile: ChipInputTile }[] = [];
     outputTiles: { name: string; tile: ChipOutputTile }[] = [];
     structure: {
-        [key: string]:
-            | ChipInputTile
-            | ChipOutputTile
-            | StructureTile
-            | undefined;
+        [key: string]: ChipTile | undefined;
     } = {};
+    originalChip?: Chip;
 
     /**
      * Chip constructor
@@ -89,11 +88,7 @@ export class Chip {
      * @param y y coordinate
      * @param tile
      */
-    setStructureTile(
-        x: number,
-        y: number,
-        tile: ChipInputTile | ChipOutputTile | StructureTile
-    ) {
+    setStructureTile(x: number, y: number, tile: ChipTile) {
         this.structure[`${x},${y}`] = tile;
     }
 
@@ -113,7 +108,7 @@ export class Chip {
      * @param tile Tile that was added
      */
     tileAdded(tile: Tile) {
-        if (tile instanceof ChipInputTile || tile instanceof ChipOutputTile) {
+        if (tile instanceof IOTile) {
             if (state.chipGridMode === ChipGridMode.STRUCTURING) {
                 tile.id = state.selectableTiles[state.selectedTileIndex].name;
             } else {
@@ -230,12 +225,66 @@ export class Chip {
     }
 
     /**
+     * rotate chip
+     *
+     * @param rotation how much to rotate chip
+     */
+    rotate(rotation: Rotation = Rotation.CLOCKWISE) {
+        const topLeft = this.getTopLeftStructure();
+        const newStructure: { [key: string]: ChipTile } = {};
+        for (const key of Object.keys(this.structure)) {
+            const split = key.split(",");
+            const x = parseInt(split[0]);
+            const y = parseInt(split[1]);
+            const newX = x - topLeft[1];
+            const newY = y - topLeft[0];
+
+            const prevTile = this.structure[key];
+            if (!prevTile) continue;
+
+            switch (rotation) {
+                case Rotation.CLOCKWISE: {
+                    newStructure[`${newY},${-newX}`] = prevTile;
+                    prevTile.x = newY;
+                    prevTile.y = -newX;
+
+                    break;
+                }
+                case Rotation.HALF_TURN: {
+                    newStructure[`${-newX},${-newY}`] = prevTile;
+                    prevTile.x = -newX;
+                    prevTile.y = -newY;
+
+                    break;
+                }
+                case Rotation.COUNTER_CLOCKWISE: {
+                    newStructure[`${-newY},${newX}`] = prevTile;
+                    prevTile.x = -newY;
+                    prevTile.y = newX;
+
+                    break;
+                }
+                case Rotation.NORMAL: {
+                    newStructure[`${newX},${newY}`] = prevTile;
+                    prevTile.x = newX;
+                    prevTile.y = newY;
+
+                    break;
+                }
+            }
+        }
+        this.structure = newStructure;
+    }
+
+    /**
      * Clone chip
      *
+     * @param noteOriginal for when cloning for a structure change
      * @returns cloned chip
      */
-    clone() {
+    clone(noteOriginal: boolean = false) {
         const newChip = new Chip(this.name, this.color, this.hue);
+        if (noteOriginal) newChip.originalChip = this.originalChip || this;
         newChip.tiles = mapObject(this.tiles, (tile) => tile?.clone());
         newChip.structure = mapObject(
             this.structure,

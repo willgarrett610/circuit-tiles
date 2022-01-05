@@ -441,6 +441,9 @@ export default class Grid extends PIXI.Container {
                 newTile.setConnection("right", false);
             }
 
+            const interacting = this.historyManager.isInteracting();
+            if (!interacting) this.historyManager.beginInteraction();
+
             if (newTile.rotatable || tile.hasConnections()) {
                 this.historyManager.performAction(editTile, {
                     x,
@@ -481,6 +484,7 @@ export default class Grid extends PIXI.Container {
             }
 
             this.handleForceConnection(tile.x, tile.y);
+            if (!interacting) this.historyManager.endInteraction();
         }
     }
 
