@@ -302,10 +302,13 @@ export default class InteractiveGrid extends Grid {
     /**
      * places a chip on the grid at a specified location
      *
-     * @param chip
+     * @param originalChip
      * @param location
      */
-    placeChip(chip: Chip, location: [number, number]) {
+    placeChip(originalChip: Chip, location: [number, number]) {
+        const chip = originalChip.clone(true);
+        chip.rotate(state.chipPlacementRotation);
+
         if (!this.isValidChipPlacement(location, chip)) return;
         const structure = chip.structure;
         const structureTiles = Object.values(structure);
@@ -557,8 +560,11 @@ export default class InteractiveGrid extends Grid {
         const gridPos = locationToTuple(
             this.screenToGrid(...this.mousePos, true)
         );
-        const chip = state.chips[state.selectedTileIndex];
-        if (!chip) return;
+        const selectedChip = state.chips[state.selectedTileIndex];
+
+        if (!selectedChip) return;
+        const chip = selectedChip.clone(true);
+        chip.rotate(state.chipPlacementRotation);
 
         const valid = this.isValidChipPlacement(gridPos, chip);
         const structure = chip.structure;
