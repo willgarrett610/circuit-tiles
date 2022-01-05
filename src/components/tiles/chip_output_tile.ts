@@ -91,6 +91,7 @@ export default class ChipOutputTile extends IOTile {
      * @param tile Old tile
      */
     createClone(tile: ChipOutputTile): void {
+        super.createClone(tile);
         this.hue = tile.hue;
     }
 }

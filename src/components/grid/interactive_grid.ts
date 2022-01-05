@@ -337,6 +337,7 @@ export default class InteractiveGrid extends Grid {
                 add(location, [structureTile.x, structureTile.y]),
                 offset
             ) as [number, number];
+            console.log({ structureTile });
             const placedTile = this.addTile(
                 ...tileLocation,
                 findType(structureTile.type) as TileType,
@@ -345,12 +346,15 @@ export default class InteractiveGrid extends Grid {
             ) as ChipTile | undefined;
 
             if (placedTile) {
+                if (placedTile instanceof ChipOutputTile)
+                    placedTile.hue = (structureTile as ChipOutputTile).hue;
                 placedTile.id = structureTile.id;
                 placedTile.chip = placedChip;
                 placedChip.setTile(...tileLocation, placedTile);
                 if (placedTile instanceof IOTile) {
                     placedTile.generateText();
                 }
+                placedTile.updateContainer();
             }
         }
         this.historyManager.endInteraction();
