@@ -5,8 +5,6 @@ import CircuitLocation from "../../logic/circuit_location";
 import LogicNode from "../../logic/node";
 import { createTextInput } from "../../menus/text_input";
 import state from "../../state";
-import { displayContextMenu } from "../../utils/context_menu";
-import { CMouseEvent } from "../../utils/event";
 import ChipInputTile from "./chip_input_tile";
 import ChipOutputTile from "./chip_output_tile";
 import ChipTile from "./chip_tile";
@@ -27,66 +25,56 @@ export default abstract class IOTile extends ChipTile {
     abstract chipTileKey: "inputTiles" | "outputTiles";
 
     /**
-     * display context menu for io tile
-     *
-     * @param e Mouse event
+     * Open menu to rename this tile
      */
-    onContext = (e: CMouseEvent) => {
-        if (this.forGraphicOnly) return;
-        displayContextMenu(e.pageX, e.pageY, "ioTile").then((name) => {
-            if (name === "rename") {
-                const close = createTextInput({
-                    title: "Rename",
-                    label: "Enter new name",
-                    value: this.id,
-                    placeholder: "Chip name",
-                    verify: (value) => {
-                        value = value.trim();
-                        if (value === this.id) return true;
-                        return (
-                            state.currentChipGrid !== undefined &&
-                            !Object.values(
-                                state.currentChipGrid?.chip.tiles
-                            ).find(
-                                (v) => v instanceof this.type && v.id === value
-                            ) &&
-                            value.length > 0 &&
-                            value.length <= 6
-                        );
-                    },
-                    onSubmit: (value) => {
-                        if (!state.currentChipGrid) return;
+    openRenameMenu(): void {
+        const close = createTextInput({
+            title: "Rename",
+            label: "Enter new name",
+            value: this.id,
+            placeholder: "Chip name",
+            verify: (value) => {
+                value = value.trim();
+                if (value === this.id) return true;
+                return (
+                    state.currentChipGrid !== undefined &&
+                    !Object.values(state.currentChipGrid?.chip.tiles).find(
+                        (v) => v instanceof this.type && v.id === value
+                    ) &&
+                    value.length > 0 &&
+                    value.length <= 6
+                );
+            },
+            onSubmit: (value) => {
+                if (!state.currentChipGrid) return;
 
-                        value = value.trim();
+                value = value.trim();
 
-                        const inputTileE = (
-                            state.currentChipGrid?.chip[this.chipTileKey] as any
-                        ).find(
-                            (value: { name: string; tile: IOTile }) =>
-                                value.name === this.id
-                        );
-                        const inputTileS = Object.values(
-                            state.currentChipGrid.chip.structure
-                        ).find(
-                            (value) =>
-                                value instanceof this.type &&
-                                value.id === this.id
-                        ) as IOTile;
-                        if (inputTileE) {
-                            inputTileE.tile.id = value;
-                            inputTileE.name = value;
-                            inputTileE.tile.generateText();
-                        }
-                        if (inputTileS) {
-                            inputTileS.id = value;
-                            inputTileS.generateText();
-                        }
-                        close();
-                    },
-                });
-            }
+                const inputTileE = (
+                    state.currentChipGrid?.chip[this.chipTileKey] as any
+                ).find(
+                    (value: { name: string; tile: IOTile }) =>
+                        value.name === this.id
+                );
+                const inputTileS = Object.values(
+                    state.currentChipGrid.chip.structure
+                ).find(
+                    (value) =>
+                        value instanceof this.type && value.id === this.id
+                ) as IOTile;
+                if (inputTileE) {
+                    inputTileE.tile.id = value;
+                    inputTileE.name = value;
+                    inputTileE.tile.generateText();
+                }
+                if (inputTileS) {
+                    inputTileS.id = value;
+                    inputTileS.generateText();
+                }
+                close();
+            },
         });
-    };
+    }
 
     /**
      * convert tile to node

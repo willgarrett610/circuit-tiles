@@ -1,4 +1,7 @@
 import config from "../../config";
+import state from "../../state";
+import { displayContextMenu } from "../../utils/context_menu";
+import { CMouseEvent } from "../../utils/event";
 import ButtonTile from "./button_tile";
 import IOTile from "./io_tile";
 import LeverTile from "./lever_tile";
@@ -19,6 +22,20 @@ export default class ChipInputTile extends IOTile {
     label: string = "Input";
 
     chipTileKey: "inputTiles" = "inputTiles";
+
+    /**
+     * display context menu for io tile
+     *
+     * @param e Mouse event
+     */
+    onContext = (e: CMouseEvent) => {
+        if (this.forGraphicOnly || !state.chipEditor) return;
+        displayContextMenu(e.pageX, e.pageY, "inputTile").then((name) => {
+            if (name === "rename") {
+                this.openRenameMenu();
+            }
+        });
+    };
 
     /**
      * Set extra input tile

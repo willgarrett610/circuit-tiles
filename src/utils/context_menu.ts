@@ -19,7 +19,10 @@ export const contextMenus = {
         edit: "Edit",
         duplicate: "Duplicate",
     },
-    ioTile: {
+    inputTile: {
+        rename: "Rename",
+    },
+    outputTile: {
         rename: "Rename",
         recolor: "Recolor",
     },
