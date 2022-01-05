@@ -6,6 +6,7 @@ import DelayTile from "./delay_tile";
 import DiodeTile from "./diode_tile";
 import LeverTile from "./lever_tile";
 import NotTile from "./not_tile";
+import StructureTile from "./structure_tile";
 import { Tile } from "./tile";
 import WireTile from "./wire_tile";
 
@@ -44,6 +45,7 @@ const tileTypes = [
  * @returns Full tile type
  */
 export function findType(type: TileConstructor) {
+    if (type === StructureTile) return { name: "Block", tile: type };
     return tileTypes.find((tile) => tile.tile === type);
 }
 
