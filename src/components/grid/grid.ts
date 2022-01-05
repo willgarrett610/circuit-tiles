@@ -18,6 +18,8 @@ import { deleteChip } from "../../history/chip_actions";
 import ChipInputTile from "../tiles/chip_input_tile";
 import ButtonTile from "../tiles/button_tile";
 import LeverTile from "../tiles/lever_tile";
+import ChipOutputTile from "../tiles/chip_output_tile";
+import { ChipOutputTileType, TileType } from "../tiles/tile_types";
 
 interface GridHandlers {
     postAddTile: ((payload: Tile) => void)[];
@@ -288,17 +290,15 @@ export default class Grid extends PIXI.Container {
      *
      * @param x x location of tile
      * @param y y location of tile
-     * @param tile tile to add
+     * @param type tile to add
      * @param prevTile last tile added
      * @param direction direction of placement
      * @returns tile if add was successful, undefined otherwise
      */
-    addTile<T extends Tile>(
+    addTile(
         x: number,
         y: number,
-        tile: {
-            new (x: number, y: number): T;
-        },
+        type: TileType,
         prevTile: Tile | undefined,
         direction: Direction | undefined
     ): Tile | undefined {
@@ -306,7 +306,7 @@ export default class Grid extends PIXI.Container {
         if (tileAtLocation) {
             if (!this.historyManager.interacting)
                 this.historyManager.beginInteraction();
-            const extraTile = new tile(x, y);
+            const extraTile = new type.tile(x, y);
             if (
                 tileAtLocation instanceof ChipInputTile &&
                 !tileAtLocation.extraInputTile &&
@@ -337,7 +337,11 @@ export default class Grid extends PIXI.Container {
             return this.getTile(x, y);
         }
 
-        const tileObj = new tile(x, y);
+        const tileObj = new type.tile(x, y);
+
+        if (tileObj instanceof ChipOutputTile) {
+            tileObj.hue = (type as ChipOutputTileType).hue;
+        }
 
         const interacting = this.historyManager.isInteracting();
         if (!interacting) this.historyManager.beginInteraction();

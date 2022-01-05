@@ -1,3 +1,4 @@
+import config from "../../config";
 import ButtonTile from "./button_tile";
 import ChipInputTile from "./chip_input_tile";
 import ChipOutputTile from "./chip_output_tile";
@@ -17,6 +18,10 @@ export interface TileType {
     tile: TileConstructor;
 }
 
+export interface ChipOutputTileType extends TileType {
+    hue: number;
+}
+
 const tileTypes = [
     { name: "Wire", tile: WireTile },
     { name: "Lever", tile: LeverTile },
@@ -25,8 +30,22 @@ const tileTypes = [
     { name: "Delay", tile: DelayTile },
     { name: "Button", tile: ButtonTile },
     { name: "Input", tile: ChipInputTile },
-    { name: "Output", tile: ChipOutputTile },
+    {
+        name: "Output",
+        tile: ChipOutputTile,
+        hue: config.colors.defaultOutputHue,
+    },
 ];
+
+/**
+ * Find tile type by constructor
+ *
+ * @param type The tile constructor
+ * @returns Full tile type
+ */
+export function findType(type: TileConstructor) {
+    return tileTypes.find((tile) => tile.tile === type);
+}
 
 /**
  * Get tile types
@@ -34,7 +53,7 @@ const tileTypes = [
  * @param chipTileIncluded whether to include chip tiles
  * @returns list of tile types
  */
-function getTileTypes(chipTileIncluded = true): TileType[] {
+export function getTileTypes(chipTileIncluded = true): TileType[] {
     return chipTileIncluded
         ? tileTypes
         : tileTypes.filter((x) => x.tile.chipTile === false);

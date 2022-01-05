@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as PIXI from "pixi.js";
 
 import { gridManager } from "../..";
@@ -24,9 +25,11 @@ import {
 import { add, sub } from "../../utils/math";
 import { Chip } from "../chip/chip";
 import { PlacedChip } from "../chip/placed_chip";
+import ChipOutputTile from "../tiles/chip_output_tile";
 import ChipTile from "../tiles/chip_tile";
 import IOTile from "../tiles/io_tile";
 import { Tile } from "../tiles/tile";
+import { findType, TileType } from "../tiles/tile_types";
 import Grid from "./grid";
 
 /**
@@ -177,7 +180,7 @@ export default class InteractiveGrid extends Grid {
 
                     const newTile: Tile | undefined = this.addTile(
                         ...locationToTuple(gridPoint),
-                        state.selectableTiles[state.selectedTileIndex].tile,
+                        state.selectableTiles[state.selectedTileIndex],
                         prevTile,
                         gridPoint.direction
                     );
@@ -225,7 +228,7 @@ export default class InteractiveGrid extends Grid {
 
                 this.addTile(
                     ...gridPoint,
-                    state.selectableTiles[state.selectedTileIndex].tile,
+                    state.selectableTiles[state.selectedTileIndex],
                     undefined,
                     undefined
                 );
@@ -336,7 +339,7 @@ export default class InteractiveGrid extends Grid {
             ) as [number, number];
             const placedTile = this.addTile(
                 ...tileLocation,
-                structureTile.type,
+                findType(structureTile.type) as TileType,
                 undefined,
                 undefined
             ) as ChipTile | undefined;
@@ -512,9 +515,11 @@ export default class InteractiveGrid extends Grid {
             state.editMode === EditMode.TILE &&
             this.getTile(...locationToTuple(gridPos)) === undefined
         ) {
-            const tempTile = new state.selectableTiles[
-                state.selectedTileIndex
-            ].tile(...locationToTuple(gridPos));
+            const tileType = state.selectableTiles[state.selectedTileIndex];
+            const tempTile = new tileType.tile(...locationToTuple(gridPos));
+            if ("hue" in tileType) {
+                (tempTile as ChipOutputTile).hue = (tileType as any).hue;
+            }
             tempTile.forGraphicOnly = true;
             const tileGraphics: PIXI.Container = tempTile.getContainer(
                 this.size

@@ -7,8 +7,12 @@ import state, {
 } from "../../../state";
 import { height } from "../../../utils";
 import ChipGridMode from "../../../utils/chip_grid_mode";
+import ChipOutputTile from "../../tiles/chip_output_tile";
 import StructureTile from "../../tiles/structure_tile";
-import getTileTypes, { TileType } from "../../tiles/tile_types";
+import getTileTypes, {
+    ChipOutputTileType,
+    TileType,
+} from "../../tiles/tile_types";
 import SelectorMenu from "../component/selector_menu";
 
 /**
@@ -32,6 +36,14 @@ export default class TileSelector extends SelectorMenu {
 
                 const tileOn = new tileType(0, 0);
                 const tileOff = new tileType(0, 0);
+
+                if (tileOn instanceof ChipOutputTile) {
+                    const outputType = state.selectableTiles[
+                        i
+                    ] as ChipOutputTileType;
+                    tileOn.hue = outputType.hue;
+                    (tileOff as ChipOutputTile).hue = outputType.hue;
+                }
 
                 tileOn.forGraphicOnly = true;
                 tileOff.forGraphicOnly = true;
@@ -87,6 +99,10 @@ export default class TileSelector extends SelectorMenu {
                                     .map(({ name, tile }) => ({
                                         name,
                                         tile: tile.type,
+                                        hue:
+                                            tile instanceof ChipOutputTile
+                                                ? tile.hue
+                                                : undefined,
                                     }));
 
                                 value.push(...selectableTiles, {
