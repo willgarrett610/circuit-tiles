@@ -250,7 +250,7 @@ export default class InteractiveGrid extends Grid {
      * @param e
      */
     onContext = (e: CMouseEvent) => {
-        if (config.debugMode)
+        if (config.debugMode && state.editMode === EditMode.CURSOR)
             displayContextMenu(e.pageX, e.pageY, "debugTile").then((pick) => {
                 const gridPoint = locationToTuple(
                     this.screenToGrid(...this.mousePos, true)
@@ -364,7 +364,7 @@ export default class InteractiveGrid extends Grid {
         if (
             (state.chipEditor &&
                 state.chipGridMode === ChipGridMode.STRUCTURING) ||
-            !chip.isStructured()
+            !chip?.originalChip?.wasStructured
         )
             return false;
         const structureOffset = chip.getTopLeftStructure();
@@ -544,6 +544,10 @@ export default class InteractiveGrid extends Grid {
         }
     };
 
+    prevCloneChip?: {
+        chip: Chip;
+        rotation: Rotation;
+    };
     updateChipOutline = () => {
         // check if the tile has a tile on each side, if it doesn't on a side put a line there,
         // if there is a missing tile on two sides that are next to each other put a corner square
@@ -552,7 +556,7 @@ export default class InteractiveGrid extends Grid {
             state.editMode !== EditMode.CHIP ||
             (state.chipEditor &&
                 state.chipGridMode === ChipGridMode.STRUCTURING) ||
-            !state.chips?.[state.selectedTileIndex]?.isStructured?.()
+            !state.chips?.[state.selectedTileIndex]?.wasStructured
         ) {
             this.chipOutlineGraphics.clear();
             return;
@@ -563,9 +567,21 @@ export default class InteractiveGrid extends Grid {
         const selectedChip = state.chips[state.selectedTileIndex];
 
         if (!selectedChip) return;
-        const chip = selectedChip.clone(true);
-        chip.rotate(state.chipPlacementRotation);
-
+        let chip: Chip;
+        if (
+            this.prevCloneChip &&
+            this.prevCloneChip.chip.originalChip === selectedChip &&
+            this.prevCloneChip.rotation === state.chipPlacementRotation
+        ) {
+            chip = this.prevCloneChip.chip;
+        } else {
+            chip = selectedChip.clone(true);
+            chip.rotate(state.chipPlacementRotation);
+            this.prevCloneChip = {
+                chip,
+                rotation: state.chipPlacementRotation,
+            };
+        }
         const valid = this.isValidChipPlacement(gridPos, chip);
         const structure = chip.structure;
         const structureTiles = Object.values(structure);
