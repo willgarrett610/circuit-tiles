@@ -160,6 +160,8 @@ export class Chip {
         }
     }
 
+    wasStructured = false;
+
     /**
      * checks if the chip has had it structure using all tiles and non-disjoint
      *
@@ -171,14 +173,19 @@ export class Chip {
                 (tile) => !(tile instanceof StructureTile)
             ).length !==
             this.inputTiles.length + this.outputTiles.length
-        )
+        ) {
+            this.wasStructured = false;
             return false;
+        }
 
         const tile = Object.values(this.structure).find(
             (tile) => tile instanceof Tile
         );
 
-        if (!tile) return true;
+        if (!tile) {
+            this.wasStructured = true;
+            return true;
+        }
 
         let tilesLeft = Object.values(this.structure).filter((x) => x !== tile);
 
@@ -198,8 +205,12 @@ export class Chip {
                 }
             }
         };
+
         isJoint(tile);
-        return tilesLeft.length === 0;
+        const output = tilesLeft.length === 0;
+        this.wasStructured = output;
+
+        return output;
     }
 
     /**
