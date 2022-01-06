@@ -1,102 +1,171 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import Grid from "../components/grid/grid";
+import IOTile from "../components/tiles/io_tile";
 import { ConnectionType, Tile } from "../components/tiles/tile";
 import CircuitLocation from "./circuit_location";
 import LogicNode from "./node";
+
+type LogicTile = {
+    tile: Tile;
+    node: LogicNode;
+};
 
 /**
  * Graph to hold logic nodes.
  */
 export default class Graph {
     nodes: LogicNode[] = []; // consider changing to a map where the key is the tile
+    scopes: string[][] = [];
+    logicTiles: { [key: string]: LogicTile | undefined } = {};
+
+    getLogicTile = (x: number, y: number) => {
+        return this.logicTiles[`${x},${y}`];
+    };
+
+    setLogicTile = (x: number, y: number, tile: LogicTile) => {
+        this.logicTiles[`${x},${y}`] = tile;
+    };
+
+    getTile = (
+        x: number,
+        y: number,
+        tiles: { [key: string]: Tile | undefined }
+    ) => {
+        return tiles[`${x},${y}`];
+    };
+
+    /**
+     * Checks if the given scope exists
+     *
+     * @param scope
+     * @returns true if scope exists
+     */
+    scopeExists(scope: string[]) {
+        for (const scopeArray of this.scopes) {
+            let match = true;
+            for (let i = 0; i < scope.length; i++) {
+                if (scopeArray[i] !== scope[i]) {
+                    match = false;
+                    break;
+                }
+            }
+            if (match) return true;
+        }
+    }
+
+    /**
+     * Adds nodes from the grid to this graph and recursively traverses chips
+     *
+     * @param tiles
+     * @param scope
+     */
+    addTiles(tiles: { [key: string]: Tile | undefined }, scope: string[]) {
+        // If the given scope already has been added
+        if (this.scopeExists(scope)) return;
+
+        this.scopes.push(scope);
+
+        for (const tile of Object.values(tiles)) {
+            if (!tile || (tile instanceof IOTile && !tile.chip)) continue;
+            if (tile.isNode && tile.toNode) {
+                // handle chip input / output tiles such that it leads to the chip's corresponding logic node
+                const node = tile.toNode(scope);
+                if (tile instanceof IOTile) {
+                    const chip = tile.chip;
+                    if (chip) {
+                        const chipTile = chip.chip.getTileById(
+                            tile.id,
+                            tile.type
+                        );
+                        if (chipTile) {
+                            node.locations.push(
+                                new CircuitLocation(
+                                    [...scope, chip.scopeName],
+                                    chipTile.x,
+                                    chipTile.y
+                                )
+                            );
+                            this.addTiles(chip.chip.tiles, [
+                                ...scope,
+                                chip.scopeName,
+                            ]);
+                        }
+                    }
+                }
+                this.nodes.push(node);
+                this.setLogicTile(tile.x, tile.y, { tile, node: node });
+            } else if (tile.isWire) {
+                // handle wire tiles
+                if (!this.getLogicTile(tile.x, tile.y))
+                    this.nodes.push(this.createLogicEdge(tiles, tile));
+            }
+        }
+    }
+
+    createLogicEdge = (
+        tiles: { [key: string]: Tile | undefined },
+        initialTile: Tile
+    ) => {
+        const logicEdge = new LogicNode("Or Wire", 0);
+
+        const findEdge = (tile: Tile): CircuitLocation[] => {
+            if (!tile.isWire) return [];
+            const edgeLocations = [
+                new CircuitLocation("global", tile.x, tile.y),
+            ];
+
+            this.setLogicTile(tile.x, tile.y, { tile, node: logicEdge });
+
+            const connections = tile.getConnections();
+            const connectionOffsets: {
+                offset: number[];
+                side: "up" | "right" | "down" | "left";
+            }[] = [
+                { offset: [1, 0], side: "right" },
+                { offset: [-1, 0], side: "left" },
+                { offset: [0, 1], side: "down" },
+                { offset: [0, -1], side: "up" },
+            ];
+
+            for (const connectionOffset of connectionOffsets) {
+                if (!connections[connectionOffset.side]) continue;
+                const connectedTile = this.getTile(
+                    tile.x + connectionOffset.offset[0],
+                    tile.y + connectionOffset.offset[1],
+                    tiles
+                );
+                if (
+                    !connectedTile ||
+                    this.getLogicTile(
+                        tile.x + connectionOffset.offset[0],
+                        tile.y + connectionOffset.offset[1]
+                    )
+                )
+                    continue;
+                edgeLocations.push(...findEdge(connectedTile));
+            }
+
+            return edgeLocations;
+        };
+
+        logicEdge.locations = findEdge(initialTile);
+        return logicEdge;
+    };
 
     /**
      * Generate graph from a grid
      *
-     * @param tiles
+     * @param grid
      * @returns graph
      */
-    static genFromTiles(tiles: { [key: string]: Tile | undefined }) {
-        const getTile = (x: number, y: number) => {
-            return tiles[`${x},${y}`];
-        };
-
+    static genFromGrid(grid: Grid) {
         const graph = new Graph();
-        type LogicTile = {
-            tile: Tile;
-            node: LogicNode;
-        };
-        const logicTiles: { [key: string]: LogicTile | undefined } = {};
-
-        const getLogicTile = (x: number, y: number) => {
-            return logicTiles[`${x},${y}`];
-        };
-
-        const setLogicTile = (x: number, y: number, tile: LogicTile) => {
-            logicTiles[`${x},${y}`] = tile;
-        };
-
-        const createLogicEdge = (initialTile: Tile) => {
-            const logicEdge = new LogicNode("Or Wire", 0);
-
-            const findEdge = (tile: Tile): CircuitLocation[] => {
-                if (!tile.isWire) return [];
-                const edgeLocations = [
-                    new CircuitLocation("global", tile.x, tile.y),
-                ];
-
-                setLogicTile(tile.x, tile.y, { tile, node: logicEdge });
-
-                const connections = tile.getConnections();
-                const connectionOffsets: {
-                    offset: number[];
-                    side: "up" | "right" | "down" | "left";
-                }[] = [
-                    { offset: [1, 0], side: "right" },
-                    { offset: [-1, 0], side: "left" },
-                    { offset: [0, 1], side: "down" },
-                    { offset: [0, -1], side: "up" },
-                ];
-
-                for (const connectionOffset of connectionOffsets) {
-                    if (!connections[connectionOffset.side]) continue;
-                    const connectedTile = getTile(
-                        tile.x + connectionOffset.offset[0],
-                        tile.y + connectionOffset.offset[1]
-                    );
-                    if (
-                        !connectedTile ||
-                        getLogicTile(
-                            tile.x + connectionOffset.offset[0],
-                            tile.y + connectionOffset.offset[1]
-                        )
-                    )
-                        continue;
-                    edgeLocations.push(...findEdge(connectedTile));
-                }
-
-                return edgeLocations;
-            };
-
-            logicEdge.locations = findEdge(initialTile);
-            return logicEdge;
-        };
 
         // initially create all logic nodes
-        for (const tile of Object.values(tiles)) {
-            if (!tile) continue;
-            if (tile.isNode && tile.toNode) {
-                // handle chip input / output tiles such that it leads to the chip's corresponding logic node
-                const node = tile.toNode("global");
-                graph.nodes.push(node);
-                setLogicTile(tile.x, tile.y, { tile, node: node });
-            } else if (tile.isWire) {
-                // handle wire tiles
-                if (!getLogicTile(tile.x, tile.y))
-                    graph.nodes.push(createLogicEdge(tile));
-            }
-        }
+        graph.addTiles(grid.tiles, ["global"]);
 
         // connect all the logic nodes
-        for (const logicTile of Object.values(logicTiles)) {
+        for (const logicTile of Object.values(graph.logicTiles)) {
             if (!logicTile) continue;
             const connections = logicTile.tile.getConnections();
             const connectionsTemplate = logicTile.tile.getConnectionTemplate();
@@ -116,7 +185,7 @@ export default class Graph {
 
                 for (const connectionOffset of connectionOffsets) {
                     if (!connections[connectionOffset.side]) continue;
-                    const connectedTile = getLogicTile(
+                    const connectedTile = graph.getLogicTile(
                         logicTile.tile.x + connectionOffset.offset[0],
                         logicTile.tile.y + connectionOffset.offset[1]
                     );

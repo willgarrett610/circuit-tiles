@@ -15,6 +15,7 @@ export class PlacedChip {
     chip: Chip;
     tiles: { [key: string]: ChipTile | undefined } = {};
     grid: Grid;
+    scopeName: string;
 
     /**
      * construct placed chip
@@ -36,6 +37,11 @@ export class PlacedChip {
         this.rotation = rotation;
         this.chip = chip;
         this.grid = grid;
+
+        let i = 1;
+        do {
+            this.scopeName = this.chip.name + i++;
+        } while (this.grid.chips.find((c) => c.scopeName === this.scopeName));
 
         const originalChip = chip.originalChip ? chip.originalChip : chip;
         originalChip.placedChips.add(this);

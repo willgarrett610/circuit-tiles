@@ -55,6 +55,19 @@ export class Chip {
     }
 
     /**
+     * Get a tile by its id
+     *
+     * @param id id of the tile
+     * @param type type of thet tile
+     * @returns tile with the id
+     */
+    getTileById(id: string, type: typeof ChipTile): ChipTile | undefined {
+        return Object.values(this.tiles).find(
+            (value) => value instanceof type && value.id === id
+        ) as ChipTile | undefined;
+    }
+
+    /**
      * set tile at location
      *
      * @param x x coordinate

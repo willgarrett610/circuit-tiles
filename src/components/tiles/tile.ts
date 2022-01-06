@@ -100,7 +100,7 @@ export abstract class Tile {
         };
     }
 
-    toNode?(scope: string): LogicNode;
+    toNode?(scope: string[]): LogicNode;
 
     /**
      * get connections

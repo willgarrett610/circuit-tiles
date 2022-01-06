@@ -43,7 +43,7 @@ export default class DelayTile extends GraphicsTile {
      * @param scope scope
      * @returns Logic node
      */
-    toNode(scope: string): LogicNode {
+    toNode(scope: string[]): LogicNode {
         const logicNode = new LogicNode(
             this.label,
             this.typeNumber,

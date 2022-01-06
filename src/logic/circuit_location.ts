@@ -5,7 +5,6 @@ export default class CircuitLocation {
     scope;
     x;
     y;
-    child;
 
     /**
      * construct circuit location
@@ -13,12 +12,10 @@ export default class CircuitLocation {
      * @param scope circuit scope
      * @param x x location of chip
      * @param y y location of chip
-     * @param child child location of chip
      */
-    constructor(scope: string, x: number, y: number, child?: CircuitLocation) {
-        this.scope = scope;
+    constructor(scope: string[] | string, x: number, y: number) {
+        this.scope = scope instanceof Array ? scope : [scope];
         this.x = x;
         this.y = y;
-        this.child = child;
     }
 }

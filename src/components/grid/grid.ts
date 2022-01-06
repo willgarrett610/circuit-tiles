@@ -661,7 +661,7 @@ export default class Grid extends PIXI.Container {
     }
 
     convertToGraph = () => {
-        return Graph.genFromTiles(this.tiles);
+        return Graph.genFromGrid(this);
     };
 
     gridPointsBetween = (x0: number, y0: number, x1: number, y1: number) => {
