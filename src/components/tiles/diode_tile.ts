@@ -7,6 +7,7 @@ import { ConnectionType, GraphicsTile } from "./tile";
 /** diode tile */
 export default class DiodeTile extends GraphicsTile {
     type = DiodeTile;
+    typeNumber = 2;
     label: string = "Diode";
 
     connectionTemplate = {
@@ -31,12 +32,14 @@ export default class DiodeTile extends GraphicsTile {
     /**
      * convert tile to node
      *
+     * @param scope scope
      * @returns Logic node
      */
-    toNode(): LogicNode {
+    toNode(scope: string): LogicNode {
         const logicNode = new LogicNode(
             this.label,
-            [new CircuitLocation("global", this.x, this.y)],
+            this.typeNumber,
+            [new CircuitLocation(scope, this.x, this.y)],
             this
         );
         logicNode.state = this.signalActive;

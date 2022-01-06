@@ -10,7 +10,7 @@ export default class LogicNode {
     outputs: Set<LogicNode> = new Set();
     originTile: Tile | undefined;
     state: boolean = false;
-    type: number = 0;
+    type: number = -1;
     /** all the locations to set the signal active value on */
     locations: CircuitLocation[];
 
@@ -18,16 +18,19 @@ export default class LogicNode {
      * constructs logic node
      *
      * @param name name of the node
+     * @param type type of node
      * @param locations locations of tile
      * @param originTile tile of origin
      */
     constructor(
         name: string,
+        type: number,
         locations: CircuitLocation[] = [],
         originTile?: Tile
     ) {
         this.name = name;
         this.locations = locations;
+        this.type = type;
         this.originTile = originTile;
     }
 

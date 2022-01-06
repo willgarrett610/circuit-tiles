@@ -10,12 +10,15 @@ import { ConnectionType } from "./tile";
 /** chip output tile */
 export default class ChipOutputTile extends IOTile {
     type = ChipOutputTile;
+    typeNumber = 6;
     connectionTemplate = {
         up: ConnectionType.OUTPUT,
         down: ConnectionType.OUTPUT,
         left: ConnectionType.OUTPUT,
         right: ConnectionType.OUTPUT,
     };
+
+    isNode: boolean = true;
 
     label: string = "Output";
 

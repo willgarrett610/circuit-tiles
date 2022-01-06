@@ -7,6 +7,7 @@ import { ConnectionType, GraphicsTile } from "./tile";
 /** not tile */
 export default class NotTile extends GraphicsTile {
     type = NotTile;
+    typeNumber = 1;
     label: string = "NOT Gate";
 
     connectionTemplate = {
@@ -30,12 +31,14 @@ export default class NotTile extends GraphicsTile {
     /**
      * convert tile to node
      *
+     * @param scope scope
      * @returns Logic node
      */
-    toNode(): LogicNode {
+    toNode(scope: string): LogicNode {
         const logicNode = new LogicNode(
             this.label,
-            [new CircuitLocation("global", this.x, this.y)],
+            this.typeNumber,
+            [new CircuitLocation(scope, this.x, this.y)],
             this
         );
         logicNode.state = this.signalActive;

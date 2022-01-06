@@ -10,12 +10,15 @@ import { ConnectionType } from "./tile";
 /** chip input tile */
 export default class ChipInputTile extends IOTile {
     type = ChipInputTile;
+    typeNumber = 7;
     connectionTemplate = {
         up: ConnectionType.INPUT,
         down: ConnectionType.INPUT,
         left: ConnectionType.INPUT,
         right: ConnectionType.INPUT,
     };
+
+    isNode: boolean = true;
 
     extraInputTile?: ButtonTile | LeverTile;
 

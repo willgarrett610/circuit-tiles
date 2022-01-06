@@ -6,6 +6,7 @@ import { ConnectionType, GraphicsTile } from "./tile";
  */
 export default class WireTile extends GraphicsTile {
     type = WireTile;
+    typeNumber = 0;
     label = "Wire";
 
     isWire = true;

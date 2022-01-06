@@ -14,6 +14,7 @@ export enum ConnectionType {
 export abstract class Tile {
     static chipTile = false;
     abstract type: typeof Tile;
+    typeNumber: number = -1;
 
     copyProps = ["connections", "label", "x", "y", "direction", "signalActive"];
     isNode = false;
@@ -99,7 +100,7 @@ export abstract class Tile {
         };
     }
 
-    toNode?(): LogicNode;
+    toNode?(scope: string): LogicNode;
 
     /**
      * get connections
