@@ -345,7 +345,7 @@ export default class InteractiveGrid extends Grid {
 
         this.historyManager.beginInteraction();
         const placedChip = new PlacedChip(
-            locationToPair(offset),
+            locationToPair(location),
             Rotation.NORMAL,
             chip,
             this

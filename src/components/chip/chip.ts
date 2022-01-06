@@ -5,6 +5,7 @@ import ChipGridMode from "../../utils/chip_grid_mode";
 import { Direction, Rotation } from "../../utils/directions";
 import { add, sub } from "../../utils/math";
 import { mapObject } from "../../utils/objects";
+import InteractiveGrid from "../grid/interactive_grid";
 import ChipInputTile from "../tiles/chip_input_tile";
 import ChipOutputTile from "../tiles/chip_output_tile";
 import ChipTile from "../tiles/chip_tile";
@@ -192,8 +193,8 @@ export class Chip {
         //     const x = parseInt(split[0]);
         //     const y = parseInt(split[1]);
         // }
-        console.log("structure tile added", { tile });
         const offset = sub(locationToTuple(tile), this.getTopLeftStructure());
+        let clashes = false;
         for (const placedChip of this.placedChips) {
             const grid = placedChip.grid;
             console.log({
@@ -203,14 +204,34 @@ export class Chip {
                 offset,
                 loc: add(locationToTuple(placedChip.location), offset),
             });
-            console.log(
-                grid.getTile(
-                    ...(add(locationToTuple(placedChip.location), offset) as [
-                        number,
-                        number
-                    ])
-                )
+
+            const gridLocation = add(
+                locationToTuple(placedChip.location),
+                offset
+            ) as [number, number];
+            const tile = grid.getTile(...gridLocation);
+            if (tile) {
+                clashes = true;
+                break;
+            }
+        }
+
+        // TODO: finish this function
+        if (clashes) {
+            // give warning to user
+            alert(
+                "OH NO!! THE STRUCTURE TILE YOU PLACED CLASHES WITH ANOTHER TILE!!!"
             );
+
+            // check if the user wants to cancel or continue
+            // if they want to cancel, undo the action
+            // if they want to continue, update all location with the new structure
+        }
+
+        // update structure in locations
+        for (const placedChip of this.placedChips) {
+            const grid = placedChip.grid;
+            if (grid instanceof InteractiveGrid) grid.prevCloneChip = undefined;
         }
     }
 
