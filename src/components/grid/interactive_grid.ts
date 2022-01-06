@@ -38,6 +38,8 @@ import Grid from "./grid";
 export default class InteractiveGrid extends Grid {
     mousePos: [x: number, y: number] = [0, 0];
     prevMousePos: [x: number, y: number] = [0, 0];
+    gridPos: [x: number, y: number] = [0, 0];
+    prevGridPos: [x: number, y: number] = [0, 0];
 
     interactive = true;
 
@@ -118,7 +120,13 @@ export default class InteractiveGrid extends Grid {
     mousemove = (event: PIXI.interaction.InteractionEvent) => {
         const e = event.data.originalEvent as PointerEvent;
         this.prevMousePos = [...this.mousePos];
+        this.prevGridPos = [...this.gridPos];
         this.mousePos = [e.pageX, e.pageY];
+        this.gridPos = locationToTuple(
+            this.screenToGrid(...this.mousePos, true)
+        );
+
+        let updated = false;
 
         if (mouseDown.left || mouseDown.middle) {
             if (
@@ -195,12 +203,20 @@ export default class InteractiveGrid extends Grid {
                 }
             }
             this.update();
+            updated = true;
         } else if (this.historyManager.interacting) {
             this.historyManager.endInteraction();
         }
 
-        this.updateChipOutline();
-        this.updateHighlightTile();
+        // check if prevGridPos is different then gridPos
+        if (
+            !updated &&
+            (this.prevGridPos[0] !== this.gridPos[0] ||
+                this.prevGridPos[1] !== this.gridPos[1])
+        ) {
+            this.updateChipOutline();
+            this.updateHighlightTile();
+        }
     };
 
     click = (event: PIXI.interaction.InteractionEvent) => {
@@ -266,6 +282,10 @@ export default class InteractiveGrid extends Grid {
                 );
                 const tile = this.getTile(...gridPoint);
                 switch (pick) {
+                    case "location": {
+                        console.log(gridPoint.join());
+                        break;
+                    }
                     case "all": {
                         console.log(tile);
                         break;
@@ -495,7 +515,6 @@ export default class InteractiveGrid extends Grid {
     };
 
     prevHighlightTileGraphics: Array<PIXI.Container> = [];
-    locationText = new PIXI.Text("");
     previewTiles: { x: number; y: number; type: TileType }[] = [];
 
     updateHighlightTile = () => {
@@ -509,15 +528,6 @@ export default class InteractiveGrid extends Grid {
 
         if (state.editMode === EditMode.CHIP) {
             this.hlTile.clear();
-            if (config.debugMode) {
-                this.addChild(this.locationText);
-                this.locationText.zIndex = 201;
-                this.locationText.text = locationToTuple(gridPos).join();
-                this.locationText.position.set(
-                    gridScreenPos.x,
-                    gridScreenPos.y
-                );
-            }
         }
 
         if (
@@ -560,13 +570,6 @@ export default class InteractiveGrid extends Grid {
             this.size,
             this.size
         );
-
-        if (config.debugMode) {
-            this.addChild(this.locationText);
-            this.locationText.zIndex = 201;
-            this.locationText.text = locationToTuple(gridPos).join();
-            this.locationText.position.set(gridScreenPos.x, gridScreenPos.y);
-        }
     };
 
     prevCloneChip?: {

@@ -27,6 +27,7 @@ export const contextMenus = {
         recolor: "Recolor",
     },
     debugTile: {
+        location: "Location",
         all: "All",
         connections: "Connections",
         type: "Type",

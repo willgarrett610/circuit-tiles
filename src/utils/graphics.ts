@@ -78,6 +78,7 @@ export function generateRoundedRectContainer(
  * @returns Hex value
  */
 export function hslToHex(h: number, s: number, l: number): number {
+    h = h % 360;
     s /= 100;
     l /= 100;
 

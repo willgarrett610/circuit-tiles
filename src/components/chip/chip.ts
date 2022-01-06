@@ -255,9 +255,9 @@ export class Chip {
 
             switch (rotation) {
                 case Rotation.CLOCKWISE: {
-                    newStructure[`${newY},${-newX}`] = prevTile;
-                    prevTile.x = newY;
-                    prevTile.y = -newX;
+                    newStructure[`${-newY},${newX}`] = prevTile;
+                    prevTile.x = -newY;
+                    prevTile.y = newX;
 
                     break;
                 }
@@ -269,9 +269,9 @@ export class Chip {
                     break;
                 }
                 case Rotation.COUNTER_CLOCKWISE: {
-                    newStructure[`${-newY},${newX}`] = prevTile;
-                    prevTile.x = -newY;
-                    prevTile.y = newX;
+                    newStructure[`${newY},${-newX}`] = prevTile;
+                    prevTile.x = newY;
+                    prevTile.y = -newX;
 
                     break;
                 }
