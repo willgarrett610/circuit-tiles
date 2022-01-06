@@ -29,7 +29,7 @@ import ChipOutputTile from "../tiles/chip_output_tile";
 import ChipTile from "../tiles/chip_tile";
 import IOTile from "../tiles/io_tile";
 import { Tile } from "../tiles/tile";
-import { findType, TileType } from "../tiles/tile_types";
+import { ChipOutputTileType, findType, TileType } from "../tiles/tile_types";
 import Grid from "./grid";
 
 /**
@@ -214,8 +214,8 @@ export default class InteractiveGrid extends Grid {
             (this.prevGridPos[0] !== this.gridPos[0] ||
                 this.prevGridPos[1] !== this.gridPos[1])
         ) {
-            this.updateHighlightTile();
             this.updateChipOutline();
+            this.updateHighlightTile();
         }
     };
 
@@ -516,6 +516,8 @@ export default class InteractiveGrid extends Grid {
     };
 
     prevHighlightTileGraphics: Array<PIXI.Container> = [];
+    previewTiles: { x: number; y: number; type: TileType }[] = [];
+
     updateHighlightTile = () => {
         const gridScreenPos = this.screenToGrid(...this.mousePos, true, true);
         const gridPos = this.screenToGrid(...this.mousePos, true);
@@ -527,7 +529,6 @@ export default class InteractiveGrid extends Grid {
 
         if (state.editMode === EditMode.CHIP) {
             this.hlTile.clear();
-            return;
         }
 
         if (
@@ -535,8 +536,15 @@ export default class InteractiveGrid extends Grid {
             state.editMode === EditMode.TILE &&
             this.getTile(...locationToTuple(gridPos)) === undefined
         ) {
-            const tileType = state.selectableTiles[state.selectedTileIndex];
-            const tempTile = new tileType.tile(...locationToTuple(gridPos));
+            this.previewTiles.push({
+                ...gridPos,
+                type: state.selectableTiles[state.selectedTileIndex],
+            });
+        }
+
+        for (const previewTile of this.previewTiles) {
+            const tileType = previewTile.type;
+            const tempTile = new tileType.tile(previewTile.x, previewTile.y);
             if ("hue" in tileType) {
                 (tempTile as ChipOutputTile).hue = (tileType as any).hue;
             }
@@ -550,6 +558,9 @@ export default class InteractiveGrid extends Grid {
             tempTile.updateContainer?.();
             tempTile.update(this.size);
         }
+        this.previewTiles = [];
+
+        if (state.editMode === EditMode.CHIP) return;
 
         this.hlTile.clear();
         this.hlTile.beginFill(config.colors.highlightTile);
@@ -615,36 +626,49 @@ export default class InteractiveGrid extends Grid {
                 structureOffset
             ) as [number, number];
 
+            const tileAtLocation = this.getTile(...tileLocation);
+
+            const type = findType(structureTile.type) as TileType;
+            if (type.tile === ChipOutputTile) {
+                (type as ChipOutputTileType).hue = (
+                    structureTile as ChipOutputTile
+                ).hue;
+            }
+
+            this.previewTiles.push({
+                x: tileLocation[0],
+                y: tileLocation[1],
+                type,
+            });
+
+            if (valid) {
+                this.chipOutlineGraphics.beginFill(chip.color, 0.2);
+            } else {
+                if (tileAtLocation) {
+                    this.chipOutlineGraphics.beginFill(
+                        config.colors.chipInvalidPlacement,
+                        0.8
+                    );
+                } else {
+                    this.chipOutlineGraphics.beginFill(chip.color, 0.2);
+                }
+            }
+            this.chipOutlineGraphics.lineStyle(undefined);
+            this.chipOutlineGraphics.drawRect(
+                ...locationToTuple(
+                    this.gridToScreen(
+                        tileLocation[0],
+                        tileLocation[1],
+                        true,
+                        false
+                    )
+                ),
+                this.size,
+                this.size
+            );
+
             for (const direction of Direction.values()) {
                 const directionOffset = Direction.getOffset(direction);
-
-                const tileAtLocation = this.getTile(...tileLocation);
-
-                if (valid) {
-                    this.chipOutlineGraphics.beginFill(chip.color, 0.2);
-                } else {
-                    if (tileAtLocation) {
-                        this.chipOutlineGraphics.beginFill(
-                            config.colors.chipInvalidPlacement,
-                            0.3
-                        );
-                    } else {
-                        this.chipOutlineGraphics.beginFill(chip.color, 0.2);
-                    }
-                }
-                this.chipOutlineGraphics.lineStyle(undefined);
-                this.chipOutlineGraphics.drawRect(
-                    ...locationToTuple(
-                        this.gridToScreen(
-                            tileLocation[0],
-                            tileLocation[1],
-                            true,
-                            false
-                        )
-                    ),
-                    this.size,
-                    this.size
-                );
 
                 const adjacentTileLocation = add(
                     [structureTile.x, structureTile.y],
@@ -724,7 +748,7 @@ export default class InteractiveGrid extends Grid {
 
     update = () => {
         super.update();
-        this.updateHighlightTile();
         this.updateChipOutline();
+        this.updateHighlightTile();
     };
 }

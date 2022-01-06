@@ -80,7 +80,7 @@ export default class TileSelector extends SelectorMenu {
                     if (state.chipEditor) {
                         if (state.chipGridMode === ChipGridMode.EDITING) {
                             for (const tileType of getTileTypes(true)) {
-                                value.push({ ...tileType });
+                                value.push(tileType.clone());
                             }
                         } else {
                             if (state.currentChipGrid) {
@@ -96,24 +96,25 @@ export default class TileSelector extends SelectorMenu {
                                                     .structure
                                             ).find((x) => x?.id === value.name)
                                     )
-                                    .map(({ name, tile }) => ({
-                                        name,
-                                        tile: tile.type,
-                                        hue:
-                                            tile instanceof ChipOutputTile
-                                                ? tile.hue
-                                                : undefined,
-                                    }));
+                                    .map(({ name, tile }) =>
+                                        tile instanceof ChipOutputTile
+                                            ? new ChipOutputTileType(
+                                                  name,
+                                                  tile.type,
+                                                  tile.hue
+                                              )
+                                            : new TileType(name, tile.type)
+                                    );
 
-                                value.push(...selectableTiles, {
-                                    name: "Block",
-                                    tile: StructureTile,
-                                });
+                                value.push(
+                                    ...selectableTiles,
+                                    new TileType("Block", StructureTile)
+                                );
                             }
                         }
                     } else {
                         for (const tileType of getTileTypes(false)) {
-                            value.push({ ...tileType });
+                            value.push(tileType.clone());
                         }
                     }
                 });

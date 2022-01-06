@@ -8,6 +8,7 @@ import { ConnectionType, GraphicsTile, Tile } from "./tile";
 /** delay tile */
 export default class DelayTile extends GraphicsTile {
     type = DelayTile;
+    typeNumber = 3;
     label: string = "Delay";
 
     connectionTemplate = {
@@ -39,12 +40,14 @@ export default class DelayTile extends GraphicsTile {
     /**
      * convert tile to node
      *
+     * @param scope scope
      * @returns Logic node
      */
-    toNode(): LogicNode {
+    toNode(scope: string): LogicNode {
         const logicNode = new LogicNode(
             this.label,
-            [new CircuitLocation("global", this.x, this.y)],
+            this.typeNumber,
+            [new CircuitLocation(scope, this.x, this.y)],
             this
         );
         logicNode.state = this.signalActive;

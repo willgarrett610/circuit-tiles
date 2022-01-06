@@ -6,6 +6,7 @@ import { ConnectionType, GraphicsTile } from "./tile";
 /** lever tile */
 export default class LeverTile extends GraphicsTile {
     type = LeverTile;
+    typeNumber = 4;
     label = "Lever";
 
     onColor = config.colors.activeTile;
@@ -25,12 +26,14 @@ export default class LeverTile extends GraphicsTile {
     /**
      * convert tile to node
      *
+     * @param scope scope
      * @returns Logic node
      */
-    toNode(): LogicNode {
+    toNode(scope: string): LogicNode {
         const logicNode = new LogicNode(
             this.label,
-            [new CircuitLocation("global", this.x, this.y)],
+            this.typeNumber,
+            [new CircuitLocation(scope, this.x, this.y)],
             this
         );
         logicNode.state = this.signalActive;

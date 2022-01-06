@@ -35,7 +35,7 @@ export default class Graph {
         };
 
         const createLogicEdge = (initialTile: Tile) => {
-            const logicEdge = new LogicNode("Or Wire");
+            const logicEdge = new LogicNode("Or Wire", 0);
 
             const findEdge = (tile: Tile): CircuitLocation[] => {
                 if (!tile.isWire) return [];
@@ -81,11 +81,11 @@ export default class Graph {
         };
 
         // initially create all logic nodes
-        for (const [_, tile] of Object.entries(tiles)) {
+        for (const tile of Object.values(tiles)) {
             if (!tile) continue;
             if (tile.isNode && tile.toNode) {
                 // handle chip input / output tiles such that it leads to the chip's corresponding logic node
-                const node = tile.toNode();
+                const node = tile.toNode("global");
                 graph.nodes.push(node);
                 setLogicTile(tile.x, tile.y, { tile, node: node });
             } else if (tile.isWire) {
@@ -96,7 +96,7 @@ export default class Graph {
         }
 
         // connect all the logic nodes
-        for (const [_, logicTile] of Object.entries(logicTiles)) {
+        for (const logicTile of Object.values(logicTiles)) {
             if (!logicTile) continue;
             const connections = logicTile.tile.getConnections();
             const connectionsTemplate = logicTile.tile.getConnectionTemplate();

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import config from "../../config";
 import ButtonTile from "./button_tile";
 import ChipInputTile from "./chip_input_tile";
@@ -14,28 +15,66 @@ export type TileConstructor = {
     new (x: number, y: number): Tile;
 };
 
-export interface TileType {
+/**
+ * Holds name of tile and its constructor
+ */
+export class TileType {
     name: string;
     tile: TileConstructor;
+
+    /**
+     * Constructs a tile type
+     *
+     * @param name Tile name
+     * @param tile Tile constructor
+     */
+    constructor(name: string, tile: TileConstructor) {
+        this.name = name;
+        this.tile = tile;
+    }
+
+    /**
+     * Create a clone of this tile type
+     *
+     * @returns TileType
+     */
+    clone() {
+        return { ...this };
+    }
 }
 
-export interface ChipOutputTileType extends TileType {
+/**
+ * Special tile type for chip output
+ */
+export class ChipOutputTileType extends TileType {
     hue: number;
+
+    /**
+     * Constructs a tile type
+     *
+     * @param name Tile name
+     * @param tile Tile constructor
+     * @param hue Hue of tile
+     */
+    constructor(name: string, tile: TileConstructor, hue: number) {
+        super(name, tile);
+        this.hue = hue;
+    }
 }
 
 const tileTypes = [
-    { name: "Wire", tile: WireTile },
-    { name: "Lever", tile: LeverTile },
-    { name: "Not Gate", tile: NotTile },
-    { name: "Diode", tile: DiodeTile },
-    { name: "Delay", tile: DelayTile },
-    { name: "Button", tile: ButtonTile },
-    { name: "Input", tile: ChipInputTile },
-    {
-        name: "Output",
-        tile: ChipOutputTile,
-        hue: config.colors.defaultOutputHue,
-    },
+    new TileType("Wire", WireTile),
+    new TileType("Lever", LeverTile),
+    new TileType("Not Gate", NotTile),
+    new TileType("Diode", DiodeTile),
+    new TileType("Delay", DelayTile),
+    new TileType("Button", ButtonTile),
+    new TileType("Input", ChipInputTile),
+    new ChipOutputTileType(
+        "Output",
+        ChipOutputTile,
+        config.colors.defaultOutputHue
+    ),
 ];
 
 /**
@@ -44,9 +83,9 @@ const tileTypes = [
  * @param type The tile constructor
  * @returns Full tile type
  */
-export function findType(type: TileConstructor) {
-    if (type === StructureTile) return { name: "Block", tile: type };
-    return tileTypes.find((tile) => tile.tile === type);
+export function findType(type: TileConstructor): TileType | undefined {
+    if (type === StructureTile) return new TileType("Block", type);
+    return tileTypes.find((tile) => tile.tile === type)?.clone();
 }
 
 /**
@@ -58,7 +97,7 @@ export function findType(type: TileConstructor) {
 export function getTileTypes(chipTileIncluded = true): TileType[] {
     return chipTileIncluded
         ? tileTypes
-        : tileTypes.filter((x) => x.tile.chipTile === false);
+        : tileTypes.filter((x) => (x.tile as any).chipTile === false);
 }
 
 export default getTileTypes;
