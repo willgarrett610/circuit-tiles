@@ -126,6 +126,8 @@ export default class InteractiveGrid extends Grid {
             this.screenToGrid(...this.mousePos, true)
         );
 
+        let updated = false;
+
         if (mouseDown.left || mouseDown.middle) {
             if (
                 (mouseDown.left &&
@@ -201,14 +203,16 @@ export default class InteractiveGrid extends Grid {
                 }
             }
             this.update();
+            updated = true;
         } else if (this.historyManager.interacting) {
             this.historyManager.endInteraction();
         }
 
         // check if prevGridPos is different then gridPos
         if (
-            this.prevGridPos[0] !== this.gridPos[0] ||
-            this.prevGridPos[1] !== this.gridPos[1]
+            !updated &&
+            (this.prevGridPos[0] !== this.gridPos[0] ||
+                this.prevGridPos[1] !== this.gridPos[1])
         ) {
             this.updateHighlightTile();
             this.updateChipOutline();
