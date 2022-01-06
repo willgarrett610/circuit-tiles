@@ -14,6 +14,7 @@ export class PlacedChip {
     rotation: Rotation;
     chip: Chip;
     tiles: { [key: string]: ChipTile | undefined } = {};
+    grid: Grid;
 
     /**
      * construct placed chip
@@ -23,15 +24,21 @@ export class PlacedChip {
      * @param location.y
      * @param rotation rotation of the chip from original orientation
      * @param chip chip to place
+     * @param grid
      */
     constructor(
         location: { x: number; y: number },
         rotation: Rotation,
-        chip: Chip
+        chip: Chip,
+        grid: Grid
     ) {
         this.location = location;
         this.rotation = rotation;
         this.chip = chip;
+        this.grid = grid;
+
+        const originalChip = chip.originalChip ? chip.originalChip : chip;
+        originalChip.placedChips.add(this);
     }
 
     /**

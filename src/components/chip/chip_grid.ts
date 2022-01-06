@@ -2,6 +2,7 @@ import state, { setState, update } from "../../state";
 import InteractiveGrid from "../grid/interactive_grid";
 import ChipInputTile from "../tiles/chip_input_tile";
 import ChipOutputTile from "../tiles/chip_output_tile";
+import ChipTile from "../tiles/chip_tile";
 import { Chip } from "./chip";
 
 /** Chip Grid */
@@ -42,6 +43,9 @@ export default class ChipGrid {
                 tile.id = state.selectableTiles[state.selectedTileIndex].name;
                 tile.generateText();
             }
+
+            this.chip.structureTileAdded(tile as ChipTile);
+
             setState({
                 isStructured: this.chip.isStructured(),
                 editedChip: update,

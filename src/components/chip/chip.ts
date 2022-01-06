@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import state from "../../state";
+import { locationToTuple } from "../../utils";
 import ChipGridMode from "../../utils/chip_grid_mode";
 import { Direction, Rotation } from "../../utils/directions";
+import { add, sub } from "../../utils/math";
 import { mapObject } from "../../utils/objects";
 import ChipInputTile from "../tiles/chip_input_tile";
 import ChipOutputTile from "../tiles/chip_output_tile";
@@ -9,6 +11,7 @@ import ChipTile from "../tiles/chip_tile";
 import IOTile from "../tiles/io_tile";
 import StructureTile from "../tiles/structure_tile";
 import { Tile } from "../tiles/tile";
+import { PlacedChip } from "./placed_chip";
 
 /**
  * Chip
@@ -24,6 +27,8 @@ export class Chip {
         [key: string]: ChipTile | undefined;
     } = {};
     originalChip?: Chip;
+
+    placedChips = new Set<PlacedChip>();
 
     /**
      * Chip constructor
@@ -157,6 +162,42 @@ export class Chip {
             const x = parseInt(split[0]);
             const y = parseInt(split[1]);
             state.currentChipGrid?.grids.structure.removeTile(x, y);
+        }
+    }
+
+    /**
+     * Called when a structure tile is added
+     *
+     * @param tile added structure tile
+     */
+    structureTileAdded(tile: ChipTile) {
+        // const key = Object.keys(this.structure).find(
+        //     (x) => this.structure[x]?.id === tile.id
+        // );
+        // if (key) {
+        //     const split = key.split(",");
+        //     const x = parseInt(split[0]);
+        //     const y = parseInt(split[1]);
+        // }
+        console.log("structure tile added", { tile });
+        const offset = sub(locationToTuple(tile), this.getTopLeftStructure());
+        for (const placedChip of this.placedChips) {
+            const grid = placedChip.grid;
+            console.log({
+                placedChip,
+                grid,
+                pcLoc: placedChip.location,
+                offset,
+                loc: add(locationToTuple(placedChip.location), offset),
+            });
+            console.log(
+                grid.getTile(
+                    ...(add(locationToTuple(placedChip.location), offset) as [
+                        number,
+                        number
+                    ])
+                )
+            );
         }
     }
 
