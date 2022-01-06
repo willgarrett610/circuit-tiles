@@ -38,6 +38,8 @@ import Grid from "./grid";
 export default class InteractiveGrid extends Grid {
     mousePos: [x: number, y: number] = [0, 0];
     prevMousePos: [x: number, y: number] = [0, 0];
+    gridPos: [x: number, y: number] = [0, 0];
+    prevGridPos: [x: number, y: number] = [0, 0];
 
     interactive = true;
 
@@ -118,7 +120,11 @@ export default class InteractiveGrid extends Grid {
     mousemove = (event: PIXI.interaction.InteractionEvent) => {
         const e = event.data.originalEvent as PointerEvent;
         this.prevMousePos = [...this.mousePos];
+        this.prevGridPos = [...this.gridPos];
         this.mousePos = [e.pageX, e.pageY];
+        this.gridPos = locationToTuple(
+            this.screenToGrid(...this.mousePos, true)
+        );
 
         if (mouseDown.left || mouseDown.middle) {
             if (
@@ -199,8 +205,14 @@ export default class InteractiveGrid extends Grid {
             this.historyManager.endInteraction();
         }
 
-        this.updateHighlightTile();
-        this.updateChipOutline();
+        // check if prevGridPos is different then gridPos
+        if (
+            this.prevGridPos[0] !== this.gridPos[0] ||
+            this.prevGridPos[1] !== this.gridPos[1]
+        ) {
+            this.updateHighlightTile();
+            this.updateChipOutline();
+        }
     };
 
     click = (event: PIXI.interaction.InteractionEvent) => {
