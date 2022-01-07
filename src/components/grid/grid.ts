@@ -306,8 +306,8 @@ export default class Grid extends PIXI.Container {
     ): Tile | undefined {
         const tileAtLocation = this.getTile(x, y);
         if (tileAtLocation) {
-            if (!this.historyManager.interacting)
-                this.historyManager.beginInteraction();
+            const interacting = this.historyManager.interacting;
+            if (!interacting) this.historyManager.beginInteraction();
             const extraTile = new type.tile(x, y);
             if (
                 tileAtLocation instanceof ChipInputTile &&
@@ -334,8 +334,7 @@ export default class Grid extends PIXI.Container {
                     prevTile,
                     direction
                 );
-            if (!this.historyManager.interacting)
-                this.historyManager.endInteraction();
+            if (!interacting) this.historyManager.endInteraction();
             return this.getTile(x, y);
         }
 
@@ -385,6 +384,7 @@ export default class Grid extends PIXI.Container {
 
         if (
             !removeChip &&
+            state.editMode !== EditMode.CURSOR &&
             tile instanceof ChipInputTile &&
             tile.extraInputTile
         ) {
