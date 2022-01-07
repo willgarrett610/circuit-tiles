@@ -383,6 +383,22 @@ export default class Grid extends PIXI.Container {
         const tile = this.getTile(x, y);
         if (!tile) return false;
 
+        if (
+            !removeChip &&
+            tile instanceof ChipInputTile &&
+            tile.extraInputTile
+        ) {
+            const newTile = tile.clone() as ChipInputTile;
+            newTile.setExtraInputTile(undefined);
+            this.historyManager.performAction(editTile, {
+                x,
+                y,
+                tile: newTile,
+                grid: this,
+            });
+            return;
+        }
+
         if (!removeChip && tile instanceof ChipTile && tile.chip) {
             const interacting = this.historyManager.isInteracting();
             if (!interacting) this.historyManager.beginInteraction();
