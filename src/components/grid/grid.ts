@@ -20,6 +20,8 @@ import ButtonTile from "../tiles/button_tile";
 import LeverTile from "../tiles/lever_tile";
 import ChipOutputTile from "../tiles/chip_output_tile";
 import { ChipOutputTileType, TileType } from "../tiles/tile_types";
+import ChipGridMode from "../../utils/chip_grid_mode";
+import IOTile from "../tiles/io_tile";
 
 interface GridHandlers {
     postAddTile: ((payload: Tile) => void)[];
@@ -339,9 +341,15 @@ export default class Grid extends PIXI.Container {
 
         const tileObj = new type.tile(x, y);
 
-        if (tileObj instanceof ChipOutputTile) {
+        if (
+            tileObj instanceof IOTile &&
+            state.chipEditor &&
+            state.chipGridMode === ChipGridMode.EDITING
+        )
+            tileObj.isInParentChip = true;
+
+        if (tileObj instanceof ChipOutputTile)
             tileObj.hue = (type as ChipOutputTileType).hue;
-        }
 
         const interacting = this.historyManager.isInteracting();
         if (!interacting) this.historyManager.beginInteraction();

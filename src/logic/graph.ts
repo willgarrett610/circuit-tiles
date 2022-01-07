@@ -8,6 +8,7 @@ import LogicNode from "./node";
 type LogicTile = {
     tile: Tile;
     node: LogicNode;
+    location: CircuitLocation;
 };
 
 /**
@@ -18,12 +19,15 @@ export default class Graph {
     scopes: string[][] = [];
     logicTiles: { [key: string]: LogicTile | undefined } = {};
 
-    getLogicTile = (x: number, y: number) => {
-        return this.logicTiles[`${x},${y}`];
+    getLogicTile = (x: number, y: number, scope: string[]) => {
+        const scopeStr = scope.join(",");
+        return this.logicTiles[`${x},${y}.${scopeStr}`];
     };
 
-    setLogicTile = (x: number, y: number, tile: LogicTile) => {
-        this.logicTiles[`${x},${y}`] = tile;
+    setLogicTile = (tile: LogicTile) => {
+        const location = tile.location;
+        const scopeStr = location.scope.join(",");
+        this.logicTiles[`${location.x},${location.y}.${scopeStr}`] = tile;
     };
 
     getTile = (
@@ -85,6 +89,15 @@ export default class Graph {
                                     chipTile.y
                                 )
                             );
+                            this.setLogicTile({
+                                tile: chipTile,
+                                node,
+                                location: new CircuitLocation(
+                                    [...scope, chip.scopeName],
+                                    chipTile.x,
+                                    chipTile.y
+                                ),
+                            });
                             this.addTiles(chip.chip.tiles, [
                                 ...scope,
                                 chip.scopeName,
@@ -93,28 +106,35 @@ export default class Graph {
                     }
                 }
                 this.nodes.push(node);
-                this.setLogicTile(tile.x, tile.y, { tile, node: node });
+                this.setLogicTile({
+                    tile,
+                    node,
+                    location: new CircuitLocation(scope, tile.x, tile.y),
+                });
             } else if (tile.isWire) {
                 // handle wire tiles
-                if (!this.getLogicTile(tile.x, tile.y))
-                    this.nodes.push(this.createLogicEdge(tiles, tile));
+                if (!this.getLogicTile(tile.x, tile.y, scope))
+                    this.nodes.push(this.createLogicEdge(tiles, tile, scope));
             }
         }
     }
 
     createLogicEdge = (
         tiles: { [key: string]: Tile | undefined },
-        initialTile: Tile
+        initialTile: Tile,
+        scope: string[]
     ) => {
         const logicEdge = new LogicNode("Or Wire", 0);
 
         const findEdge = (tile: Tile): CircuitLocation[] => {
             if (!tile.isWire) return [];
-            const edgeLocations = [
-                new CircuitLocation("global", tile.x, tile.y),
-            ];
+            const edgeLocations = [new CircuitLocation(scope, tile.x, tile.y)];
 
-            this.setLogicTile(tile.x, tile.y, { tile, node: logicEdge });
+            this.setLogicTile({
+                tile,
+                node: logicEdge,
+                location: new CircuitLocation(scope, tile.x, tile.y),
+            });
 
             const connections = tile.getConnections();
             const connectionOffsets: {
@@ -138,7 +158,8 @@ export default class Graph {
                     !connectedTile ||
                     this.getLogicTile(
                         tile.x + connectionOffset.offset[0],
-                        tile.y + connectionOffset.offset[1]
+                        tile.y + connectionOffset.offset[1],
+                        scope
                     )
                 )
                     continue;
@@ -186,8 +207,9 @@ export default class Graph {
                 for (const connectionOffset of connectionOffsets) {
                     if (!connections[connectionOffset.side]) continue;
                     const connectedTile = graph.getLogicTile(
-                        logicTile.tile.x + connectionOffset.offset[0],
-                        logicTile.tile.y + connectionOffset.offset[1]
+                        logicTile.location.x + connectionOffset.offset[0],
+                        logicTile.location.y + connectionOffset.offset[1],
+                        logicTile.location.scope
                     );
                     if (!connectedTile) continue;
 
