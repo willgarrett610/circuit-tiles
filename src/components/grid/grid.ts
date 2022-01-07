@@ -20,6 +20,8 @@ import ButtonTile from "../tiles/button_tile";
 import LeverTile from "../tiles/lever_tile";
 import ChipOutputTile from "../tiles/chip_output_tile";
 import { ChipOutputTileType, TileType } from "../tiles/tile_types";
+import ChipGridMode from "../../utils/chip_grid_mode";
+import IOTile from "../tiles/io_tile";
 
 interface GridHandlers {
     postAddTile: ((payload: Tile) => void)[];
@@ -304,8 +306,8 @@ export default class Grid extends PIXI.Container {
     ): Tile | undefined {
         const tileAtLocation = this.getTile(x, y);
         if (tileAtLocation) {
-            if (!this.historyManager.interacting)
-                this.historyManager.beginInteraction();
+            const interacting = this.historyManager.interacting;
+            if (!interacting) this.historyManager.beginInteraction();
             const extraTile = new type.tile(x, y);
             if (
                 tileAtLocation instanceof ChipInputTile &&
@@ -332,16 +334,21 @@ export default class Grid extends PIXI.Container {
                     prevTile,
                     direction
                 );
-            if (!this.historyManager.interacting)
-                this.historyManager.endInteraction();
+            if (!interacting) this.historyManager.endInteraction();
             return this.getTile(x, y);
         }
 
         const tileObj = new type.tile(x, y);
 
-        if (tileObj instanceof ChipOutputTile) {
+        if (
+            tileObj instanceof IOTile &&
+            state.chipEditor &&
+            state.chipGridMode === ChipGridMode.EDITING
+        )
+            tileObj.isInParentChip = true;
+
+        if (tileObj instanceof ChipOutputTile)
             tileObj.hue = (type as ChipOutputTileType).hue;
-        }
 
         const interacting = this.historyManager.isInteracting();
         if (!interacting) this.historyManager.beginInteraction();
@@ -374,6 +381,23 @@ export default class Grid extends PIXI.Container {
     removeTile(x: number, y: number, removeChip = false) {
         const tile = this.getTile(x, y);
         if (!tile) return false;
+
+        if (
+            !removeChip &&
+            state.editMode !== EditMode.CURSOR &&
+            tile instanceof ChipInputTile &&
+            tile.extraInputTile
+        ) {
+            const newTile = tile.clone() as ChipInputTile;
+            newTile.setExtraInputTile(undefined);
+            this.historyManager.performAction(editTile, {
+                x,
+                y,
+                tile: newTile,
+                grid: this,
+            });
+            return;
+        }
 
         if (!removeChip && tile instanceof ChipTile && tile.chip) {
             const interacting = this.historyManager.isInteracting();
