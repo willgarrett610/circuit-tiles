@@ -80,13 +80,15 @@ export function setupMenus() {
         render(<App />, attachLocation);
 
         // setTimeout(() => {
-        //     const close = createChipInputForm({
-        //         hueValue: 180,
-        //         onSubmit: (data) => {
-        //             console.log(data);
+        //     const close = createStructureClashAlert({
+        //         onSubmit: (ignoreFurther) => {
+        //             console.log({ ignoreFurther });
         //             close();
         //         },
-        //         verifyText: (text) => text.length > 4,
+        //         onCancel: () => {
+        //             console.log("canceled");
+        //             close();
+        //         },
         //     });
         // }, 100);
     }

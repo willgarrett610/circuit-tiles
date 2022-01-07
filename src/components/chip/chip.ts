@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import state from "../../state";
+import { gridManager } from "../..";
+import { showStructureClashAlert } from "../../menus/structure_clash_alert";
+import state, { setState } from "../../state";
 import { locationToTuple } from "../../utils";
 import ChipGridMode from "../../utils/chip_grid_mode";
 import { Direction, Rotation } from "../../utils/directions";
@@ -184,7 +186,7 @@ export class Chip {
      *
      * @param tile added structure tile
      */
-    structureTileAdded(tile: ChipTile) {
+    async structureTileAdded(tile: ChipTile) {
         // const key = Object.keys(this.structure).find(
         //     (x) => this.structure[x]?.id === tile.id
         // );
@@ -216,19 +218,18 @@ export class Chip {
             }
         }
 
-        // TODO: finish this function
-        if (clashes) {
+        // ! Issue with top left value changing ruins checking.
+        if (clashes && !state.ignoreStructureClashWarning) {
             // give warning to user
-            alert(
-                "OH NO!! THE STRUCTURE TILE YOU PLACED CLASHES WITH ANOTHER TILE!!!"
-            );
+            const result = await showStructureClashAlert();
 
-            // check if the user wants to cancel or continue
-            // if they want to cancel, undo the action
-            // if they want to continue, update all location with the new structure
+            if (!result.continue) gridManager.getGrid().historyManager.undo();
+
+            if (result.ignoreFurther)
+                setState({ ignoreStructureClashWarning: true });
         }
 
-        // update structure in locations
+        // TODO: update structure in locations
         for (const placedChip of this.placedChips) {
             const grid = placedChip.grid;
             if (grid instanceof InteractiveGrid) grid.prevCloneChip = undefined;

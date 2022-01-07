@@ -4,5 +4,8 @@ import { EditMode } from "./utils/edit_mode";
 
 subscribe("editMode", (editMode) => {
     if (editMode === EditMode.CHIP)
-        setState({ chipPlacementRotation: Rotation.NORMAL });
+        setState({
+            chipPlacementRotation: Rotation.NORMAL,
+            ignoreStructureClashWarning: false,
+        });
 });

@@ -22,6 +22,8 @@ interface State {
     editedChip: Updater;
     /** whether the current grid is structured or not */
     isStructured: boolean;
+    /** whether warning message should continue to show for structure clashes*/
+    ignoreStructureClashWarning: boolean;
     /** the current chip grid */
     currentChipGrid?: ChipGrid;
     /** the current chip grid mode */
@@ -58,6 +60,7 @@ const state: State = {
     },
     editedChip: update,
     isStructured: true,
+    ignoreStructureClashWarning: false,
     currentChipGrid: undefined,
     chipGridMode: ChipGridMode.EDITING,
     selectedTileIndex: -1,
