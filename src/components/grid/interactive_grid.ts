@@ -25,7 +25,6 @@ import {
 import { add, sub } from "../../utils/math";
 import { Chip } from "../chip/chip";
 import { PlacedChip } from "../chip/placed_chip";
-import ChipInputTile from "../tiles/chip_input_tile";
 import ChipOutputTile from "../tiles/chip_output_tile";
 import ChipTile from "../tiles/chip_tile";
 import IOTile from "../tiles/io_tile";
@@ -113,18 +112,6 @@ export default class InteractiveGrid extends Grid {
         this.dragData.endLocation.screen = locationToPair(mousePos);
         this.dragData.endLocation.grid = this.screenToGrid(...mousePos, true);
         this.historyManager.beginInteraction();
-
-        const gridPos = this.dragData.startLocation.grid;
-        const tile = this.getTile(gridPos.x, gridPos.y);
-
-        if (
-            state.editMode === EditMode.ERASER &&
-            !state.chipEditor &&
-            tile instanceof ChipInputTile &&
-            tile.extraInputTile
-        ) {
-            this.removingExtraTiles = true;
-        }
 
         this.renderSelection();
     };

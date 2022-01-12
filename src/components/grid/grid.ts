@@ -385,6 +385,16 @@ export default class Grid extends PIXI.Container {
         if (!tile) return false;
 
         if (
+            state.editMode === EditMode.ERASER &&
+            !state.chipEditor &&
+            tile instanceof ChipInputTile &&
+            tile.extraInputTile &&
+            !removeChip
+        ) {
+            this.removingExtraTiles = true;
+        }
+
+        if (
             !removeChip &&
             state.editMode !== EditMode.CURSOR &&
             tile instanceof ChipInputTile &&
