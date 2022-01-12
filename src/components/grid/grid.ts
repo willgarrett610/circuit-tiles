@@ -647,12 +647,23 @@ export default class Grid extends PIXI.Container {
             if (tile) tile.update(this.size);
     }
 
-    /** render all the chip outlines */
-    renderChipOutlines() {
+    /**
+     * render all the chip outlines
+     *
+     * @param mouseX
+     * @param mouseY
+     */
+    renderChipOutlines(mouseX: number, mouseY: number) {
         // TODO: make this more efficient
+        const tile = this.getTile(mouseX, mouseY);
         this.chipOutlines.removeChildren();
         for (const chip of this.chips) {
-            this.chipOutlines.addChild(chip.buildOutlineGraphic(this));
+            const hovering =
+                tile instanceof ChipTile &&
+                tile.chip?.scopeName === chip.scopeName;
+            this.chipOutlines.addChild(
+                chip.buildOutlineGraphic(this, hovering)
+            );
         }
     }
 
@@ -688,13 +699,13 @@ export default class Grid extends PIXI.Container {
      * Update the grids graphics
      */
     update() {
+        console.log("grid");
         this.backgroundGraphics.x = -this.x;
         this.backgroundGraphics.y = -this.y;
         this.backgroundGraphics.width = width();
         this.backgroundGraphics.height = height();
         this.renderGrid();
         this.renderTiles();
-        this.renderChipOutlines();
         this.renderSelection();
     }
 
