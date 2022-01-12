@@ -370,6 +370,8 @@ export default class Grid extends PIXI.Container {
         return this.getTile(x, y) as Tile;
     }
 
+    removingExtraTiles = false;
+
     /**
      * Removes tile at location
      *
@@ -398,6 +400,8 @@ export default class Grid extends PIXI.Container {
             });
             return;
         }
+
+        if (this.removingExtraTiles) return;
 
         if (!removeChip && tile instanceof ChipTile && tile.chip) {
             const interacting = this.historyManager.isInteracting();
