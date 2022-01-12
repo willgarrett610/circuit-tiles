@@ -771,7 +771,6 @@ export default class InteractiveGrid extends Grid {
     };
 
     update = () => {
-        console.log("interactive");
         super.update();
         this.renderChipOutlines(...this.gridPos);
         this.updateChipOutline();
