@@ -9,13 +9,68 @@ pub struct Node {
     arr_index: usize,
     index: usize,
     tile_type: i32,
-    state: i32,
+    state: bool,
+    updated: bool,
     inputs: Vec<i32>,
     outputs: Vec<i32>,
 }
 
+pub struct UpdateData {
+    index: usize,
+    state: bool
+}
+
+pub struct Graph {
+    nodes: Vec<Node>
+    updated: js_sys::Array
+}
+
+trait Update {
+    fn update_tile(&self, index: usize);
+}
+
+impl Update for Graph {
+    fn update_tile(&self, index: usize) {
+        let node: &Node = self.nodes[index];
+        
+        if node.updated { 
+            return;
+        }
+    
+        let mut inputState: bool = false;
+    
+        for in_index in node.inputs {
+            if self.nodes.state {
+                inputState = true;
+                break;
+            }
+        }
+    
+        // Invert input if node is a not tile
+        if node.tile_type == 1 {
+            inputState = !inputState;
+        }
+    
+        if node.state != inputState {
+            node.updated = true;
+            self.updated.push();
+        }
+    }
+}
+
+/* 
+Type numbers:
+Wire: 0
+Not: 1
+Diode: 2
+Delay: 3
+Lever: 4
+Button: 5
+ChipOutput: 6
+ChipInput: 7
+*/
 #[wasm_bindgen]
-pub fn compute_logic(nodes_data: Vec<i32>) -> Result<js_sys::Array, JsValue> {
+pub fn compute_logic(nodes_data: Vec<i32>, update_indices: Vec<i32>) -> Result<js_sys::Array, JsValue> {
     console_error_panic_hook::set_once();
     use web_sys::console;
     let arr = js_sys::Array::new();
@@ -38,7 +93,8 @@ pub fn compute_logic(nodes_data: Vec<i32>) -> Result<js_sys::Array, JsValue> {
             index: index_pair.0,
             arr_index: index_pair.1,
             tile_type: nodes_data[index_pair.0],
-            state: nodes_data[index_pair.0 + 1],
+            state: nodes_data[index_pair.0 + 1] != 0,
+            updated: false,
             inputs: Vec::new(),
             outputs: Vec::new(),
         };
@@ -69,6 +125,11 @@ pub fn compute_logic(nodes_data: Vec<i32>) -> Result<js_sys::Array, JsValue> {
         }
         nodes.push(node);
     }
+
+    for update_index in update_indices {
+
+    }
+
     // console::log_2(&"index_map: ".into(), &JsValue::from("bruh"));
 
     Ok(arr)
