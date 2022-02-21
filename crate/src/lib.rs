@@ -11,54 +11,66 @@ pub struct Node {
     tile_type: i32,
     state: bool,
     updated: bool,
-    inputs: Vec<i32>,
-    outputs: Vec<i32>,
+    inputs: Vec<usize>,
+    outputs: Vec<usize>,
 }
 
 pub struct UpdateData {
     index: usize,
-    state: bool
+    state: bool,
 }
 
 pub struct Graph {
-    nodes: Vec<Node>
-    updated: js_sys::Array
+    nodes: Vec<Node>,
+    updated: js_sys::Array,
 }
 
 trait Update {
-    fn update_tile(&self, index: usize);
+    fn update_values(&mut self, index: usize, state: bool);
 }
 
 impl Update for Graph {
-    fn update_tile(&self, index: usize) {
-        let node: &Node = self.nodes[index];
-        
-        if node.updated { 
-            return;
-        }
-    
-        let mut inputState: bool = false;
-    
-        for in_index in node.inputs {
-            if self.nodes.state {
-                inputState = true;
-                break;
-            }
-        }
-    
-        // Invert input if node is a not tile
-        if node.tile_type == 1 {
-            inputState = !inputState;
-        }
-    
-        if node.state != inputState {
+    fn update_values(&mut self, index: usize, state: bool) {
+        if self.nodes[index].state != state {
+            let mut node = &mut self.nodes[index];
             node.updated = true;
-            self.updated.push();
+            self.updated.push(&JsValue::from_f64(index as f64));
+            self.updated.push(&JsValue::from_bool(state));
         }
     }
 }
 
-/* 
+pub fn update_tile(graph: &mut Graph, index: usize) {
+    if graph.nodes[index].updated {
+        return;
+    }
+
+    let mut inputState: bool = false;
+
+    for i in &graph.nodes[index].inputs {
+        if graph.nodes[*i].state {
+            inputState = true;
+            break;
+        }
+    }
+
+    // Invert input if node is a not tile
+    if graph.nodes[index].tile_type == 1 {
+        inputState = !inputState;
+    }
+
+    graph.update_values(index, inputState);
+
+    //TODO Add logic for delay tile
+    for i in &graph.nodes[index].outputs {
+        let outNode = &graph.nodes[*i];
+        if outNode.state != graph.nodes[index].state {
+            update_tile(graph, *i);
+        }
+    }
+}
+
+/*
 Type numbers:
 Wire: 0
 Not: 1
@@ -70,7 +82,10 @@ ChipOutput: 6
 ChipInput: 7
 */
 #[wasm_bindgen]
-pub fn compute_logic(nodes_data: Vec<i32>, update_indices: Vec<i32>) -> Result<js_sys::Array, JsValue> {
+pub fn compute_logic(
+    nodes_data: Vec<i32>,
+    update_indices: Vec<i32>,
+) -> Result<js_sys::Array, JsValue> {
     console_error_panic_hook::set_once();
     use web_sys::console;
     let arr = js_sys::Array::new();
@@ -103,13 +118,13 @@ pub fn compute_logic(nodes_data: Vec<i32>, update_indices: Vec<i32>) -> Result<j
         let outputs_length = nodes_data[node.arr_index + 3] as usize;
 
         for i in node.arr_index + 4..inputs_length + node.arr_index + 4 {
-            node.inputs.push(nodes_data[i]);
+            node.inputs.push(nodes_data[i] as usize);
         }
 
         for i in
             node.arr_index + inputs_length + 4..outputs_length + node.arr_index + inputs_length + 4
         {
-            node.outputs.push(nodes_data[i]);
+            node.outputs.push(nodes_data[i] as usize);
         }
 
         console::log_1(&"---------------node---------------".into());
@@ -126,9 +141,7 @@ pub fn compute_logic(nodes_data: Vec<i32>, update_indices: Vec<i32>) -> Result<j
         nodes.push(node);
     }
 
-    for update_index in update_indices {
-
-    }
+    for update_index in update_indices {}
 
     // console::log_2(&"index_map: ".into(), &JsValue::from("bruh"));
 
