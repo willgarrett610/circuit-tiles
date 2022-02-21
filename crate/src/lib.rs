@@ -15,11 +15,6 @@ pub struct Node {
     outputs: Vec<usize>,
 }
 
-pub struct UpdateData {
-    index: usize,
-    state: bool,
-}
-
 pub struct Graph {
     nodes: Vec<Node>,
     updated: js_sys::Array,
@@ -45,27 +40,28 @@ pub fn update_tile(graph: &mut Graph, index: usize) {
         return;
     }
 
-    let mut inputState: bool = false;
+    let mut input_state: bool = false;
 
     for i in &graph.nodes[index].inputs {
         if graph.nodes[*i].state {
-            inputState = true;
+            input_state = true;
             break;
         }
     }
 
     // Invert input if node is a not tile
     if graph.nodes[index].tile_type == 1 {
-        inputState = !inputState;
+        input_state = !input_state;
     }
 
-    graph.update_values(index, inputState);
+    graph.update_values(index, input_state);
+
+    let outputs = graph.nodes[index].outputs.clone();
 
     //TODO Add logic for delay tile
-    for i in &graph.nodes[index].outputs {
-        let outNode = &graph.nodes[*i];
-        if outNode.state != graph.nodes[index].state {
-            update_tile(graph, *i);
+    for i in outputs {
+        if graph.nodes[i].state != graph.nodes[index].state {
+            update_tile(graph, i);
         }
     }
 }
@@ -88,11 +84,12 @@ pub fn compute_logic(
 ) -> Result<js_sys::Array, JsValue> {
     console_error_panic_hook::set_once();
     use web_sys::console;
-    let arr = js_sys::Array::new();
 
     let mut index_map: Vec<(usize, usize)> = Vec::new();
     let mut i: usize = 0;
     let mut map_index: usize = 0;
+
+    // Find the index of each node in the nodes_data array
     while i < nodes_data.len() {
         console::log_2(&"index: ".into(), &JsValue::from(i as i32));
         index_map.push((map_index, i));
@@ -103,6 +100,7 @@ pub fn compute_logic(
 
     let mut nodes: Vec<Node> = Vec::new();
 
+    // Contruct nodes from node_data
     for index_pair in index_map {
         let mut node = Node {
             index: index_pair.0,
@@ -141,9 +139,16 @@ pub fn compute_logic(
         nodes.push(node);
     }
 
-    for update_index in update_indices {}
+    let mut graph: Graph = Graph {
+        nodes: nodes,
+        updated: js_sys::Array::new(),
+    };
+
+    for update_index in update_indices {
+        update_tile(&mut graph, update_index as usize);
+    }
 
     // console::log_2(&"index_map: ".into(), &JsValue::from("bruh"));
 
-    Ok(arr)
+    Ok(graph.updated)
 }
