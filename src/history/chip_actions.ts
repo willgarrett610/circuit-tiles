@@ -27,10 +27,11 @@ interface RemoveChipPayload {
     grid: Grid;
 }
 
-// ! Issue with placedChips
 export const deleteChip: Action<RemoveChipPayload> = {
     do: ({ grid, chip }) => {
-        chip.chip.placedChips.delete(chip);
+        if (chip.chip.originalChip)
+            chip.chip.originalChip.placedChips.delete(chip);
+
         const index = grid.chips.indexOf(chip);
         if (index === -1) return;
         grid.dispatchHandler("postRemoveChip", chip);
@@ -38,7 +39,9 @@ export const deleteChip: Action<RemoveChipPayload> = {
         grid.update();
     },
     undo: ({ payload: { chip, grid } }) => {
-        chip.chip.placedChips.add(chip);
+        if (chip.chip.originalChip)
+            chip.chip.originalChip.placedChips.add(chip);
+
         grid.chips.push(chip);
         grid.dispatchHandler("postAddChip", chip);
         grid.update();

@@ -253,6 +253,8 @@ export class Chip {
         // TODO: update structure in locations
         // make sure to delete tile there (so this will remove the chips if they are there)
         // then place them
+        console.log("pre");
+        console.log(this.placedChips);
         for (const placedChip of this.placedChips) {
             const grid = placedChip.grid;
             if (grid instanceof InteractiveGrid) grid.prevCloneChip = undefined;
@@ -262,15 +264,18 @@ export class Chip {
             ) as [number, number];
             grid.removeTile(...gridLocation);
         }
+
+        console.log("post");
+        console.log(this.placedChips);
+
         for (const placedChip of this.placedChips) {
             const grid = placedChip.grid;
-            if (grid instanceof InteractiveGrid) grid.prevCloneChip = undefined;
 
             const gridLocation = add(
                 locationToTuple(placedChip.location),
                 offset
             ) as [number, number];
-            grid.removeTile(...gridLocation);
+
             const placedTile = grid.addTile(
                 ...gridLocation,
                 findType(tile.type) as TileType,
