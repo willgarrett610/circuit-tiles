@@ -370,6 +370,8 @@ export default class Grid extends PIXI.Container {
         return this.getTile(x, y) as Tile;
     }
 
+    removingExtraTiles = false;
+
     /**
      * Removes tile at location
      *
@@ -381,6 +383,16 @@ export default class Grid extends PIXI.Container {
     removeTile(x: number, y: number, removeChip = false) {
         const tile = this.getTile(x, y);
         if (!tile) return false;
+
+        if (
+            state.editMode === EditMode.ERASER &&
+            !state.chipEditor &&
+            tile instanceof ChipInputTile &&
+            tile.extraInputTile &&
+            !removeChip
+        ) {
+            this.removingExtraTiles = true;
+        }
 
         if (
             !removeChip &&
@@ -398,6 +410,8 @@ export default class Grid extends PIXI.Container {
             });
             return;
         }
+
+        if (this.removingExtraTiles) return;
 
         if (!removeChip && tile instanceof ChipTile && tile.chip) {
             const interacting = this.historyManager.isInteracting();
@@ -633,12 +647,23 @@ export default class Grid extends PIXI.Container {
             if (tile) tile.update(this.size);
     }
 
-    /** render all the chip outlines */
-    renderChipOutlines() {
+    /**
+     * render all the chip outlines
+     *
+     * @param mouseX
+     * @param mouseY
+     */
+    renderChipOutlines(mouseX: number, mouseY: number) {
         // TODO: make this more efficient
+        const tile = this.getTile(mouseX, mouseY);
         this.chipOutlines.removeChildren();
         for (const chip of this.chips) {
-            this.chipOutlines.addChild(chip.buildOutlineGraphic(this));
+            const hovering =
+                tile instanceof ChipTile &&
+                tile.chip?.scopeName === chip.scopeName;
+            this.chipOutlines.addChild(
+                chip.buildOutlineGraphic(this, hovering)
+            );
         }
     }
 
@@ -680,7 +705,6 @@ export default class Grid extends PIXI.Container {
         this.backgroundGraphics.height = height();
         this.renderGrid();
         this.renderTiles();
-        this.renderChipOutlines();
         this.renderSelection();
     }
 

@@ -83,9 +83,10 @@ export class PlacedChip {
      * build graphic for outline of chip
      *
      * @param grid
+     * @param hovering
      * @returns graphic for outline of chip
      */
-    buildOutlineGraphic(grid: Grid) {
+    buildOutlineGraphic(grid: Grid, hovering: boolean): PIXI.Graphics {
         const graphic = new PIXI.Graphics();
         const color = this.chip.color;
 
@@ -119,6 +120,8 @@ export class PlacedChip {
 
                 if (adjacentTile) continue;
 
+                const lineWidth = hovering ? 4 : 2;
+
                 const topLeft = grid.gridToScreen(
                     tileLocation[0],
                     tileLocation[1],
@@ -144,26 +147,56 @@ export class PlacedChip {
                     false
                 );
 
-                graphic.lineStyle(2, color);
+                const tileToRightLocation = add(
+                    tileLocation,
+                    Direction.getOffset(Direction.RIGHT)
+                ) as [number, number];
+                const tileToRight = this.getTile(...tileToRightLocation);
+
+                const tileToLeftLocation = add(
+                    tileLocation,
+                    Direction.getOffset(Direction.LEFT)
+                ) as [number, number];
+                const tileToLeft = this.getTile(...tileToLeftLocation);
+
+                graphic.lineStyle(lineWidth, color);
                 switch (direction) {
                     case Direction.UP: {
-                        graphic.moveTo(topLeft.x, topLeft.y);
-                        graphic.lineTo(topRight.x, topRight.y);
+                        graphic.moveTo(
+                            topLeft.x - (tileToLeft ? lineWidth : 0),
+                            topLeft.y + lineWidth / 2
+                        );
+                        graphic.lineTo(
+                            topRight.x + (tileToRight ? lineWidth : 0),
+                            topRight.y + lineWidth / 2
+                        );
                         break;
                     }
                     case Direction.DOWN: {
-                        graphic.moveTo(bottomLeft.x, bottomLeft.y);
-                        graphic.lineTo(bottomRight.x, bottomRight.y);
+                        graphic.moveTo(
+                            bottomLeft.x - (tileToLeft ? lineWidth : 0),
+                            bottomLeft.y - lineWidth / 2
+                        );
+                        graphic.lineTo(
+                            bottomRight.x + (tileToRight ? lineWidth : 0),
+                            bottomRight.y - lineWidth / 2
+                        );
                         break;
                     }
                     case Direction.LEFT: {
-                        graphic.moveTo(topLeft.x, topLeft.y);
-                        graphic.lineTo(bottomLeft.x, bottomLeft.y);
+                        graphic.moveTo(topLeft.x + lineWidth / 2, topLeft.y);
+                        graphic.lineTo(
+                            bottomLeft.x + lineWidth / 2,
+                            bottomLeft.y
+                        );
                         break;
                     }
                     case Direction.RIGHT: {
-                        graphic.moveTo(topRight.x, topRight.y);
-                        graphic.lineTo(bottomRight.x, bottomRight.y);
+                        graphic.moveTo(topRight.x - lineWidth / 2, topRight.y);
+                        graphic.lineTo(
+                            bottomRight.x - lineWidth / 2,
+                            bottomRight.y
+                        );
                         break;
                     }
                 }
