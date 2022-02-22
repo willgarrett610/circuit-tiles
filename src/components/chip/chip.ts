@@ -2,7 +2,7 @@
 import { gridManager } from "../..";
 import { showStructureClashAlert } from "../../menus/structure_clash_alert";
 import state, { setState } from "../../state";
-import { locationToTuple } from "../../utils";
+import { locationToPair, locationToTuple } from "../../utils";
 import ChipGridMode from "../../utils/chip_grid_mode";
 import { Direction, Rotation } from "../../utils/directions";
 import { add, sub } from "../../utils/math";
@@ -14,6 +14,7 @@ import ChipTile from "../tiles/chip_tile";
 import IOTile from "../tiles/io_tile";
 import StructureTile from "../tiles/structure_tile";
 import { Tile } from "../tiles/tile";
+import { findType, TileType } from "../tiles/tile_types";
 import { PlacedChip } from "./placed_chip";
 
 /**
@@ -32,6 +33,9 @@ export class Chip {
     originalChip?: Chip;
 
     placedChips = new Set<PlacedChip>();
+
+    topLeftStructure: [x: number, y: number] | undefined;
+    prevTopLeftStructure: [x: number, y: number] | undefined;
 
     /**
      * Chip constructor
@@ -187,6 +191,16 @@ export class Chip {
      * @param tile added structure tile
      */
     async structureTileAdded(tile: ChipTile) {
+        this.prevTopLeftStructure = this.topLeftStructure;
+        this.topLeftStructure = this.getTopLeftStructure();
+
+        if (!this.prevTopLeftStructure)
+            this.prevTopLeftStructure = this.topLeftStructure;
+
+        const topLeftDiff = sub(
+            this.topLeftStructure,
+            this.prevTopLeftStructure
+        ) as [number, number];
         // const key = Object.keys(this.structure).find(
         //     (x) => this.structure[x]?.id === tile.id
         // );
@@ -195,7 +209,10 @@ export class Chip {
         //     const x = parseInt(split[0]);
         //     const y = parseInt(split[1]);
         // }
-        const offset = sub(locationToTuple(tile), this.getTopLeftStructure());
+        const offset = sub(
+            locationToTuple(tile),
+            this.prevTopLeftStructure
+        ) as [number, number];
         let clashes = false;
         for (const placedChip of this.placedChips) {
             const grid = placedChip.grid;
@@ -219,20 +236,67 @@ export class Chip {
         }
 
         // ! Issue with top left value changing ruins checking.
+        // ! this should be working once tile updating is done
         if (clashes && !state.ignoreStructureClashWarning) {
             // give warning to user
             const result = await showStructureClashAlert();
 
-            if (!result.continue) gridManager.getGrid().historyManager.undo();
+            if (!result.continue) {
+                gridManager.getGrid().historyManager.undo();
+                return;
+            }
 
             if (result.ignoreFurther)
                 setState({ ignoreStructureClashWarning: true });
         }
 
         // TODO: update structure in locations
+        // make sure to delete tile there (so this will remove the chips if they are there)
+        // then place them
         for (const placedChip of this.placedChips) {
             const grid = placedChip.grid;
             if (grid instanceof InteractiveGrid) grid.prevCloneChip = undefined;
+            const gridLocation = add(
+                locationToTuple(placedChip.location),
+                offset
+            ) as [number, number];
+            grid.removeTile(...gridLocation);
+        }
+        for (const placedChip of this.placedChips) {
+            const grid = placedChip.grid;
+            if (grid instanceof InteractiveGrid) grid.prevCloneChip = undefined;
+
+            const gridLocation = add(
+                locationToTuple(placedChip.location),
+                offset
+            ) as [number, number];
+            grid.removeTile(...gridLocation);
+            const placedTile = grid.addTile(
+                ...gridLocation,
+                findType(tile.type) as TileType,
+                undefined,
+                undefined
+            ) as ChipTile | undefined;
+
+            if (placedTile) {
+                if (placedTile instanceof ChipOutputTile)
+                    placedTile.hue = (tile as ChipOutputTile).hue;
+                placedTile.id = tile.id;
+                placedTile.chip = placedChip;
+                placedChip.setTile(...gridLocation, placedTile);
+                if (placedTile instanceof IOTile) {
+                    placedTile.generateText();
+                }
+                placedTile.updateContainer();
+            }
+            grid.update();
+
+            placedChip.location = locationToPair(
+                add(locationToTuple(placedChip.location), topLeftDiff) as [
+                    number,
+                    number
+                ]
+            );
         }
     }
 
@@ -294,7 +358,7 @@ export class Chip {
      *
      * @returns top left tile location of structure
      */
-    getTopLeftStructure() {
+    getTopLeftStructure(): [number, number] {
         const structureTiles = Object.values(this.structure);
 
         if (structureTiles.length === 0) return [0, 0];

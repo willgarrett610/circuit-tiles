@@ -375,7 +375,7 @@ export default class Grid extends PIXI.Container {
      *
      * @param x x coordinate
      * @param y y coordinate
-     * @param removeChip whether you are moving a chip (you do no need to handle this)
+     * @param removeChip whether you are moving a chip (Leave this as default value)
      * @returns success of deletion
      */
     removeTile(x: number, y: number, removeChip = false) {
