@@ -37,6 +37,8 @@ export class Chip {
     topLeftStructure: [x: number, y: number] | undefined;
     prevTopLeftStructure: [x: number, y: number] | undefined;
 
+    chipDependencies = new Set<Chip>();
+
     /**
      * Chip constructor
      *
@@ -201,14 +203,7 @@ export class Chip {
             this.topLeftStructure,
             this.prevTopLeftStructure
         ) as [number, number];
-        // const key = Object.keys(this.structure).find(
-        //     (x) => this.structure[x]?.id === tile.id
-        // );
-        // if (key) {
-        //     const split = key.split(",");
-        //     const x = parseInt(split[0]);
-        //     const y = parseInt(split[1]);
-        // }
+
         const offset = sub(
             locationToTuple(tile),
             this.prevTopLeftStructure
@@ -216,13 +211,6 @@ export class Chip {
         let clashes = false;
         for (const placedChip of this.placedChips) {
             const grid = placedChip.grid;
-            console.log({
-                placedChip,
-                grid,
-                pcLoc: placedChip.location,
-                offset,
-                loc: add(locationToTuple(placedChip.location), offset),
-            });
 
             const gridLocation = add(
                 locationToTuple(placedChip.location),
@@ -235,8 +223,6 @@ export class Chip {
             }
         }
 
-        // ! Issue with top left value changing ruins checking.
-        // ! this should be working once tile updating is done
         if (clashes && !state.ignoreStructureClashWarning) {
             // give warning to user
             const result = await showStructureClashAlert();
@@ -250,11 +236,6 @@ export class Chip {
                 setState({ ignoreStructureClashWarning: true });
         }
 
-        // TODO: update structure in locations
-        // make sure to delete tile there (so this will remove the chips if they are there)
-        // then place them
-        console.log("pre");
-        console.log(this.placedChips);
         for (const placedChip of this.placedChips) {
             const grid = placedChip.grid;
             if (grid instanceof InteractiveGrid) grid.prevCloneChip = undefined;
@@ -264,9 +245,6 @@ export class Chip {
             ) as [number, number];
             grid.removeTile(...gridLocation);
         }
-
-        console.log("post");
-        console.log(this.placedChips);
 
         for (const placedChip of this.placedChips) {
             const grid = placedChip.grid;
@@ -296,6 +274,48 @@ export class Chip {
             }
             grid.update();
 
+            placedChip.location = locationToPair(
+                add(locationToTuple(placedChip.location), topLeftDiff) as [
+                    number,
+                    number
+                ]
+            );
+        }
+    }
+
+    /**
+     * Called when a structure tile is removed
+     *
+     * @param tile removed structure tile
+     */
+    async structureTileRemoved(tile: Tile) {
+        this.prevTopLeftStructure = this.topLeftStructure;
+        this.topLeftStructure = this.getTopLeftStructure();
+
+        if (!this.prevTopLeftStructure)
+            this.prevTopLeftStructure = this.topLeftStructure;
+
+        const topLeftDiff = sub(
+            this.topLeftStructure,
+            this.prevTopLeftStructure
+        ) as [number, number];
+
+        const offset = sub(
+            locationToTuple(tile),
+            this.prevTopLeftStructure
+        ) as [number, number];
+
+        for (const placedChip of this.placedChips) {
+            const grid = placedChip.grid;
+            if (grid instanceof InteractiveGrid) grid.prevCloneChip = undefined;
+            const gridLocation = add(
+                locationToTuple(placedChip.location),
+                offset
+            ) as [number, number];
+            grid.removeTile(...gridLocation, true);
+            placedChip.deleteTile(...gridLocation);
+
+            grid.update();
             placedChip.location = locationToPair(
                 add(locationToTuple(placedChip.location), topLeftDiff) as [
                     number,

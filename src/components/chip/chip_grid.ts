@@ -52,7 +52,9 @@ export default class ChipGrid {
             });
         });
 
-        this.grids.structure.addHandler("postRemoveTile", () => {
+        this.grids.structure.addHandler("postRemoveTile", (tile) => {
+            this.chip.structureTileRemoved(tile);
+
             setState({
                 isStructured: this.chip.isStructured(),
                 editedChip: update,
