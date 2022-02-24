@@ -30,13 +30,16 @@ export default class HistoryManager {
      * @param action Action to be performed
      * @param payload Payload of the action
      * @param redo True if this is a redo
+     * @param record if true, the action will be recorded
      */
     performAction<T>(
         action: Action<T, any>,
         payload: T,
-        redo: boolean = false
+        redo = false,
+        record = true
     ) {
         const prevValue = action.do(payload);
+        if (!record) return;
         if (this.interacting) {
             this.interactionHistory.push({ action, payload, prevValue });
         } else {

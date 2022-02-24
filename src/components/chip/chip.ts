@@ -258,7 +258,8 @@ export class Chip {
                 ...gridLocation,
                 findType(tile.type) as TileType,
                 undefined,
-                undefined
+                undefined,
+                true
             ) as ChipTile | undefined;
 
             if (placedTile) {
@@ -312,7 +313,7 @@ export class Chip {
                 locationToTuple(placedChip.location),
                 offset
             ) as [number, number];
-            grid.removeTile(...gridLocation, true);
+            grid.removeTile(...gridLocation, true, true);
             placedChip.deleteTile(...gridLocation);
 
             grid.update();

@@ -295,6 +295,7 @@ export default class Grid extends PIXI.Container {
      * @param type tile to add
      * @param prevTile last tile added
      * @param direction direction of placement
+     * @param noHistory if history shouldn't be recorded
      * @returns tile if add was successful, undefined otherwise
      */
     addTile(
@@ -302,7 +303,8 @@ export default class Grid extends PIXI.Container {
         y: number,
         type: TileType,
         prevTile: Tile | undefined,
-        direction: Direction | undefined
+        direction: Direction | undefined,
+        noHistory = false
     ): Tile | undefined {
         const tileAtLocation = this.getTile(x, y);
         if (tileAtLocation) {
@@ -319,12 +321,17 @@ export default class Grid extends PIXI.Container {
                 const newTileAtLocation =
                     tileAtLocation.clone() as ChipInputTile;
                 newTileAtLocation.setExtraInputTile(extraTile);
-                this.historyManager.performAction(editTile, {
-                    x,
-                    y,
-                    tile: newTileAtLocation,
-                    grid: this,
-                });
+                this.historyManager.performAction(
+                    editTile,
+                    {
+                        x,
+                        y,
+                        tile: newTileAtLocation,
+                        grid: this,
+                    },
+                    false,
+                    !noHistory
+                );
                 tileAtLocation.chip?.deleteTile(x, y);
                 tileAtLocation.chip?.setTile(x, y, newTileAtLocation);
             }
@@ -353,12 +360,17 @@ export default class Grid extends PIXI.Container {
         const interacting = this.historyManager.isInteracting();
         if (!interacting) this.historyManager.beginInteraction();
 
-        this.historyManager.performAction(setTile, {
-            x,
-            y,
-            tile: tileObj,
-            grid: this,
-        });
+        this.historyManager.performAction(
+            setTile,
+            {
+                x,
+                y,
+                tile: tileObj,
+                grid: this,
+            },
+            false,
+            !noHistory
+        );
 
         if (prevTile && direction !== undefined)
             this.connectTiles(tileObj, prevTile, direction);
@@ -378,9 +390,10 @@ export default class Grid extends PIXI.Container {
      * @param x x coordinate
      * @param y y coordinate
      * @param removeChip whether you are moving a chip (Leave this as default value)
+     * @param noHistory if history shouldn't be recorded
      * @returns success of deletion
      */
-    removeTile(x: number, y: number, removeChip = false) {
+    removeTile(x: number, y: number, removeChip = false, noHistory = false) {
         const tile = this.getTile(x, y);
         if (!tile) return false;
 
@@ -402,12 +415,17 @@ export default class Grid extends PIXI.Container {
         ) {
             const newTile = tile.clone() as ChipInputTile;
             newTile.setExtraInputTile(undefined);
-            this.historyManager.performAction(editTile, {
-                x,
-                y,
-                tile: newTile,
-                grid: this,
-            });
+            this.historyManager.performAction(
+                editTile,
+                {
+                    x,
+                    y,
+                    tile: newTile,
+                    grid: this,
+                },
+                false,
+                !noHistory
+            );
             return;
         }
 
@@ -416,19 +434,30 @@ export default class Grid extends PIXI.Container {
         if (!removeChip && tile instanceof ChipTile && tile.chip) {
             const interacting = this.historyManager.isInteracting();
             if (!interacting) this.historyManager.beginInteraction();
-            this.historyManager.performAction(deleteChip, {
-                grid: this,
-                chip: tile.chip,
-            });
+            this.historyManager.performAction(
+                deleteChip,
+                {
+                    grid: this,
+                    chip: tile.chip,
+                },
+                false,
+                !noHistory
+            );
 
             for (const chipTile of Object.values(tile.chip.tiles)) {
-                if (chipTile) this.removeTile(chipTile.x, chipTile.y, true);
+                if (chipTile)
+                    this.removeTile(chipTile.x, chipTile.y, true, noHistory);
             }
             if (!interacting) this.historyManager.endInteraction();
             return;
         }
 
-        this.historyManager.performAction(deleteTile, { x, y, grid: this });
+        this.historyManager.performAction(
+            deleteTile,
+            { x, y, grid: this },
+            false,
+            !noHistory
+        );
 
         const removalSpots: {
             offset: number[];
@@ -451,12 +480,17 @@ export default class Grid extends PIXI.Container {
             ) {
                 const newTile = adjacentTile.clone();
                 newTile.setConnection(removalSpot.side, false);
-                this.historyManager.performAction(editTile, {
-                    x: newTile.x,
-                    y: newTile.y,
-                    tile: newTile,
-                    grid: this,
-                });
+                this.historyManager.performAction(
+                    editTile,
+                    {
+                        x: newTile.x,
+                        y: newTile.y,
+                        tile: newTile,
+                        grid: this,
+                    },
+                    false,
+                    !noHistory
+                );
             }
         }
         return true;
