@@ -26,8 +26,6 @@ import { add, sub } from "../../utils/math";
 import { Chip } from "../chip/chip";
 import { PlacedChip } from "../chip/placed_chip";
 import ChipOutputTile from "../tiles/chip_output_tile";
-import ChipTile from "../tiles/chip_tile";
-import IOTile from "../tiles/io_tile";
 import { Tile } from "../tiles/tile";
 import { ChipOutputTileType, findType, TileType } from "../tiles/tile_types";
 import Grid from "./grid";
@@ -357,57 +355,36 @@ export default class InteractiveGrid extends Grid {
      *
      * @param originalChip
      * @param location
+     * @param recordHistory
+     * @param injectPlaceChip
      */
-    placeChip(originalChip: Chip, location: [number, number]) {
+    placeChip(
+        originalChip: Chip,
+        location: [number, number],
+        recordHistory = true,
+        injectPlaceChip: PlacedChip | undefined = undefined
+    ) {
         const chip = originalChip.clone(true);
         chip.rotate(state.chipPlacementRotation);
 
         if (!this.isValidChipPlacement(location, chip)) return;
-        const structure = chip.structure;
-        const structureTiles = Object.values(structure);
-        const offset = chip.getTopLeftStructure() as [number, number];
 
         this.historyManager.beginInteraction();
-        const placedChip = new PlacedChip(
-            locationToPair(location),
-            Rotation.NORMAL,
-            chip,
-            this
-        );
+        const placedChip =
+            injectPlaceChip ||
+            new PlacedChip(
+                locationToPair(location),
+                Rotation.NORMAL,
+                chip,
+                this
+            );
 
         this.historyManager.performAction(setChip, {
             grid: this,
             chip: placedChip,
         });
 
-        // this.chips.push(placedChip);
-
-        for (const structureTile of structureTiles) {
-            if (!structureTile) continue;
-            const tileLocation = sub(
-                add(location, [structureTile.x, structureTile.y]),
-                offset
-            ) as [number, number];
-            const placedTile = this.addTile(
-                ...tileLocation,
-                findType(structureTile.type) as TileType,
-                undefined,
-                undefined
-            ) as ChipTile | undefined;
-
-            if (placedTile) {
-                if (placedTile instanceof ChipOutputTile)
-                    placedTile.hue = (structureTile as ChipOutputTile).hue;
-                placedTile.id = structureTile.id;
-                placedTile.chip = placedChip;
-                placedChip.setTile(...tileLocation, placedTile);
-                if (placedTile instanceof IOTile) {
-                    placedTile.generateText();
-                }
-                placedTile.updateContainer();
-            }
-        }
-        this.historyManager.endInteraction();
+        this.historyManager.endInteraction(!recordHistory);
     }
 
     /**

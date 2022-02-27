@@ -48,7 +48,6 @@ export default class HistoryManager {
         if (!redo) {
             this.undoHistory = [];
         }
-        // (window as any).gridHistory = this.history;
     }
 
     /**
@@ -60,10 +59,12 @@ export default class HistoryManager {
 
     /**
      * End an interaction that is stored in the history
+     *
+     * @param discard is true, the interaction will be discarded
      */
-    endInteraction() {
+    endInteraction(discard = false) {
         this.interacting = false;
-        if (this.interactionHistory.length > 0)
+        if (this.interactionHistory.length > 0 && !discard)
             this.history.push(this.interactionHistory);
         this.interactionHistory = [];
     }

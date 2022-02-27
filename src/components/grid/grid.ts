@@ -432,32 +432,15 @@ export default class Grid extends PIXI.Container {
         if (this.removingExtraTiles) return;
 
         if (!removeChip && tile instanceof ChipTile && tile.chip) {
-            const interacting = this.historyManager.isInteracting();
-            if (!interacting) this.historyManager.beginInteraction();
+            this.removeChip(tile.chip, !noHistory);
+        } else {
             this.historyManager.performAction(
-                deleteChip,
-                {
-                    grid: this,
-                    chip: tile.chip,
-                },
+                deleteTile,
+                { x, y, grid: this },
                 false,
                 !noHistory
             );
-
-            for (const chipTile of Object.values(tile.chip.tiles)) {
-                if (chipTile)
-                    this.removeTile(chipTile.x, chipTile.y, true, noHistory);
-            }
-            if (!interacting) this.historyManager.endInteraction();
-            return;
         }
-
-        this.historyManager.performAction(
-            deleteTile,
-            { x, y, grid: this },
-            false,
-            !noHistory
-        );
 
         const removalSpots: {
             offset: number[];
@@ -494,6 +477,29 @@ export default class Grid extends PIXI.Container {
             }
         }
         return true;
+    }
+
+    /**
+     * removed specified chip
+     *
+     * @param placedChip placed chip to be removed
+     * @param recordHistory if true, record history
+     */
+    removeChip(placedChip: PlacedChip, recordHistory = true) {
+        const interacting = this.historyManager.isInteracting();
+        if (!interacting) this.historyManager.beginInteraction();
+
+        this.historyManager.performAction(
+            deleteChip,
+            {
+                grid: this,
+                chip: placedChip,
+            },
+            false,
+            recordHistory
+        );
+
+        if (!interacting) this.historyManager.endInteraction(!recordHistory);
     }
 
     /**
