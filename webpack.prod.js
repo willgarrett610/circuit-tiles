@@ -4,6 +4,7 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 module.exports = {
     mode: "production",
@@ -41,6 +42,9 @@ module.exports = {
         }),
         new CopyPlugin({
             patterns: [{ from: "assets", to: "assets" }]
+        }),
+        new CleanWebpackPlugin({
+            cleanAfterEveryBuildPatterns: ["dist"]
         }),
         new WasmPackPlugin({
             crateDirectory: path.join(__dirname, "crate"),

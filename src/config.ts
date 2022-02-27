@@ -13,6 +13,7 @@ const config = {
         activeTile: 0xd9514c,
         inactiveTile: 0x420f0d,
         menu: 0xaaaaaa,
+        menuOut: 0x8c8c8c,
         menuHeader: 0x888888,
         // activeOutput: 0x37b514,
         // inactiveOutput: 0x174709,

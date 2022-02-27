@@ -47,7 +47,7 @@ export default class SelectorMenu extends GUIWindow {
         onSelectionChange: (i: number) => void
     ) {
         // Create window for this
-        super(x, y, width, height, config.colors.menu, 4);
+        super(x, y, width, height, config.colors.menuOut);
         this.scrollableY = true;
         this.scrollMarginY = config.tileSelector.margin * 2;
         this.title = title;
@@ -108,10 +108,10 @@ export default class SelectorMenu extends GUIWindow {
 
         // Add header text to Selector window
         const headerText = new PIXI.Text(this.title, {
-            fontFamily: "Arial",
+            fontFamily: '"Lucida Console", Monaco, monospace',
             fontSize: 24,
             fill: 0x000000,
-            fontWeight: "bold",
+            // fontWeight: "bold",
         });
         headerText.x = 75 - headerText.width / 2;
         headerText.y = 10;

@@ -4,17 +4,12 @@ import * as PIXI from "pixi.js";
 import { gridManager } from "../..";
 import config from "../../config";
 import { setChip } from "../../history/chip_actions";
-import state, { setState, subscribe } from "../../state";
+import state, { subscribe } from "../../state";
 import { height, locationToPair, locationToTuple, width } from "../../utils";
 import { Interaction } from "../../utils/action";
 import ChipGridMode from "../../utils/chip_grid_mode";
 import { displayContextMenu } from "../../utils/context_menu";
-import {
-    Direction,
-    rotateClockWise,
-    Rotation,
-    rotationToString,
-} from "../../utils/directions";
+import { Direction, Rotation, rotationToString } from "../../utils/directions";
 import { EditMode } from "../../utils/edit_mode";
 import {
     CMouseEvent,
@@ -341,11 +336,12 @@ export default class InteractiveGrid extends Grid {
             });
 
         if (state.editMode === EditMode.CHIP) {
-            setState({
-                chipPlacementRotation: rotateClockWise(
-                    state.chipPlacementRotation
-                ),
-            });
+            // ! DISABLED FOR NOW
+            // setState({
+            //     chipPlacementRotation: rotateClockWise(
+            //         state.chipPlacementRotation
+            //     ),
+            // });
             this.update();
         }
     };

@@ -73,10 +73,7 @@ interface RemoveChipPayload {
 export const deleteChip: Action<RemoveChipPayload> = {
     do: ({ grid, chip: placedChip }) => {
         if (placedChip.chip.originalChip) {
-            console.log("REMOVING");
-            console.log(placedChip.chip.originalChip.placedChips);
             placedChip.chip.originalChip.placedChips.delete(placedChip);
-            console.log(placedChip.chip.originalChip.placedChips);
         } else {
             placedChip.chip.placedChips.delete(placedChip);
         }
@@ -93,7 +90,6 @@ export const deleteChip: Action<RemoveChipPayload> = {
         grid.update();
     },
     undo: ({ payload: { chip: placedChip, grid } }) => {
-        console.log(placedChip.chip);
         (grid as InteractiveGrid).placeChip(
             placedChip.chip?.originalChip || placedChip.chip,
             locationToTuple(placedChip.location),

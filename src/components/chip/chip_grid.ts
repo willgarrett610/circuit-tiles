@@ -1,4 +1,5 @@
 import state, { setState, update } from "../../state";
+import InteractiveChipGrid from "../grid/interactive_chip_grid";
 import InteractiveGrid from "../grid/interactive_grid";
 import ChipInputTile from "../tiles/chip_input_tile";
 import ChipOutputTile from "../tiles/chip_output_tile";
@@ -9,7 +10,7 @@ import { Chip } from "./chip";
 export default class ChipGrid {
     chip: Chip;
     grids: {
-        chip: InteractiveGrid;
+        chip: InteractiveChipGrid;
         structure: InteractiveGrid;
     };
 
@@ -21,7 +22,7 @@ export default class ChipGrid {
     constructor(chip: Chip) {
         this.chip = chip;
         this.grids = {
-            chip: new InteractiveGrid(100, chip.tiles),
+            chip: new InteractiveChipGrid(100, chip.tiles),
             structure: new InteractiveGrid(100, chip.structure),
         };
 
