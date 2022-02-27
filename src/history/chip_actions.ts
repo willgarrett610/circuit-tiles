@@ -17,7 +17,7 @@ interface PlaceChipPayload {
 export const setChip: Action<PlaceChipPayload> = {
     do: ({ grid, chip: placedChip }) => {
         grid.chips.push(placedChip);
-        const chip = placedChip.chip;
+        const chip = placedChip.chip.originalChip || placedChip.chip;
         const structure = chip.structure;
         const structureTiles = Object.values(structure);
         const offset = chip.getTopLeftStructure() as [number, number];
@@ -93,8 +93,9 @@ export const deleteChip: Action<RemoveChipPayload> = {
         grid.update();
     },
     undo: ({ payload: { chip: placedChip, grid } }) => {
+        console.log(placedChip.chip);
         (grid as InteractiveGrid).placeChip(
-            placedChip.chip?.originalChip ?? placedChip.chip,
+            placedChip.chip?.originalChip || placedChip.chip,
             locationToTuple(placedChip.location),
             false,
             placedChip
