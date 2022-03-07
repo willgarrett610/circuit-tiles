@@ -11,6 +11,8 @@ const textureFiles = [
     ["add", "./assets/sprites/add.svg"],
     ["cursor", "./assets/sprites/cursor.png"],
     ["swap", "./assets/sprites/swap.png"],
+    ["play", "./assets/sprites/play.svg"],
+    ["pause", "./assets/sprites/pause.svg"],
 ];
 
 const loadSprites = () => {

@@ -36,6 +36,8 @@ interface State {
     chipPlacementRotation: Rotation;
     /** currently show pop-ups */
     openMenus: JSX.Element[];
+    /** whether the circuit is running or nor */
+    running: boolean;
 }
 
 export type Updater = undefined;
@@ -67,6 +69,7 @@ const state: State = {
     selectableTiles: [],
     chipPlacementRotation: Rotation.NORMAL,
     openMenus: [],
+    running: true,
 };
 
 interface StateCallback {
