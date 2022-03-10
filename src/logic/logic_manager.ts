@@ -11,7 +11,10 @@ export const beginLoop = async (interval: number) => {
     loop = setInterval(() => {
         const grid = gridManager.mainGrid;
         const graph = Graph.genFromGrid(grid);
+        console.log(graph);
         const nodes = graph.convertForRust();
+        console.log(nodes);
+        console.log(updatedTiles);
 
         const updatedIndices = [];
 
@@ -23,6 +26,8 @@ export const beginLoop = async (interval: number) => {
             }
         }
         updatedTiles = [];
+
+        console.log(updatedIndices);
 
         const updates = lib.compute_logic(
             nodes,

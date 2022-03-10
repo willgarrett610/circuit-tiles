@@ -26,41 +26,80 @@ trait Update {
 
 impl Update for Graph {
     fn update_values(&mut self, index: usize, state: bool) {
+        console_error_panic_hook::set_once();
+        use web_sys::console;
+        console::log_1(&JsValue::from("update"));
+        console::log_2(&JsValue::from(index as f64), &JsValue::from(state));
         if self.nodes[index].state != state {
             let mut node = &mut self.nodes[index];
             node.updated = true;
+            node.state = state;
             self.updated.push(&JsValue::from_f64(index as f64));
             self.updated.push(&JsValue::from_bool(state));
+
+            console::log_1(&JsValue::from_str("Updated: "));
+            console::log_2(&JsValue::from(index as f64), &JsValue::from(state));
         }
     }
 }
 
+fn willStateChange(state1: bool, state2: bool, tile_type: i32) -> bool {
+    return if tile_type == 1 {
+        state1 == state2
+    } else {
+        state1 != state2
+    };
+}
+
 pub fn update_tile(graph: &mut Graph, index: usize) {
+    console_error_panic_hook::set_once();
+    use web_sys::console;
     if graph.nodes[index].updated {
+        console::log_2(
+            &JsValue::from("already updated"),
+            &JsValue::from(index as f64),
+        );
         return;
     }
+    console::log_2(&JsValue::from("update tile"), &JsValue::from(index as f64));
 
-    let mut input_state: bool = false;
+    let node = &graph.nodes[index];
 
-    for i in &graph.nodes[index].inputs {
-        if graph.nodes[*i].state {
-            input_state = true;
-            break;
+    // TODO I don't like this
+    if node.tile_type != 4 && node.tile_type != 5 {
+        let mut input_state: bool = false;
+
+        for i in &graph.nodes[index].inputs {
+            if graph.nodes[*i].state {
+                input_state = true;
+                break;
+            }
         }
-    }
 
-    // Invert input if node is a not tile
-    if graph.nodes[index].tile_type == 1 {
-        input_state = !input_state;
-    }
+        console::log_1(&JsValue::from("will update"));
 
-    graph.update_values(index, input_state);
+        // Invert input if node is a not tile
+        if graph.nodes[index].tile_type == 1 {
+            input_state = !input_state;
+        }
+
+        graph.update_values(index, input_state);
+    }
 
     let outputs = graph.nodes[index].outputs.clone();
 
     //TODO Add logic for delay tile
     for i in outputs {
-        if graph.nodes[i].state != graph.nodes[index].state {
+        console::log_2(&JsValue::from("i"), &JsValue::from(i as f64));
+        console::log_2(
+            &JsValue::from(graph.nodes[i].state),
+            &JsValue::from(graph.nodes[index].state),
+        );
+        if willStateChange(
+            graph.nodes[i].state,
+            graph.nodes[index].state,
+            graph.nodes[i].tile_type,
+        ) {
             update_tile(graph, i);
         }
     }
@@ -105,8 +144,8 @@ pub fn compute_logic(
         let mut node = Node {
             index: index_pair.0,
             arr_index: index_pair.1,
-            tile_type: nodes_data[index_pair.0],
-            state: nodes_data[index_pair.0 + 1] != 0,
+            tile_type: nodes_data[index_pair.1],
+            state: nodes_data[index_pair.1 + 1] != 0,
             updated: false,
             inputs: Vec::new(),
             outputs: Vec::new(),
