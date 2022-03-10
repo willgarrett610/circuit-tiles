@@ -6,6 +6,9 @@ import { loadSprites } from "./components/sprites/sprite_loader";
 import { initContextMenu } from "./utils/context_menu";
 import { setupMenus } from "./menus";
 import { handleEvent } from "./utils/event";
+import Graph from "./logic/graph";
+import { subscribe } from "./state";
+import { beginLoop, stopLoop } from "./logic/logic_manager";
 
 PIXI.utils.skipHello();
 
@@ -36,10 +39,19 @@ const main = async () => {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).gridManager = gridManager;
+    (window as any).graph = Graph;
 
     app.stage.addChild(gridManager);
 
     loadSprites().then(() => initGUI(app));
+
+    subscribe("running", (runnning) => {
+        if (runnning) {
+            beginLoop(500);
+        } else {
+            stopLoop();
+        }
+    });
 
     window.addEventListener("contextmenu", (e) => {
         e.preventDefault();

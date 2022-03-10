@@ -1,5 +1,6 @@
 import config from "../../config";
 import CircuitLocation from "../../logic/circuit_location";
+import { addUpdatedTile } from "../../logic/logic_manager";
 import LogicNode from "../../logic/node";
 import { ConnectionType, GraphicsTile } from "./tile";
 
@@ -57,6 +58,7 @@ export default class LeverTile extends GraphicsTile {
         this.container.on("click", () => {
             this.signalActive = !this.signalActive;
             this.updateContainer();
+            addUpdatedTile(this);
         });
     }
 
