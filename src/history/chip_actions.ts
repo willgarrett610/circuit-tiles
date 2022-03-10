@@ -16,8 +16,10 @@ interface PlaceChipPayload {
 
 export const setChip: Action<PlaceChipPayload> = {
     do: ({ grid, chip: placedChip }) => {
+        placedChip.tiles = {};
         grid.chips.push(placedChip);
-        const chip = placedChip.chip.originalChip || placedChip.chip;
+        const chip = placedChip.chip.getRootOriginal();
+        chip.placedChips.add(placedChip);
         const structure = chip.structure;
         const structureTiles = Object.values(structure);
         const offset = chip.getTopLeftStructure() as [number, number];
@@ -56,12 +58,7 @@ export const setChip: Action<PlaceChipPayload> = {
         grid.update();
     },
     undo: ({ payload: { chip, grid } }) => {
-        const index = grid.chips.indexOf(chip);
-        if (index === -1) return;
         grid.removeChip(chip, false);
-        grid.dispatchHandler("postRemoveChip", chip);
-        grid.chips.splice(index, 1);
-        grid.update();
     },
 };
 
@@ -72,8 +69,8 @@ interface RemoveChipPayload {
 
 export const deleteChip: Action<RemoveChipPayload> = {
     do: ({ grid, chip: placedChip }) => {
-        if (placedChip.chip.originalChip) {
-            placedChip.chip.originalChip.placedChips.delete(placedChip);
+        if (placedChip.chip.getRootOriginal()) {
+            placedChip.chip.getRootOriginal().placedChips.delete(placedChip);
         } else {
             placedChip.chip.placedChips.delete(placedChip);
         }
@@ -90,8 +87,10 @@ export const deleteChip: Action<RemoveChipPayload> = {
         grid.update();
     },
     undo: ({ payload: { chip: placedChip, grid } }) => {
+        placedChip.tiles = {};
+
         (grid as InteractiveGrid).placeChip(
-            placedChip.chip?.originalChip || placedChip.chip,
+            placedChip.chip.getRootOriginal(),
             locationToTuple(placedChip.location),
             false,
             placedChip

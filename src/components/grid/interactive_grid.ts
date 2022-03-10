@@ -375,6 +375,8 @@ export default class InteractiveGrid extends Grid {
                 this
             );
 
+        // originalChip.placedChips.add(placedChip);
+
         this.historyManager.performAction(setChip, {
             grid: this,
             chip: placedChip,
@@ -596,7 +598,7 @@ export default class InteractiveGrid extends Grid {
         let chip: Chip;
         if (
             this.prevCloneChip &&
-            this.prevCloneChip.chip.originalChip === selectedChip &&
+            this.prevCloneChip.chip.getRootOriginal() === selectedChip &&
             this.prevCloneChip.rotation === state.chipPlacementRotation
         ) {
             chip = this.prevCloneChip.chip;

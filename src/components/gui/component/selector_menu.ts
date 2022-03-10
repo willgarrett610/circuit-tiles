@@ -108,6 +108,7 @@ export default class SelectorMenu extends GUIWindow {
 
         // Add header text to Selector window
         const headerText = new PIXI.Text(this.title, {
+            // eslint-disable-next-line quotes
             fontFamily: '"Lucida Console", Monaco, monospace',
             fontSize: 24,
             fill: 0x000000,

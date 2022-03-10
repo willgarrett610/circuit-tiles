@@ -53,6 +53,16 @@ export class Chip {
     }
 
     /**
+     * retrieves the root chip
+     *
+     * @returns the original chip
+     */
+    getRootOriginal(): Chip {
+        if (this.originalChip) return this.originalChip.getRootOriginal();
+        return this;
+    }
+
+    /**
      * get tile at location
      *
      * @param x x coordinate
@@ -67,7 +77,7 @@ export class Chip {
      * Get a tile by its id
      *
      * @param id id of the tile
-     * @param type type of thet tile
+     * @param type type of the tile
      * @returns tile with the id
      */
     getTileById(id: string, type: typeof ChipTile): ChipTile | undefined {
@@ -273,7 +283,7 @@ export class Chip {
                 }
                 placedTile.updateContainer();
             }
-            grid.update();
+            // grid.update();
 
             placedChip.location = locationToPair(
                 add(locationToTuple(placedChip.location), topLeftDiff) as [
@@ -281,6 +291,8 @@ export class Chip {
                     number
                 ]
             );
+            // if (grid instanceof InteractiveGrid)
+            //     (grid as InteractiveGrid).updateChipOutline();
         }
     }
 
@@ -323,6 +335,8 @@ export class Chip {
                     number
                 ]
             );
+            // if (grid instanceof InteractiveGrid)
+            //     (grid as InteractiveGrid).updateChipOutline();
         }
     }
 

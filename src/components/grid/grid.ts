@@ -489,6 +489,8 @@ export default class Grid extends PIXI.Container {
         const interacting = this.historyManager.isInteracting();
         if (!interacting) this.historyManager.beginInteraction();
 
+        placedChip.chip.getRootOriginal().placedChips.delete(placedChip);
+
         this.historyManager.performAction(
             deleteChip,
             {

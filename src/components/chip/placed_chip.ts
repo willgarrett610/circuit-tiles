@@ -43,7 +43,7 @@ export class PlacedChip {
             this.scopeName = this.chip.name + i++;
         } while (this.grid.chips.find((c) => c.scopeName === this.scopeName));
 
-        const originalChip = chip.originalChip ? chip.originalChip : chip;
+        const originalChip = chip.getRootOriginal();
         originalChip.placedChips.add(this);
     }
 
@@ -96,21 +96,6 @@ export class PlacedChip {
 
             for (const direction of Direction.values()) {
                 const directionOffset = Direction.getOffset(direction);
-
-                // this.chipOutlineGraphics.beginFill(chip.color, 0.3);
-                // this.chipOutlineGraphics.lineStyle(undefined);
-                // this.chipOutlineGraphics.drawRect(
-                //     ...locationToTuple(
-                //         this.gridToScreen(
-                //             tileLocation[0],
-                //             tileLocation[1],
-                //             true,
-                //             false
-                //         )
-                //     ),
-                //     this.size,
-                //     this.size
-                // );
 
                 const adjacentTileLocation = add(
                     tileLocation,
