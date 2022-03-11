@@ -11,18 +11,20 @@ import { Action } from "./history_manager";
 
 interface PlaceChipPayload {
     chip: PlacedChip;
+    chipFormerLocation: [number, number];
     grid: Grid;
 }
 
 export const setChip: Action<PlaceChipPayload> = {
-    do: ({ grid, chip: placedChip }) => {
+    do: ({ grid, chip: placedChip, chipFormerLocation }) => {
         placedChip.tiles = {};
         grid.chips.push(placedChip);
         const chip = placedChip.chip.getRootOriginal();
         chip.placedChips.add(placedChip);
         const structure = chip.structure;
         const structureTiles = Object.values(structure);
-        const offset = chip.getTopLeftStructure() as [number, number];
+
+        const offset = chipFormerLocation;
 
         for (const structureTile of structureTiles) {
             if (!structureTile) continue;

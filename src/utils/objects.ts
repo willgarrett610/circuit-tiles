@@ -47,3 +47,14 @@ export function mapObject<T>(
     }
     return newObject;
 }
+
+/**
+ * Check if an object is empty
+ *
+ * @param object object to check
+ * @returns true if object is empty
+ */
+export function isEmpty(object: object): boolean {
+    for (const _ in object) return false;
+    return true;
+}

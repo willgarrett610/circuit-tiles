@@ -380,6 +380,7 @@ export default class InteractiveGrid extends Grid {
         this.historyManager.performAction(setChip, {
             grid: this,
             chip: placedChip,
+            chipFormerLocation: originalChip.getTopLeftStructure(),
         });
 
         this.historyManager.endInteraction(!recordHistory);
