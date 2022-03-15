@@ -39,6 +39,7 @@ const main = async () => {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).gridManager = gridManager;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).graph = Graph;
 
     app.stage.addChild(gridManager);

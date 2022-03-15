@@ -113,8 +113,11 @@ export default class Graph {
                 });
             } else if (tile.isWire) {
                 // handle wire tiles
-                if (!this.getLogicTile(tile.x, tile.y, scope))
-                    this.nodes.push(this.createLogicEdge(tiles, tile, scope));
+                if (!this.getLogicTile(tile.x, tile.y, scope)) {
+                    const node = this.createLogicEdge(tiles, tile, scope);
+                    node.state = tile.signalActive;
+                    this.nodes.push(node);
+                }
             }
         }
     }

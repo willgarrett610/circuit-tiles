@@ -35,7 +35,7 @@ export const beginLoop = async (interval: number) => {
         );
 
         console.log(graph.nodes);
-        console.log(updates);
+        console.log("update", updates);
 
         for (let i = 0; i < updates.length; i += 2) {
             const index = updates[i];
@@ -49,7 +49,7 @@ export const beginLoop = async (interval: number) => {
                 }
             }
         }
-        gridManager.getGrid().renderTiles();
+        gridManager.getGrid().update();
     }, interval);
 };
 

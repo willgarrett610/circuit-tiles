@@ -185,6 +185,9 @@ pub fn compute_logic(
 
     for update_index in update_indices {
         update_tile(&mut graph, update_index as usize);
+        graph.updated.push(&JsValue::from(update_index as f64));
+        let state: bool = graph.nodes[update_index as usize].state;
+        graph.updated.push(&JsValue::from(state));
     }
 
     // console::log_2(&"index_map: ".into(), &JsValue::from("bruh"));
