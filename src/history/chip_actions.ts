@@ -36,10 +36,12 @@ export const setChip: Action<PlaceChipPayload> = {
                 offset
             ) as [number, number];
             const placedTile = grid.addTile(
-                ...tileLocation,
+                tileLocation[0],
+                tileLocation[1],
                 findType(structureTile.type) as TileType,
                 undefined,
                 undefined,
+                true,
                 true
             ) as ChipTile | undefined;
 

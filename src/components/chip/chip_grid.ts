@@ -22,9 +22,13 @@ export default class ChipGrid {
     constructor(chip: Chip) {
         this.chip = chip;
         this.grids = {
-            chip: new InteractiveChipGrid(100, chip.tiles),
+            chip: new InteractiveChipGrid(chip, 100, chip.tiles),
             structure: new InteractiveGrid(100, chip.structure),
         };
+
+        this.grids.chip.addHandler("postAddChip", (placedChip) => {
+            this.chip.chipDependencies.add(placedChip.chip.getRootOriginal());
+        });
 
         this.grids.chip.addHandler("postAddTile", (tile) => {
             this.chip.tileAdded(tile);

@@ -296,6 +296,7 @@ export default class Grid extends PIXI.Container {
      * @param prevTile last tile added
      * @param direction direction of placement
      * @param noHistory if history shouldn't be recorded
+     * @param fromChipPlacement if the tile is being placed from a chip
      * @returns tile if add was successful, undefined otherwise
      */
     addTile(
@@ -304,7 +305,8 @@ export default class Grid extends PIXI.Container {
         type: TileType,
         prevTile: Tile | undefined,
         direction: Direction | undefined,
-        noHistory = false
+        noHistory = false,
+        fromChipPlacement = false
     ): Tile | undefined {
         const tileAtLocation = this.getTile(x, y);
         if (tileAtLocation) {
@@ -346,6 +348,10 @@ export default class Grid extends PIXI.Container {
         }
 
         const tileObj = new type.tile(x, y);
+
+        if (fromChipPlacement && tileObj instanceof ChipTile) {
+            tileObj.placedInChip = false;
+        }
 
         if (
             tileObj instanceof IOTile &&

@@ -11,7 +11,7 @@ interface PlaceTilePayload {
 }
 
 export const setTile: Action<PlaceTilePayload> = {
-    do: (payload) => {
+    do: async (payload) => {
         const newTile = payload.tile;
         payload.grid.setTile(payload.x, payload.y, newTile);
         payload.grid.addChild(newTile.getContainer(payload.grid.size));

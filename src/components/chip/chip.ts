@@ -50,6 +50,27 @@ export class Chip {
         this.name = name;
         this.color = color;
         this.hue = hue;
+
+        this.chipDependencies.add(this);
+    }
+
+    /**
+     * get all the chip dependencies including children
+     *
+     * @returns all the chip dependencies including children
+     */
+    getChipDependencies(): Set<Chip> {
+        const dependencies = new Set<Chip>(this.chipDependencies);
+
+        for (const chip of this.chipDependencies) {
+            if (this === chip) continue;
+            const childDependencies = chip.getChipDependencies();
+            for (const childDependency of childDependencies) {
+                dependencies.add(childDependency);
+            }
+        }
+
+        return dependencies;
     }
 
     /**
@@ -149,22 +170,27 @@ export class Chip {
             if (state.chipGridMode === ChipGridMode.STRUCTURING) {
                 tile.id = state.selectableTiles[state.selectedTileIndex].name;
             } else {
-                if (tile instanceof ChipInputTile) {
-                    let i = 1;
-                    let newId: string;
-                    do {
-                        newId = "IN" + i++;
-                    } while (this.inputTiles.find((x) => x.name === newId));
-                    tile.id = newId;
-                    this.inputTiles.push({ name: tile.id, tile: tile });
-                } else if (tile instanceof ChipOutputTile) {
-                    let i = 1;
-                    let newId: string;
-                    do {
-                        newId = "OUT" + i++;
-                    } while (this.outputTiles.find((x) => x.name === newId));
-                    tile.id = newId;
-                    this.outputTiles.push({ name: tile.id, tile: tile });
+                console.log(tile.placedInChip);
+                if (tile.placedInChip) {
+                    if (tile instanceof ChipInputTile) {
+                        let i = 1;
+                        let newId: string;
+                        do {
+                            newId = "IN" + i++;
+                        } while (this.inputTiles.find((x) => x.name === newId));
+                        tile.id = newId;
+                        this.inputTiles.push({ name: tile.id, tile: tile });
+                    } else if (tile instanceof ChipOutputTile) {
+                        let i = 1;
+                        let newId: string;
+                        do {
+                            newId = "OUT" + i++;
+                        } while (
+                            this.outputTiles.find((x) => x.name === newId)
+                        );
+                        tile.id = newId;
+                        this.outputTiles.push({ name: tile.id, tile: tile });
+                    }
                 }
             }
             tile.generateText();

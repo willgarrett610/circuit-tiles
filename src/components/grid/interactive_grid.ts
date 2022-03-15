@@ -596,6 +596,10 @@ export default class InteractiveGrid extends Grid {
         if (!selectedChip) return;
         let chip: Chip;
         // TODO: fix this such that changes will be considered.
+        // solution possible is to have a random value or incrementing value as a property of the chip
+        // this value can be changed every time the chip is updated
+        // this value can be used to determine if the chip has changed
+
         // if (
         //     this.prevCloneChip &&
         //     this.prevCloneChip.chip.getRootOriginal() === selectedChip &&

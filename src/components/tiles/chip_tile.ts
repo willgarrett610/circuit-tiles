@@ -13,6 +13,11 @@ export default abstract class ChipTile extends GraphicsTile {
     static chipTile = true;
     chip: PlacedChip | undefined;
 
+    /**
+     * signifies if this tile is placed in the editing or structuring of a chip and not a part of a chip that was placed
+     */
+    placedInChip: boolean = true;
+
     abstract type:
         | typeof ChipInputTile
         | typeof ChipOutputTile
