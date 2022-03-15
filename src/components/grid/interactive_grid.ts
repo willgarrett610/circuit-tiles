@@ -410,9 +410,7 @@ export default class InteractiveGrid extends Grid {
             const tileAtLocation = this.getTile(...tileLocation);
 
             // there was a tile in the way
-            if (tileAtLocation) {
-                return false;
-            }
+            if (tileAtLocation) return false;
         }
 
         return true;
@@ -597,20 +595,22 @@ export default class InteractiveGrid extends Grid {
 
         if (!selectedChip) return;
         let chip: Chip;
-        if (
-            this.prevCloneChip &&
-            this.prevCloneChip.chip.getRootOriginal() === selectedChip &&
-            this.prevCloneChip.rotation === state.chipPlacementRotation
-        ) {
-            chip = this.prevCloneChip.chip;
-        } else {
-            chip = selectedChip.clone(true);
-            chip.rotate(state.chipPlacementRotation);
-            this.prevCloneChip = {
-                chip,
-                rotation: state.chipPlacementRotation,
-            };
-        }
+        // TODO: fix this such that changes will be considered.
+        // if (
+        //     this.prevCloneChip &&
+        //     this.prevCloneChip.chip.getRootOriginal() === selectedChip &&
+        //     this.prevCloneChip.rotation === state.chipPlacementRotation
+        // ) {
+        //     chip = this.prevCloneChip.chip;
+        // } else {
+        // eslint-disable-next-line prefer-const
+        chip = selectedChip.clone(true);
+        chip.rotate(state.chipPlacementRotation);
+        this.prevCloneChip = {
+            chip,
+            rotation: state.chipPlacementRotation,
+        };
+        // }
         const valid = this.isValidChipPlacement(gridPos, chip);
         const structure = chip.structure;
         const structureTiles = Object.values(structure);
