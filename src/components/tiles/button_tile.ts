@@ -1,5 +1,6 @@
 import config from "../../config";
 import CircuitLocation from "../../logic/circuit_location";
+import { addUpdatedTile } from "../../logic/logic_manager";
 import LogicNode from "../../logic/node";
 import { ConnectionType, GraphicsTile } from "./tile";
 
@@ -58,11 +59,13 @@ export default class ButtonTile extends GraphicsTile {
         this.container.on("mousedown", (_: any) => {
             this.signalActive = true;
             this.updateContainer();
+            addUpdatedTile(this);
         });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const release = (_: any) => {
             this.signalActive = false;
             this.updateContainer();
+            addUpdatedTile(this);
         };
         this.container.on("mouseup", release);
         this.container.on("mouseupoutside", release);

@@ -222,6 +222,9 @@ export abstract class Tile {
             this.container.x = this.x * size + size / 2;
             this.container.y = this.y * size + size / 2;
             this.container.rotation = (this.direction.valueOf() * Math.PI) / 2;
+            // TODO this might not be very efficient
+            // Only need to rerender when state is changed
+            this.updateContainer?.();
         }
     }
 

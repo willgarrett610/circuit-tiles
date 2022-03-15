@@ -747,6 +747,7 @@ export default class Grid extends PIXI.Container {
      * Update the grids graphics
      */
     update() {
+        console.log("updateing grid");
         this.backgroundGraphics.x = -this.x;
         this.backgroundGraphics.y = -this.y;
         this.backgroundGraphics.width = width();

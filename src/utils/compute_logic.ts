@@ -1,14 +1,16 @@
-let mod: typeof import("../../crate/pkg");
-import init from "../lib";
-
 /**
- * load up computation logic
+ * load wasm logic module
+ *
+ * @param onLoad
  */
-async function load() {
-    mod = await init();
+async function load(onLoad: (mod: typeof import("../../crate/pkg")) => void) {
+    const mod = await import("../../crate/pkg");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).mod = mod;
+    onLoad(mod);
     // console.log(mod.compute_logic(Int32Array.from([1, 2, 3, 4, 5])));
 }
 
-load();
+load((mod) => {
+    console.log(mod);
+});
