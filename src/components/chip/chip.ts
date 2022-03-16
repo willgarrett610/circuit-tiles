@@ -39,6 +39,8 @@ export class Chip {
 
     chipDependencies = new Set<Chip>();
 
+    placedChipsInside: PlacedChip[] = [];
+
     /**
      * Chip constructor
      *

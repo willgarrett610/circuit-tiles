@@ -15,14 +15,17 @@ export default class InteractiveChipGrid extends InteractiveGrid {
      * @param chip the chip the grid is for
      * @param size pixel size of grid tile
      * @param tiles initial tiles
+     * @param placedChips initial placed chips
      */
     constructor(
         chip: Chip,
         size: number,
-        tiles?: { [key: string]: Tile | undefined }
+        tiles?: { [key: string]: Tile | undefined },
+        placedChips?: PlacedChip[]
     ) {
         super(size, tiles);
         this.chip = chip;
+        if (placedChips) this.chips = placedChips;
     }
 
     /**
@@ -39,7 +42,14 @@ export default class InteractiveChipGrid extends InteractiveGrid {
         recordHistory = true,
         injectPlaceChip: PlacedChip | undefined = undefined
     ) {
-        if (originalChip.getRootOriginal().chipDependencies.has(this.chip)) {
+        console.log(
+            [...originalChip.getRootOriginal().getChipDependencies()].map(
+                (x) => x.name
+            )
+        );
+        if (
+            originalChip.getRootOriginal().getChipDependencies().has(this.chip)
+        ) {
             console.log("oh no! you can't do that!");
             return;
         }
