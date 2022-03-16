@@ -7,8 +7,13 @@ import { initContextMenu } from "./utils/context_menu";
 import { setupMenus } from "./menus";
 import { handleEvent } from "./utils/event";
 import Graph from "./logic/graph";
-import { subscribe } from "./state";
-import { beginLoop, stopLoop } from "./logic/logic_manager";
+import state, { subscribe } from "./state";
+import {
+    addUpdatedTile,
+    beginLoop,
+    doTick,
+    stopLoop,
+} from "./logic/logic_manager";
 
 PIXI.utils.skipHello();
 
@@ -61,6 +66,11 @@ const main = async () => {
 
     window.addEventListener("wheel", (e: WheelEvent) => {
         handleEvent(e, app);
+    });
+
+    gridManager.mainGrid.addHandler("postAddTile", (tile) => {
+        addUpdatedTile(tile);
+        if (!state.running) doTick();
     });
 };
 
