@@ -22,12 +22,9 @@ export default class ChipGrid {
     constructor(chip: Chip) {
         this.chip = chip;
         this.grids = {
-            chip: new InteractiveChipGrid(
-                chip,
-                100,
-                chip.tiles,
-                chip.placedChipsInside
-            ),
+            chip: new InteractiveChipGrid(chip, 100, chip.tiles, [
+                ...chip.placedChipsInside,
+            ]),
             structure: new InteractiveGrid(100, chip.structure),
         };
 
@@ -36,15 +33,21 @@ export default class ChipGrid {
             this.chip.chipDependencies.add(placedChip.chip.getRootOriginal());
         });
 
-        this.grids.chip.addHandler("postRemoveChip", (placedChip) => {
+        this.grids.chip.addHandler("postRemoveChip", (removedPlacedChip) => {
             this.chip.placedChipsInside.splice(
-                this.chip.placedChipsInside.indexOf(placedChip),
+                this.chip.placedChipsInside.indexOf(removedPlacedChip),
                 1
             );
+
+            const ogChip = removedPlacedChip.chip.getRootOriginal();
             // Todo: remove if no instance of the chip exists inside of placed chips inside
-            // this.chip.chipDependencies.delete(
-            //     placedChip.chip.getRootOriginal()
-            // );
+            if (
+                this.chip.placedChipsInside.every(
+                    (pCI) => pCI.chip.getRootOriginal() !== ogChip
+                )
+            ) {
+                this.chip.chipDependencies.delete(ogChip);
+            }
         });
 
         this.grids.chip.addHandler("postAddTile", (tile) => {
