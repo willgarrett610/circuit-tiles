@@ -14,6 +14,7 @@ import { clamp } from "./math";
  * @param radius.topRight
  * @param radius.botRight
  * @param radius.botLeft
+ * @param graphicUpdater
  * @returns Pixi container
  */
 export function generateRoundedRectContainer(
