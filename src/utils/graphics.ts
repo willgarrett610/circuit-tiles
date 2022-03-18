@@ -22,7 +22,11 @@ export function generateRoundedRectContainer(
     w: number,
     h: number,
     color: number,
-    { topLeft = 0, topRight = 0, botRight = 0, botLeft = 0 }
+    { topLeft = 0, topRight = 0, botRight = 0, botLeft = 0 },
+    graphicUpdater?: (
+        graphics: PIXI.Graphics,
+        colorChanger: (color: number) => void
+    ) => void
 ): PIXI.Container {
     const container = new PIXI.Container();
     container.x = x;
@@ -37,29 +41,35 @@ export function generateRoundedRectContainer(
 
     const graphics = new PIXI.Graphics();
 
-    graphics.beginFill(color);
+    const colorChanger = (color: number) => {
+        graphics.clear();
+        graphics.beginFill(color);
 
-    // Top left
-    graphics.drawCircle(topLeft, topLeft, topLeft);
-    graphics.drawRect(0, topLeft, w / 2, h / 2 - topLeft);
-    graphics.drawRect(topLeft, 0, w / 2 - topLeft, h / 2);
+        // Top left
+        graphics.drawCircle(topLeft, topLeft, topLeft);
+        graphics.drawRect(0, topLeft, w / 2, h / 2 - topLeft);
+        graphics.drawRect(topLeft, 0, w / 2 - topLeft, h / 2);
 
-    // Top right
-    graphics.drawCircle(w - topRight, topRight, topRight);
-    graphics.drawRect(w / 2, topRight, w / 2, h / 2 - topRight);
-    graphics.drawRect(w / 2, 0, w / 2 - topRight, h / 2);
+        // Top right
+        graphics.drawCircle(w - topRight, topRight, topRight);
+        graphics.drawRect(w / 2, topRight, w / 2, h / 2 - topRight);
+        graphics.drawRect(w / 2, 0, w / 2 - topRight, h / 2);
 
-    // Bottom right
-    graphics.drawCircle(w - botRight, h - botRight, botRight);
-    graphics.drawRect(w / 2, h / 2, w / 2, h / 2 - botRight);
-    graphics.drawRect(w / 2, h / 2, w / 2 - botRight, h / 2);
+        // Bottom right
+        graphics.drawCircle(w - botRight, h - botRight, botRight);
+        graphics.drawRect(w / 2, h / 2, w / 2, h / 2 - botRight);
+        graphics.drawRect(w / 2, h / 2, w / 2 - botRight, h / 2);
 
-    // Bottom left
-    graphics.drawCircle(botLeft, h - botLeft, botLeft);
-    graphics.drawRect(0, h / 2, w / 2, h / 2 - botLeft);
-    graphics.drawRect(botLeft, h / 2, w / 2 - botLeft, h / 2);
+        // Bottom left
+        graphics.drawCircle(botLeft, h - botLeft, botLeft);
+        graphics.drawRect(0, h / 2, w / 2, h / 2 - botLeft);
+        graphics.drawRect(botLeft, h / 2, w / 2 - botLeft, h / 2);
 
-    graphics.endFill();
+        graphics.endFill();
+    };
+
+    graphicUpdater?.(graphics, colorChanger);
+    colorChanger(color);
 
     container.addChild(graphics);
 

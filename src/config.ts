@@ -24,6 +24,7 @@ const config = {
         textFieldBackground: 0xcccccc,
         chipModeIndicator: 0x119911,
         chipModeIndicatorClose: 0xbb3333,
+        chipModeIndicatorCloseDisabled: 0x661111,
         chipGridMode: 0x444444,
         chipGridModeHighlight: 0xbb5555,
         gridSelection: 0x999999,

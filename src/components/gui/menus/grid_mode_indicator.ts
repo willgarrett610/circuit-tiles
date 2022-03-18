@@ -1,7 +1,7 @@
 import * as PIXI from "pixi.js";
 
 import config from "../../../config";
-import { subscribe, setState } from "../../../state";
+import state, { subscribe, setState } from "../../../state";
 import { width } from "../../../utils";
 import ChipGridMode from "../../../utils/chip_grid_mode";
 import { generateRoundedRectContainer } from "../../../utils/graphics";
@@ -130,7 +130,11 @@ export default class GridModeIndicator extends GUIWindow {
         );
 
         closeBtn.onClick = () => {
-            setState({ chipEditor: false });
+            if (state.isStructured) {
+                setState({ chipEditor: false });
+            } else {
+                // add an alert here
+            }
         };
 
         closeBtn.backgroundSprite.alpha = 0;
@@ -143,7 +147,15 @@ export default class GridModeIndicator extends GUIWindow {
             closeBtn.width,
             closeBtn.height,
             config.colors.chipModeIndicatorClose,
-            { botRight: 5 }
+            { botRight: 5 },
+            (_, colorChanger) =>
+                subscribe("isStructured", (isStructured) => {
+                    colorChanger(
+                        isStructured
+                            ? config.colors.chipModeIndicatorClose
+                            : config.colors.chipModeIndicatorCloseDisabled
+                    );
+                })
         );
 
         closeBtnContainer.addChild(closeBackground);

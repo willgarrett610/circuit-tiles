@@ -40,7 +40,6 @@ export default class ChipGrid {
             );
 
             const ogChip = removedPlacedChip.chip.getRootOriginal();
-            // Todo: remove if no instance of the chip exists inside of placed chips inside
             if (
                 this.chip.placedChipsInside.every(
                     (pCI) => pCI.chip.getRootOriginal() !== ogChip
