@@ -35,6 +35,7 @@ export const setChip: Action<PlaceChipPayload> = {
                 ]),
                 offset
             ) as [number, number];
+            grid.removeTile(tileLocation[0], tileLocation[1], undefined, true);
             const placedTile = grid.addTile(
                 tileLocation[0],
                 tileLocation[1],
