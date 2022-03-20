@@ -1,6 +1,7 @@
 import * as PIXI from "pixi.js";
 
 import config from "../../../config";
+import { showAlert } from "../../../menus/alert";
 import state, { subscribe, setState } from "../../../state";
 import { width } from "../../../utils";
 import ChipGridMode from "../../../utils/chip_grid_mode";
@@ -133,6 +134,10 @@ export default class GridModeIndicator extends GUIWindow {
             if (state.isStructured) {
                 setState({ chipEditor: false });
             } else {
+                showAlert(
+                    "Alert",
+                    "You must finish structuring before you can exit."
+                );
                 // add an alert here
             }
         };
