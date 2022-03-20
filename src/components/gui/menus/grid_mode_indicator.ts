@@ -138,7 +138,6 @@ export default class GridModeIndicator extends GUIWindow {
                     "Alert",
                     "You must finish structuring before you can exit."
                 );
-                // add an alert here
             }
         };
 

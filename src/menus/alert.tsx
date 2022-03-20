@@ -12,9 +12,9 @@ type AlertProps = {
 /**
  * show a structure clash warning
  *
+ * @param titleText
  * @param alertText
  * @param buttonText
- * @param titleText
  * @returns promise of selection
  */
 export function showAlert(
