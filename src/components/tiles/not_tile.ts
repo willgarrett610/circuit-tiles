@@ -27,6 +27,7 @@ export default class NotTile extends GraphicsTile {
     direction = Rotation.CLOCKWISE;
     rotatable = true;
     isNode = true;
+    signalActive = true;
 
     /**
      * convert tile to node
