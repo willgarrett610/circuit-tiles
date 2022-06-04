@@ -53,7 +53,7 @@ const main = async () => {
 
     subscribe("running", (runnning) => {
         if (runnning) {
-            beginLoop(500);
+            beginLoop(1000);
         } else {
             stopLoop();
         }

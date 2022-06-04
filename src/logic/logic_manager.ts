@@ -3,6 +3,10 @@ import { gridManager } from "../index";
 import init from "../lib";
 import Graph from "./graph";
 
+let lib:
+    | typeof import("d:/Programming/Web/Circuit Tiles/crate/pkg/index")
+    | undefined;
+
 let loop: NodeJS.Timer | undefined;
 let updatedTiles: Tile[] = [];
 
@@ -14,7 +18,9 @@ const includesTile = (tiles: Tile[], search: Tile) => {
 };
 
 export const doTick = async () => {
-    const lib = await init();
+    if (!lib) {
+        lib = await init();
+    }
     const grid = gridManager.mainGrid;
     const graph = Graph.genFromGrid(grid);
     console.log(graph);
@@ -49,7 +55,7 @@ export const doTick = async () => {
             const logicTile = graph.getLogicTile(loc.x, loc.y, loc.scope);
             const tile = logicTile?.tile;
             if (tile) {
-                tile.signalActive = state;
+                tile.setSignalActive(state);
             }
         }
     }

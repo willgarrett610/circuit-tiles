@@ -1,4 +1,5 @@
 import config from "../../config";
+import { addUpdatedTile } from "../../logic/logic_manager";
 import state from "../../state";
 import { displayContextMenu } from "../../utils/context_menu";
 import { CMouseEvent } from "../../utils/event";
@@ -70,6 +71,12 @@ export default class ChipInputTile extends IOTile {
                 this.container.height / (2 * this.container.scale.y) -
                 extraContainer.height / 2;
             this.container?.addChild(extraContainer);
+            extraInput.onSignalUpdate = (signalActive: boolean) => {
+                console.log("input signal update", signalActive);
+                this.setSignalActive(signalActive);
+                this.updateContainer();
+                addUpdatedTile(this);
+            };
         }
         this.updateContainer();
     }

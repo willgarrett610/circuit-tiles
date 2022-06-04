@@ -57,13 +57,13 @@ export default class ButtonTile extends GraphicsTile {
         this.container.interactive = true;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.container.on("mousedown", (_: any) => {
-            this.signalActive = true;
+            this.setSignalActive(true);
             this.updateContainer();
             addUpdatedTile(this);
         });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const release = (_: any) => {
-            this.signalActive = false;
+            this.setSignalActive(false);
             this.updateContainer();
             addUpdatedTile(this);
         };

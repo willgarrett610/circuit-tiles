@@ -56,7 +56,7 @@ export default class LeverTile extends GraphicsTile {
         if (!this.container) return;
         this.container.interactive = true;
         this.container.on("click", () => {
-            this.signalActive = !this.signalActive;
+            this.setSignalActive(!this.signalActive);
             this.updateContainer();
             addUpdatedTile(this);
         });

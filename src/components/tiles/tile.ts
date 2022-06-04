@@ -55,6 +55,28 @@ export abstract class Tile {
     rotatable = true;
     breakOnRotate = true;
     forGraphicOnly = false;
+    onSignalUpdate?(signalActive: boolean): void;
+
+    /**
+     * constructs tile
+     *
+     * @param x x position
+     * @param y y position
+     */
+    constructor(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+
+    /**
+     * Update the signal active state
+     *
+     * @param signalActive New signal active value
+     */
+    public setSignalActive(signalActive: boolean) {
+        this.signalActive = signalActive;
+        this.onSignalUpdate?.(signalActive);
+    }
 
     /**
      * Get rotation from direction
@@ -156,17 +178,6 @@ export abstract class Tile {
     }
 
     canUse = () => true;
-
-    /**
-     * constructs tile
-     *
-     * @param x x position
-     * @param y y position
-     */
-    constructor(x: number, y: number) {
-        this.x = x;
-        this.y = y;
-    }
 
     onClick?(e: PIXI.interaction.InteractionEvent): void;
     onContext?(e: CMouseEvent): void;
