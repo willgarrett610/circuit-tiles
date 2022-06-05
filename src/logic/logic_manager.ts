@@ -22,6 +22,7 @@ export const doTick = async () => {
         lib = await init();
     }
     const grid = gridManager.mainGrid;
+    // TODO Only generate graph when tiles have changed
     const graph = Graph.genFromGrid(grid);
     console.log(graph);
     const nodes = graph.convertForRust();
@@ -31,6 +32,7 @@ export const doTick = async () => {
     const updatedIndices = [];
 
     // Map updated tiles to graph node indices
+    // TODO Shouldn't loop through all tiles, but only updated tiles
     for (let i = 0; i < graph.nodes.length; i++) {
         const node = graph.nodes[i];
         console.log("node", node);
@@ -52,7 +54,12 @@ export const doTick = async () => {
         const state = updates[i + 1];
         const node = graph.nodes[index];
         for (const loc of node.locations) {
-            const logicTile = graph.getLogicTile(loc.x, loc.y, loc.scope);
+            const logicTile = graph.getLogicTile(
+                loc.x,
+                loc.y,
+                loc.scope,
+                loc.extraInput
+            );
             const tile = logicTile?.tile;
             if (tile) {
                 tile.setSignalActive(state);

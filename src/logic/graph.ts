@@ -4,6 +4,7 @@ import IOTile from "../components/tiles/io_tile";
 import { ConnectionType, Tile } from "../components/tiles/tile";
 import CircuitLocation from "./circuit_location";
 import LogicNode from "./node";
+import ChipInputTile from "../components/tiles/chip_input_tile";
 
 type LogicTile = {
     tile: Tile;
@@ -19,15 +20,24 @@ export default class Graph {
     scopes: string[][] = [];
     logicTiles: { [key: string]: LogicTile | undefined } = {};
 
-    getLogicTile = (x: number, y: number, scope: string[]) => {
+    getLogicTile = (
+        x: number,
+        y: number,
+        scope: string[],
+        extraInput: boolean = false
+    ) => {
         const scopeStr = scope.join(",");
-        return this.logicTiles[`${x},${y}.${scopeStr}`];
+        return this.logicTiles[`${x},${y}.${scopeStr}${extraInput ? "&" : ""}`];
     };
 
     setLogicTile = (tile: LogicTile) => {
         const location = tile.location;
         const scopeStr = location.scope.join(",");
-        this.logicTiles[`${location.x},${location.y}.${scopeStr}`] = tile;
+        this.logicTiles[
+            `${location.x},${location.y}.${scopeStr}${
+                location.extraInput ? "&" : ""
+            }`
+        ] = tile;
     };
 
     getTile = (
@@ -102,6 +112,22 @@ export default class Graph {
                                 ...scope,
                                 chip.scopeName,
                             ]);
+                        }
+
+                        // Add chip input tile extraInput as a node
+                        if (
+                            tile instanceof ChipInputTile &&
+                            tile.extraInputTile
+                        ) {
+                            const extraInputTile = tile.extraInputTile;
+                            const extraInputNode = extraInputTile.toNode(scope);
+                            extraInputNode.locations[0].extraInput = true;
+                            this.nodes.push(extraInputNode);
+                            this.setLogicTile({
+                                tile: extraInputTile,
+                                node: extraInputNode,
+                                location: extraInputNode.locations[0],
+                            });
                         }
                     }
                 }
@@ -227,6 +253,21 @@ export default class Graph {
                     ) {
                         node.connectTo(connectedTile.node);
                     }
+                }
+
+                // Connect chip input tile extraInput
+                if (
+                    logicTile.tile instanceof ChipInputTile &&
+                    logicTile.tile.extraInputTile
+                ) {
+                    const extraInputTile = graph.getLogicTile(
+                        logicTile.tile.x,
+                        logicTile.tile.y,
+                        logicTile.location.scope,
+                        true
+                    );
+                    if (!extraInputTile) continue;
+                    node.connectFrom(extraInputTile?.node);
                 }
             }
         }
