@@ -3,9 +3,7 @@ import { gridManager } from "../index";
 import init from "../lib";
 import Graph from "./graph";
 
-let lib:
-    | typeof import("d:/Programming/Web/Circuit Tiles/crate/pkg/index")
-    | undefined;
+let lib: typeof import("../../crate/pkg/index") | undefined;
 
 let loop: NodeJS.Timer | undefined;
 let updatedTiles: Tile[] = [];
