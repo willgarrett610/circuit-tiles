@@ -97,8 +97,7 @@ export function displayContextMenu<T extends keyof typeof contextMenus>(
         );
 
         let i = 0;
-        for (const k in menu) {
-            const key = k as keyof typeof menu;
+        for (const key in menu) {
             const label = menu[key] as unknown as string;
             const item = new GUIComponent(
                 0,

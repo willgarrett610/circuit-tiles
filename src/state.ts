@@ -78,18 +78,19 @@ interface StateCallback {
     priority: number;
 }
 
-interface StateChangeEvent {
-    name: string;
-    prevValue: any;
-    value: any;
-}
+type StateChangeEvent = {
+    [key in keyof State]: {
+        name: key;
+        prevValue: State[key] | undefined;
+        value: State[key];
+    };
+}[keyof State];
 
 interface SpecificStateCallback<T extends keyof State> {
     name: T;
     callback: (value: State[T], prevValue: State[T] | undefined) => void;
     priority: number;
 }
-
 const callbacks: Array<StateCallback> = [];
 const specificCallbacks: SpecificStateCallback<keyof State>[] = [];
 
@@ -100,12 +101,12 @@ const specificCallbacks: SpecificStateCallback<keyof State>[] = [];
  * @param callback Function to be called when the state is changed
  * @param priority The priority of the callback. Higher priority callbacks are called first
  */
-export function multiSubscribe(
-    names: Array<keyof State>,
+export function multiSubscribe<T extends keyof State>(
+    names: Array<T>,
     callback: (event: StateChangeEvent) => void,
     priority: number = 0
 ) {
-    callbacks.push({ names, callback, priority });
+    callbacks.push({ names, callback: callback as any, priority });
 }
 
 /**
@@ -155,7 +156,7 @@ export function setStateByName<T extends keyof State>(
         if ("name" in callback) {
             callback.callback(value, prevValue);
         } else {
-            callback.callback({ name, prevValue, value });
+            callback.callback({ name, prevValue, value } as any);
         }
     }
 }
@@ -205,7 +206,7 @@ export function setStateProp<T extends keyof State>(
         if ("name" in callback) {
             callback.callback(value, undefined);
         } else {
-            callback.callback({ name, prevValue: undefined, value });
+            callback.callback({ name, prevValue: undefined, value } as any);
         }
     }
 }

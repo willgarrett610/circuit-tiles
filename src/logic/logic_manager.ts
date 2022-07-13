@@ -68,6 +68,7 @@ export const doTick = async () => {
 };
 
 export const beginLoop = async (interval: number) => {
+    stopLoop();
     loop = setInterval(doTick, interval);
 };
 

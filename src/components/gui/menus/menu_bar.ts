@@ -77,10 +77,7 @@ export default class MenuBar extends GUIWindow {
         btn.setHoverContainer(hoverContainer);
         btn.setState(GUIComponentState.DEFAULT);
 
-        btn.onClick = () => {
-            setState({ running: playBtn });
-        };
-
+        btn.onClick = () => setState({ running: playBtn });
         if (playBtn) btn.visible = false;
 
         this.addChild(btn);
@@ -108,8 +105,7 @@ export default class MenuBar extends GUIWindow {
             config.colors.chipGridMode
         );
 
-        btn.xLambda = () =>
-            width() - (btn.defaultContainer as PIXI.Container).width - 5;
+        btn.xLambda = () => width() - btn.defaultContainer!.width - 5;
 
         chipGridModeText.y = (btn.height - chipGridModeText.height) / 2;
         chipGridModeText.x = btn.width - chipGridModeText.width - 5;

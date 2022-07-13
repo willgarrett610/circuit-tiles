@@ -5,11 +5,9 @@ import { clamp } from "../../utils/math";
 import config from "../../config";
 import { ConnectionType, Tile } from "../tiles/tile";
 import { Direction, rotateClockWise } from "../../utils/directions";
-import "../../utils/compute_logic";
 import state from "../../state";
 import { EditMode } from "../../utils/edit_mode";
 import Graph from "../../logic/graph";
-import { GridAction } from "../../utils/action";
 import { deleteTile, editTile, setTile } from "../../history/tile_actions";
 import HistoryManager from "../../history/history_manager";
 import { PlacedChip } from "../chip/placed_chip";
@@ -29,28 +27,6 @@ interface GridHandlers {
     postEditTile: ((payload: Tile) => void)[];
     postAddChip: ((payload: PlacedChip) => void)[];
     postRemoveChip: ((payload: PlacedChip) => void)[];
-    postUndo: ((
-        payload: {
-            action: GridAction;
-            prevTile: Tile | undefined;
-            postTile: Tile | undefined;
-            location: {
-                x: number;
-                y: number;
-            };
-        }[]
-    ) => void)[];
-    postRedo: ((
-        payload: {
-            action: GridAction;
-            prevTile: Tile | undefined;
-            postTile: Tile | undefined;
-            location: {
-                x: number;
-                y: number;
-            };
-        }[]
-    ) => void)[];
 }
 
 /** Grid class */
@@ -77,8 +53,6 @@ export default class Grid extends PIXI.Container {
         postEditTile: [],
         postAddChip: [],
         postRemoveChip: [],
-        postUndo: [],
-        postRedo: [],
     };
 
     dragData: {
@@ -822,16 +796,41 @@ export default class Grid extends PIXI.Container {
               };
 
     /**
-     * From grid space to screen space (Top Left corner)
+     * From grid space to screen space (Top Left corner by default)
      *
      * @param x X in grid space
      * @param y Y in grid space
      * @param floored whether to floor the coordinates (default true)
      * @param offset whether to offset the coordinates (default true)
+     * @param corner what corner grid location is in respect to
      * @returns Coordinates in screen space
      */
-    gridToScreen = (x: number, y: number, floored = true, offset = true) =>
-        offset
+    gridToScreen = (
+        x: number,
+        y: number,
+        floored = true,
+        offset = true,
+        corner:
+            | "top-left"
+            | "top-right"
+            | "bottom-left"
+            | "bottom-right" = "top-left"
+    ) => {
+        switch (corner) {
+            case "top-left":
+                break;
+            case "top-right":
+                x++;
+                break;
+            case "bottom-left":
+                y++;
+                break;
+            case "bottom-right":
+                x++;
+                y++;
+                break;
+        }
+        return offset
             ? floored
                 ? {
                       x: Math.floor(x) * this.size + this.x,
@@ -850,4 +849,5 @@ export default class Grid extends PIXI.Container {
                   x: x * this.size,
                   y: y * this.size,
               };
+    };
 }
