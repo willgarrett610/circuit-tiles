@@ -43,7 +43,7 @@ impl Update for Graph {
     }
 }
 
-fn willStateChange(state1: bool, state2: bool, tile_type: i32) -> bool {
+fn will_state_change(state1: bool, state2: bool, tile_type: i32) -> bool {
     return if tile_type == 1 {
         state1 == state2
     } else {
@@ -95,7 +95,7 @@ pub fn update_tile(graph: &mut Graph, index: usize) {
             &JsValue::from(graph.nodes[i].state),
             &JsValue::from(graph.nodes[index].state),
         );
-        if willStateChange(
+        if will_state_change(
             graph.nodes[i].state,
             graph.nodes[index].state,
             graph.nodes[i].tile_type,
@@ -139,7 +139,7 @@ pub fn compute_logic(
 
     let mut nodes: Vec<Node> = Vec::new();
 
-    // Contruct nodes from node_data
+    // Construct nodes from node_data
     for index_pair in index_map {
         let mut node = Node {
             index: index_pair.0,
