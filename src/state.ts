@@ -78,13 +78,15 @@ interface StateCallback {
     priority: number;
 }
 
-type StateChangeEvent = {
-    [key in keyof State]: {
-        name: key;
-        prevValue: State[key] | undefined;
-        value: State[key];
-    };
-}[keyof State];
+type StateChangeEvent = NonNullable<
+    {
+        [key in keyof State]: {
+            name: key;
+            prevValue: State[key] | undefined;
+            value: State[key];
+        };
+    }[keyof State]
+>;
 
 interface SpecificStateCallback<T extends keyof State> {
     name: T;
