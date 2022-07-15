@@ -20,7 +20,10 @@ import {
 import { add, sub } from "../../utils/math";
 import { Chip } from "../chip/chip";
 import { PlacedChip } from "../chip/placed_chip";
+import ButtonTile from "../tiles/button_tile";
+import ChipInputTile from "../tiles/chip_input_tile";
 import ChipOutputTile from "../tiles/chip_output_tile";
+import LeverTile from "../tiles/lever_tile";
 import { Tile } from "../tiles/tile";
 import { ChipOutputTileType, findType, TileType } from "../tiles/tile_types";
 import Grid from "./grid";
@@ -258,8 +261,23 @@ export default class InteractiveGrid extends Grid {
                 if (
                     gridManager.modeManager.currentInteraction ===
                     Interaction.NONE
-                )
-                    this.rotateTile(...gridPoint);
+                ) {
+                    const tile = this.getTile(...gridPoint);
+                    if (
+                        !(
+                            tile instanceof ChipInputTile &&
+                            (tile.extraInputTile ||
+                                ChipInputTile.extraInputTypes.includes(
+                                    state.selectableTiles[
+                                        state.selectedTileIndex
+                                    ].name
+                                ))
+                        )
+                    ) {
+                        this.rotateTile(...gridPoint);
+                    }
+                }
+
                 gridManager.modeManager.currentInteraction =
                     Interaction.PLACING;
 
