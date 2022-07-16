@@ -9,6 +9,8 @@ import { ConnectionType } from "./tile";
 
 /** chip input tile */
 export default class ChipInputTile extends IOTile {
+    static extraInputTypes = ["Button", "Lever"];
+
     type = ChipInputTile;
     typeNumber = 7;
     connectionTemplate = {
