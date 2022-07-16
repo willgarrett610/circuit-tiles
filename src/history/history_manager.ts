@@ -38,9 +38,6 @@ export default class HistoryManager {
         redo = false,
         record = true
     ) {
-        // ! NEED TO FIGURE OUT HOW TO MAKE ALL THIS ASYNC
-        // ! THIS WAS NOT WORKING WHEN EVERYTHING
-        // ! THIS IS BECAUSE THE MODEL WAITS ON USER RESPONSE TO CANCEL ADDING TO HISTORY
         let isRejected = false;
         const reject = () => (isRejected = true);
         const prevValue = await action.do(payload, reject);

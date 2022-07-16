@@ -1,7 +1,8 @@
 import config from "../../config";
 import CircuitLocation from "../../logic/circuit_location";
-import { addUpdatedTile } from "../../logic/logic_manager";
+import { addUpdatedTile, doTick } from "../../logic/logic_manager";
 import LogicNode from "../../logic/node";
+import state from "../../state";
 import { ConnectionType, GraphicsTile } from "./tile";
 
 /** Button Tile */
@@ -60,12 +61,14 @@ export default class ButtonTile extends GraphicsTile {
             this.setSignalActive(true);
             this.updateContainer();
             addUpdatedTile(this);
+            if (state.running) doTick();
         });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const release = (_: any) => {
             this.setSignalActive(false);
             this.updateContainer();
             addUpdatedTile(this);
+            if (state.running) doTick();
         };
         this.container.on("mouseup", release);
         this.container.on("mouseupoutside", release);

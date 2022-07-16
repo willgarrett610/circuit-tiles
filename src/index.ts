@@ -51,9 +51,11 @@ const main = async () => {
 
     loadSprites().then(() => initGUI(app));
 
-    subscribe("running", (runnning) => {
-        if (runnning) {
-            beginLoop(400);
+    subscribe("running", (running) => {
+        if (running) {
+            // ! ADD BACK?
+            // beginLoop(400);
+            doTick();
         } else {
             stopLoop();
         }
@@ -70,7 +72,7 @@ const main = async () => {
 
     gridManager.mainGrid.addHandler("postAddTile", async (tile) => {
         addUpdatedTile(tile);
-        if (!state.running) doTick();
+        if (state.running) doTick();
     });
 };
 

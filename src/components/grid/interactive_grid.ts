@@ -20,10 +20,8 @@ import {
 import { add, sub } from "../../utils/math";
 import { Chip } from "../chip/chip";
 import { PlacedChip } from "../chip/placed_chip";
-import ButtonTile from "../tiles/button_tile";
 import ChipInputTile from "../tiles/chip_input_tile";
 import ChipOutputTile from "../tiles/chip_output_tile";
-import LeverTile from "../tiles/lever_tile";
 import { Tile } from "../tiles/tile";
 import { ChipOutputTileType, findType, TileType } from "../tiles/tile_types";
 import Grid from "./grid";

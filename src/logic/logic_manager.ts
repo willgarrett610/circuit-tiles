@@ -4,6 +4,7 @@ import init from "../lib";
 import Graph from "./graph";
 
 let lib: typeof import("../../crate/pkg/index") | undefined;
+init().then((mod) => (lib = mod));
 
 let loop: NodeJS.Timer | undefined;
 let updatedTiles: Tile[] = [];
@@ -16,9 +17,8 @@ const includesTile = (tiles: Tile[], search: Tile) => {
 };
 
 export const doTick = async () => {
-    if (!lib) {
-        lib = await init();
-    }
+    if (!lib) lib = await init();
+
     const grid = gridManager.mainGrid;
     // TODO Only generate graph when tiles have changed
     const graph = Graph.genFromGrid(grid);

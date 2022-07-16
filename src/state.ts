@@ -69,7 +69,7 @@ const state: State = {
     selectableTiles: [],
     chipPlacementRotation: Rotation.NORMAL,
     openMenus: [],
-    running: false,
+    running: true,
 };
 
 interface StateCallback {

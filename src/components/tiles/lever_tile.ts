@@ -1,7 +1,8 @@
 import config from "../../config";
 import CircuitLocation from "../../logic/circuit_location";
-import { addUpdatedTile } from "../../logic/logic_manager";
+import { addUpdatedTile, doTick } from "../../logic/logic_manager";
 import LogicNode from "../../logic/node";
+import state from "../../state";
 import { ConnectionType, GraphicsTile } from "./tile";
 
 /** lever tile */
@@ -59,6 +60,7 @@ export default class LeverTile extends GraphicsTile {
             this.setSignalActive(!this.signalActive);
             this.updateContainer();
             addUpdatedTile(this);
+            if (state.running) doTick();
         });
     }
 
