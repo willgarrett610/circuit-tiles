@@ -1,9 +1,11 @@
+let loadingModPromise: Promise<typeof import("../crate/pkg/index")> | undefined;
 /**
  * init wasm
  *
  * @returns wasm module
  */
-export default async function init() {
-    const mod = await import("../crate/pkg");
-    return mod;
+export default function init(): Promise<typeof import("../crate/pkg/index")> {
+    if (loadingModPromise) return loadingModPromise;
+    loadingModPromise = import("../crate/pkg");
+    return loadingModPromise;
 }
