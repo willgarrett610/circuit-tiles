@@ -68,7 +68,7 @@ const main = async () => {
         handleEvent(e, app);
     });
 
-    gridManager.mainGrid.addHandler("postAddTile", (tile) => {
+    gridManager.mainGrid.addHandler("postAddTile", async (tile) => {
         addUpdatedTile(tile);
         if (!state.running) doTick();
     });

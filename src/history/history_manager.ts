@@ -3,7 +3,7 @@
 import { gridManager } from "..";
 
 export interface Action<T, U = void> {
-    do(payload: T): U | void;
+    do(payload: T, reject: () => void): Promise<U | void>;
     undo(actionPayload: ActionPayload<T, U>): void;
 }
 
@@ -32,14 +32,19 @@ export default class HistoryManager {
      * @param redo True if this is a redo
      * @param record if true, the action will be recorded
      */
-    performAction<T>(
+    async performAction<T>(
         action: Action<T, any>,
         payload: T,
         redo = false,
         record = true
     ) {
-        const prevValue = action.do(payload);
-        if (!record) return;
+        // ! NEED TO FIGURE OUT HOW TO MAKE ALL THIS ASYNC
+        // ! THIS WAS NOT WORKING WHEN EVERYTHING
+        // ! THIS IS BECAUSE THE MODEL WAITS ON USER RESPONSE TO CANCEL ADDING TO HISTORY
+        let isRejected = false;
+        const reject = () => (isRejected = true);
+        const prevValue = await action.do(payload, reject);
+        if (isRejected || !record) return;
         if (this.interacting) {
             this.interactionHistory.push({ action, payload, prevValue });
         } else {
@@ -86,12 +91,12 @@ export default class HistoryManager {
     /**
      * Redo the last undone action
      */
-    redo() {
+    async redo() {
         const actions = this.undoHistory.pop();
         if (actions) {
             this.beginInteraction();
             for (const action of actions) {
-                this.performAction(action.action, action.payload, true);
+                await this.performAction(action.action, action.payload, true);
             }
             this.endInteraction();
         }

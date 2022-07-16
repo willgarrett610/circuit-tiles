@@ -110,7 +110,7 @@ export default class InteractiveGrid extends Grid {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mousemove = (event: PIXI.interaction.InteractionEvent) => {
+    mousemove = async (event: PIXI.interaction.InteractionEvent) => {
         const e = event.data.originalEvent as PointerEvent;
         this.prevMousePos = [...this.mousePos];
         this.prevGridPos = [...this.gridPos];
@@ -201,14 +201,15 @@ export default class InteractiveGrid extends Grid {
                             for (let i = 0; i < gridPoints.length; i++) {
                                 const gridPoint = gridPoints[i];
 
-                                const newTile: Tile | undefined = this.addTile(
-                                    ...locationToTuple(gridPoint),
-                                    state.selectableTiles[
-                                        state.selectedTileIndex
-                                    ],
-                                    prevTile,
-                                    gridPoint.direction
-                                );
+                                const newTile: Tile | undefined =
+                                    await this.addTile(
+                                        ...locationToTuple(gridPoint),
+                                        state.selectableTiles[
+                                            state.selectedTileIndex
+                                        ],
+                                        prevTile,
+                                        gridPoint.direction
+                                    );
 
                                 prevTile = newTile;
                             }

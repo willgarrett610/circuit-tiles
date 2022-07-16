@@ -16,7 +16,7 @@ interface PlaceChipPayload {
 }
 
 export const setChip: Action<PlaceChipPayload> = {
-    do: ({ grid, chip: placedChip, chipFormerLocation }) => {
+    do: async ({ grid, chip: placedChip, chipFormerLocation }) => {
         placedChip.tiles = {};
         grid.chips.push(placedChip);
         const chip = placedChip.chip.getRootOriginal();
@@ -35,8 +35,13 @@ export const setChip: Action<PlaceChipPayload> = {
                 ]),
                 offset
             ) as [number, number];
-            grid.removeTile(tileLocation[0], tileLocation[1], undefined, true);
-            const placedTile = grid.addTile(
+            await grid.removeTile(
+                tileLocation[0],
+                tileLocation[1],
+                undefined,
+                true
+            );
+            const placedTile = (await grid.addTile(
                 tileLocation[0],
                 tileLocation[1],
                 findType(structureTile.type) as TileType,
@@ -44,7 +49,7 @@ export const setChip: Action<PlaceChipPayload> = {
                 undefined,
                 true,
                 true
-            ) as ChipTile | undefined;
+            )) as ChipTile | undefined;
 
             if (placedTile) {
                 if (placedTile instanceof ChipOutputTile)
@@ -59,7 +64,7 @@ export const setChip: Action<PlaceChipPayload> = {
             }
         }
 
-        grid.dispatchHandler("postAddChip", placedChip);
+        await grid.dispatchHandler("postAddChip", placedChip);
         grid.update();
     },
     undo: ({ payload: { chip, grid } }) => {
@@ -73,7 +78,7 @@ interface RemoveChipPayload {
 }
 
 export const deleteChip: Action<RemoveChipPayload> = {
-    do: ({ grid, chip: placedChip }) => {
+    do: async ({ grid, chip: placedChip }) => {
         if (placedChip.chip.getRootOriginal()) {
             placedChip.chip.getRootOriginal().placedChips.delete(placedChip);
         } else {
@@ -84,10 +89,11 @@ export const deleteChip: Action<RemoveChipPayload> = {
         if (index === -1) return;
 
         for (const chipTile of Object.values(placedChip.tiles)) {
-            if (chipTile) grid.removeTile(chipTile.x, chipTile.y, true, true);
+            if (chipTile)
+                await grid.removeTile(chipTile.x, chipTile.y, true, true);
         }
 
-        grid.dispatchHandler("postRemoveChip", placedChip);
+        await grid.dispatchHandler("postRemoveChip", placedChip);
         grid.chips.splice(index, 1);
         grid.update();
     },

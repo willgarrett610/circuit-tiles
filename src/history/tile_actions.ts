@@ -11,12 +11,22 @@ interface PlaceTilePayload {
 }
 
 export const setTile: Action<PlaceTilePayload> = {
-    do: async (payload) => {
+    do: async (payload, reject) => {
+        let isRejected = false;
+        const reject2 = () => {
+            // I hate this
+            isRejected = true;
+            reject();
+        };
+
         const newTile = payload.tile;
+        await payload.grid.dispatchHandler("preAddTile", payload.tile, reject2);
+        if (isRejected) return;
+
         payload.grid.setTile(payload.x, payload.y, newTile);
         payload.grid.addChild(newTile.getContainer(payload.grid.size));
         if (newTile instanceof IOTile) newTile.generateText();
-        payload.grid.dispatchHandler("postAddTile", newTile);
+        await payload.grid.dispatchHandler("postAddTile", newTile);
     },
     undo: ({ payload }) => {
         const tile = payload.grid.getTile(payload.x, payload.y);
@@ -36,7 +46,7 @@ interface EditTilePayload {
 }
 
 export const editTile: Action<EditTilePayload, Tile> = {
-    do: ({ x, y, tile, grid }) => {
+    do: async ({ x, y, tile, grid }) => {
         const refTile = grid.getTile(x, y);
 
         if (refTile) {
@@ -71,13 +81,13 @@ interface DeleteTilePayload {
 }
 
 export const deleteTile: Action<DeleteTilePayload, Tile> = {
-    do: ({ x, y, grid }) => {
+    do: async ({ x, y, grid }) => {
         const tile = grid.getTile(x, y);
         if (tile) {
             const prevTile = tile?.clone();
             grid.removeChild(tile?.getContainer(grid.size));
             grid.deleteTile(x, y);
-            grid.dispatchHandler("postRemoveTile", tile);
+            await grid.dispatchHandler("postRemoveTile", tile);
             return prevTile;
         }
     },

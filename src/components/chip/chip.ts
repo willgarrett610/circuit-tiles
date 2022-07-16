@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { gridManager } from "../..";
 import { showStructureClashAlert } from "../../menus/structure_clash_alert";
 import state, { setState } from "../../state";
 import { locationToPair, locationToTuple } from "../../utils";
@@ -16,6 +15,12 @@ import StructureTile from "../tiles/structure_tile";
 import { Tile } from "../tiles/tile";
 import { findType, TileType } from "../tiles/tile_types";
 import { PlacedChip } from "./placed_chip";
+
+export enum ClashResult {
+    NO_CLASH,
+    CLASH,
+    IGNORE_CLASH,
+}
 
 /**
  * Chip
@@ -226,21 +231,17 @@ export class Chip {
     }
 
     /**
-     * Called when a structure tile is added
+     * Checks if tile clashes
      *
-     * @param tile added structure tile
+     * @param tile Tile placement to check
+     * @returns
      */
-    async structureTileAdded(tile: ChipTile) {
+    async checkClash(tile: ChipTile): Promise<ClashResult> {
         this.prevTopLeftStructure = this.topLeftStructure;
         this.topLeftStructure = this.getTopLeftStructure();
 
         if (!this.prevTopLeftStructure)
             this.prevTopLeftStructure = this.topLeftStructure;
-
-        const topLeftDiff = sub(
-            this.topLeftStructure,
-            this.prevTopLeftStructure
-        ) as [number, number];
 
         const offset = sub(
             locationToTuple(tile),
@@ -261,18 +262,42 @@ export class Chip {
             }
         }
 
-        if (clashes && !state.ignoreStructureClashWarning) {
-            // give warning to user
-            const result = await showStructureClashAlert();
+        if (clashes) {
+            if (!state.ignoreStructureClashWarning) {
+                // give warning to user
+                const result = await showStructureClashAlert();
 
-            if (!result.continue) {
-                gridManager.getGrid().historyManager.undo();
-                return;
+                if (!result.continue) return ClashResult.CLASH;
+
+                if (result.ignoreFurther)
+                    setState({ ignoreStructureClashWarning: true });
             }
 
-            if (result.ignoreFurther)
-                setState({ ignoreStructureClashWarning: true });
+            return ClashResult.IGNORE_CLASH;
         }
+
+        return ClashResult.NO_CLASH;
+    }
+
+    /**
+     * Called when a structure tile is added
+     *
+     * @param tile added structure tile
+     */
+    async structureTileAdded(tile: ChipTile) {
+        if (!this.topLeftStructure || !this.prevTopLeftStructure) {
+            throw Error("Should have been initialized in checkClash");
+        }
+
+        const topLeftDiff = sub(
+            this.topLeftStructure,
+            this.prevTopLeftStructure
+        ) as [number, number];
+
+        const offset = sub(
+            locationToTuple(tile),
+            this.prevTopLeftStructure
+        ) as [number, number];
 
         for (const placedChip of this.placedChips) {
             const grid = placedChip.grid;
@@ -281,7 +306,7 @@ export class Chip {
                 locationToTuple(placedChip.location),
                 offset
             ) as [number, number];
-            grid.removeTile(...gridLocation);
+            await grid.removeTile(...gridLocation);
         }
 
         for (const placedChip of this.placedChips) {
@@ -292,13 +317,13 @@ export class Chip {
                 offset
             ) as [number, number];
 
-            const placedTile = grid.addTile(
+            const placedTile = (await grid.addTile(
                 ...gridLocation,
                 findType(tile.type) as TileType,
                 undefined,
                 undefined,
                 true
-            ) as ChipTile | undefined;
+            )) as ChipTile | undefined;
 
             if (placedTile) {
                 if (placedTile instanceof ChipOutputTile)
