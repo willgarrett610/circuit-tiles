@@ -74,6 +74,14 @@ const main = async () => {
         addUpdatedTile(tile);
         if (state.running) doTick();
     });
+
+    gridManager.mainGrid.addHandler("postEditTile", async () => {
+        if (state.running) doTick();
+    });
+
+    gridManager.mainGrid.addHandler("postRemoveTile", async () => {
+        if (state.running) doTick();
+    });
 };
 
 main();
