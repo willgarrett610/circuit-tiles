@@ -197,13 +197,14 @@ export abstract class Tile {
     getContainer(size: number): PIXI.Container {
         if (!this.container) {
             this.container = this.generateContainer();
+            this.container.zIndex = 100;
+
             if (this.onClick || this.onContext)
                 this.container.interactive = true;
             if (this.onClick) this.container.addListener("click", this.onClick);
             if (this.onContext) onContextMenu(this.container, this.onContext);
             this.postGenerate?.();
         }
-        this.container.zIndex = 100;
         this.container.width = size;
         this.container.height = size;
         this.container.pivot.x =
@@ -219,24 +220,48 @@ export abstract class Tile {
     /**
      * updates container
      *
-     * @param size size of the tile
+     * @param root0
+     * @param root0.newSize new size of the tile
+     * @param root0.newDirection if there was a new direction
+     * @param root0.newGraphics if there is new graphics update
      */
-    update(size: number) {
+    update({
+        newSize,
+        newDirection = false,
+        newGraphics = false,
+    }: {
+        newSize?: number;
+        newDirection: boolean;
+        newGraphics: boolean;
+    }) {
         if (this.container) {
-            this.container.zIndex = 100;
-            this.container.width = size;
-            this.container.height = size;
-            this.container.pivot.x =
-                this.container.width / (this.container.scale.x * 2);
-            this.container.pivot.y =
-                this.container.height / (this.container.scale.y * 2);
-            this.container.x = this.x * size + size / 2;
-            this.container.y = this.y * size + size / 2;
-            this.container.rotation = (this.direction.valueOf() * Math.PI) / 2;
+            if (newSize) this.updateSize(newSize);
+            if (newDirection) this.updateRotation();
             // TODO this might not be very efficient
             // Only need to rerender when state is changed
-            this.updateContainer?.();
+            if (newGraphics) this.updateContainer?.();
         }
+    }
+
+    /** updates the rotation on the container graphic */
+    updateRotation() {
+        this.container!.rotation = (this.direction.valueOf() * Math.PI) / 2;
+    }
+
+    /**
+     * updates the properties of the tile on size change
+     *
+     * @param size
+     */
+    updateSize(size: number) {
+        const container = this.container!;
+        container.width = size;
+        container.height = size;
+        container.pivot.x = container.width / (container.scale.x * 2);
+        container.pivot.y = container.height / (container.scale.y * 2);
+        container.x = this.x * size + size / 2;
+        container.y = this.y * size + size / 2;
+        container.rotation = (this.direction.valueOf() * Math.PI) / 2;
     }
 
     /**

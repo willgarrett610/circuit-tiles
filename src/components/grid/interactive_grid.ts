@@ -218,7 +218,7 @@ export default class InteractiveGrid extends Grid {
                     }
                 }
             }
-            this.update();
+            // ! this.update();
             updated = true;
         } else if (this.historyManager.interacting) {
             this.historyManager.endInteraction();
@@ -571,7 +571,7 @@ export default class InteractiveGrid extends Grid {
             this.addChild(tileGraphics);
             this.prevHighlightTileGraphics.push(tileGraphics);
             tempTile.updateContainer?.();
-            tempTile.update(this.size);
+            // tempTile.update(this.size);
         }
         this.previewTiles = [];
 

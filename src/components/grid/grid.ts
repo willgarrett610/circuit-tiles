@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as PIXI from "pixi.js";
-import { dimensions, height, width } from "../../utils";
+import { dimensions } from "../../utils";
 import { clamp } from "../../utils/math";
 import config from "../../config";
 import { ConnectionType, Tile } from "../tiles/tile";
@@ -39,7 +39,6 @@ export default class Grid extends PIXI.Container {
     tiles: { [key: string]: Tile | undefined } = {};
     chips: PlacedChip[] = [];
 
-    backgroundGraphics: PIXI.Graphics;
     lineGraphics: PIXI.Graphics;
     hlTile: PIXI.Graphics;
     selectionGraphics: PIXI.Graphics;
@@ -89,12 +88,6 @@ export default class Grid extends PIXI.Container {
 
         this.historyManager = new HistoryManager();
 
-        this.backgroundGraphics = new PIXI.Graphics();
-        this.backgroundGraphics.zIndex = 0;
-        this.backgroundGraphics.beginFill(config.colors.background);
-        this.backgroundGraphics.drawRect(0, 0, width(), height());
-        this.backgroundGraphics.endFill();
-
         this.lineGraphics = new PIXI.Graphics();
         this.lineGraphics.zIndex = 1000;
         this.hlTile = new PIXI.Graphics();
@@ -108,7 +101,6 @@ export default class Grid extends PIXI.Container {
 
         if (tiles) this.tiles = tiles;
 
-        this.addChild(this.backgroundGraphics);
         this.addChild(this.lineGraphics);
         this.addChild(this.hlTile);
         this.addChild(this.selectionGraphics);
@@ -681,7 +673,7 @@ export default class Grid extends PIXI.Container {
     /** renders all the tiles */
     renderTiles() {
         for (const [_, tile] of Object.entries(this.tiles))
-            if (tile) tile.update(this.size);
+            if (tile) tile.update({ newDirection: true, newGraphics: true, newSize: this.size });
     }
 
     /**
@@ -712,8 +704,7 @@ export default class Grid extends PIXI.Container {
                 child !== this.lineGraphics &&
                 child !== this.hlTile &&
                 child !== this.selectionGraphics &&
-                child !== this.chipOutlines &&
-                child !== this.backgroundGraphics
+                child !== this.chipOutlines
             ) {
                 this.removeChild(child);
             }
@@ -732,17 +723,28 @@ export default class Grid extends PIXI.Container {
         }
     }
 
+    /** Updates the background and the grid lines. Should be called when screen has moved or resized */
+    updateGridLines() {
+        this.renderGrid();
+    }
+
+    /** Updates all the graphics of the tiles */
+    updateTiles() {
+        this.renderTiles();
+    }
+
+    /** Updates the selection */
+    updateSelection() {
+        this.renderSelection();
+    }
+
     /**
      * Update the grids graphics
      */
     update() {
-        this.backgroundGraphics.x = -this.x;
-        this.backgroundGraphics.y = -this.y;
-        this.backgroundGraphics.width = width();
-        this.backgroundGraphics.height = height();
-        this.renderGrid();
-        this.renderTiles();
-        this.renderSelection();
+        this.updateGridLines();
+        this.updateTiles();
+        this.updateSelection();
     }
 
     convertToGraph = () => {

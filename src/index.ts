@@ -5,15 +5,12 @@ import GridManager from "./components/grid/grid_manager";
 import { loadSprites } from "./components/sprites/sprite_loader";
 import { initContextMenu } from "./utils/context_menu";
 import { setupMenus } from "./menus";
-import { handleEvent } from "./utils/event";
+import { handleEvent, onResize } from "./utils/event";
 import Graph from "./logic/graph";
 import state, { subscribe } from "./state";
-import {
-    addUpdatedTile,
-    beginLoop,
-    doTick,
-    stopLoop,
-} from "./logic/logic_manager";
+import { addUpdatedTile, doTick, stopLoop } from "./logic/logic_manager";
+import { height, width } from "./utils";
+import config from "./config";
 
 PIXI.utils.skipHello();
 
@@ -47,6 +44,20 @@ const main = async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).graph = Graph;
 
+    const backgroundGraphics = new PIXI.Graphics();
+    backgroundGraphics.zIndex = 0;
+    backgroundGraphics.beginFill(config.colors.background);
+    backgroundGraphics.drawRect(0, 0, width(), height());
+    backgroundGraphics.endFill();
+
+    onResize(() => {
+        backgroundGraphics.clear();
+        backgroundGraphics.beginFill(config.colors.background);
+        backgroundGraphics.drawRect(0, 0, width(), height());
+        backgroundGraphics.endFill();
+    });
+
+    app.stage.addChild(backgroundGraphics);
     app.stage.addChild(gridManager);
 
     loadSprites().then(() => initGUI(app));
