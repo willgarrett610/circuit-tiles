@@ -30,7 +30,7 @@ export default class WireTile extends GraphicsTile {
                 ? config.colors.activeTile
                 : config.colors.inactiveTile
         );
-        if (Object.entries(this.connections).some(([_, value]) => value))
+        if (Object.values(this.connections).some((value) => value))
             this.graphics.drawRect(40, 40, 40, 40);
         else this.graphics.drawRect(30, 30, 60, 60);
 

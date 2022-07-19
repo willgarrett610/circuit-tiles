@@ -42,9 +42,9 @@ export function mapObject<T>(
     callback: (value: T, key: string) => T
 ): { [key: string]: T } {
     const newObject: { [key: string]: T } = {};
-    for (const key of Object.keys(object)) {
+    for (const key of Object.keys(object))
         newObject[key] = callback(object[key], key);
-    }
+
     return newObject;
 }
 

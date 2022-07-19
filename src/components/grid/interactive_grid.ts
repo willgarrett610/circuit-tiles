@@ -143,6 +143,12 @@ export default class InteractiveGrid extends Grid {
 
                 this.x += newGridPos.x - prevGridPos.x;
                 this.y += newGridPos.y - prevGridPos.y;
+
+                this.update(
+                    { updateGridLines: true, updateTiles: {} },
+                    false,
+                    false
+                );
             } else {
                 const prevGridPos = this.screenToGrid(
                     ...this.prevMousePos,
@@ -215,6 +221,15 @@ export default class InteractiveGrid extends Grid {
                                 prevTile = newTile;
                             }
                         }
+
+                        this.update({
+                            updateGridLines: true,
+                            updateTiles: {
+                                newDirection: true,
+                                newGraphics: true,
+                            },
+                            updateSelection: true,
+                        });
                     }
                 }
             }
@@ -295,7 +310,13 @@ export default class InteractiveGrid extends Grid {
                 this.placeChip(chip, gridPoint);
             }
 
-            this.update();
+            this.update({
+                updateTiles: {
+                    newDirection: true,
+                    newGraphics: true,
+                    updateSize: true,
+                },
+            });
         }
 
         this.removingExtraTiles = false;
@@ -359,7 +380,17 @@ export default class InteractiveGrid extends Grid {
             //         state.chipPlacementRotation
             //     ),
             // });
-            this.update();
+            this.update(
+                {
+                    updateTiles: {
+                        newDirection: true,
+                        newGraphics: true,
+                        updateSize: true,
+                    },
+                },
+                false,
+                false
+            );
         }
     };
 
@@ -484,7 +515,12 @@ export default class InteractiveGrid extends Grid {
                 this.x += (newPos.x - prevPos.x) * this.size;
                 this.y += (newPos.y - prevPos.y) * this.size;
 
-                this.update();
+                this.update({
+                    updateTiles: {
+                        updateSize: true,
+                    },
+                    updateGridLines: true,
+                });
             }
 
             if (e.code === "Delete") {
@@ -526,7 +562,13 @@ export default class InteractiveGrid extends Grid {
             e.preventDefault();
             this.x = 0;
             this.y = 0;
-            this.update();
+            this.update({
+                updateTiles: {
+                    updateSize: true,
+                },
+                updateGridLines: true,
+                updateSelection: true,
+            });
         }
     };
 
@@ -767,10 +809,24 @@ export default class InteractiveGrid extends Grid {
         }
     };
 
-    update = () => {
-        super.update();
-        this.renderChipOutlines(...this.gridPos);
-        this.updateChipOutline();
-        this.updateHighlightTile();
+    update = (
+        superOptions: {
+            updateGridLines?: boolean | undefined;
+            updateTiles: {
+                updateSize?: boolean | undefined;
+                newGraphics?: boolean | undefined;
+                newDirection?: boolean | undefined;
+            };
+            updateSelection?: boolean | undefined;
+        },
+        updateChipOutlines = true,
+        updateHighlightTile = true
+    ) => {
+        super.update(superOptions);
+        if (updateChipOutlines) {
+            this.renderChipOutlines(...this.gridPos);
+            this.updateChipOutline();
+        }
+        if (updateHighlightTile) this.updateHighlightTile();
     };
 }

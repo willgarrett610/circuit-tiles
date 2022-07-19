@@ -64,7 +64,15 @@ export const doTick = async () => {
             }
         }
     }
-    gridManager.getGrid().update();
+    gridManager.getGrid().update(
+        {
+            updateTiles: {
+                newGraphics: true,
+            },
+        },
+        false,
+        false
+    );
 };
 
 export const beginLoop = async (interval: number) => {

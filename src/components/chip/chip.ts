@@ -381,7 +381,7 @@ export class Chip {
             grid.removeTile(...gridLocation, true, true);
             placedChip.deleteTile(...gridLocation);
 
-            grid.update();
+            grid.update({ updateTiles: { newGraphics: true } });
             placedChip.location = locationToPair(
                 add(locationToTuple(placedChip.location), topLeftDiff) as [
                     number,

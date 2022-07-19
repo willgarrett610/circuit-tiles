@@ -25,7 +25,13 @@ export default class GridManager extends PIXI.Container {
 
         onResize(() => {
             const grid = this.getGrid();
-            grid.update();
+            grid.update({
+                updateTiles: {
+                    updateSize: true,
+                },
+                updateGridLines: true,
+                updateSelection: true,
+            });
         });
 
         onScroll(this, (e) => {

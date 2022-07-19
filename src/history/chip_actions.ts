@@ -65,7 +65,7 @@ export const setChip: Action<PlaceChipPayload> = {
         }
 
         await grid.dispatchHandler("postAddChip", placedChip);
-        grid.update();
+        grid.update({ updateTiles: { newGraphics: true } });
     },
     undo: ({ payload: { chip, grid } }) => {
         grid.removeChip(chip, false);
@@ -95,7 +95,7 @@ export const deleteChip: Action<RemoveChipPayload> = {
 
         await grid.dispatchHandler("postRemoveChip", placedChip);
         grid.chips.splice(index, 1);
-        grid.update();
+        grid.update({ updateTiles: { newGraphics: true } });
     },
     undo: ({ payload: { chip: placedChip, grid } }) => {
         placedChip.tiles = {};

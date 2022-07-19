@@ -43,6 +43,7 @@ export default class Grid extends PIXI.Container {
     hlTile: PIXI.Graphics;
     selectionGraphics: PIXI.Graphics;
     chipOutlines: PIXI.Container;
+    tilesContainer: PIXI.Container;
 
     historyManager: HistoryManager;
 
@@ -105,6 +106,9 @@ export default class Grid extends PIXI.Container {
         this.addChild(this.hlTile);
         this.addChild(this.selectionGraphics);
         this.addChild(this.chipOutlines);
+
+        this.tilesContainer = new PIXI.Container();
+        this.addChild(this.tilesContainer);
 
         this.renderGrid();
     }
@@ -573,7 +577,10 @@ export default class Grid extends PIXI.Container {
         this.x += (newPos.x - prevPos.x) * this.size;
         this.y += (newPos.y - prevPos.y) * this.size;
 
-        this.update();
+        this.update({
+            updateTiles: { updateSize: true },
+            updateGridLines: true,
+        });
     };
 
     /** renders out grid */
@@ -670,10 +677,26 @@ export default class Grid extends PIXI.Container {
         }
     }
 
-    /** renders all the tiles */
-    renderTiles() {
-        for (const [_, tile] of Object.entries(this.tiles))
-            if (tile) tile.update({ newDirection: true, newGraphics: true, newSize: this.size });
+    /**
+     * renders all the tiles
+     *
+     * @param root0
+     * @param root0.updateSize
+     * @param root0.newGraphics
+     * @param root0.newDirection
+     */
+    renderTiles({
+        updateSize = false,
+        newGraphics = false,
+        newDirection = false,
+    }) {
+        for (const tile of Object.values(this.tiles))
+            if (tile)
+                tile.update({
+                    newDirection,
+                    newGraphics,
+                    newSize: updateSize ? this.size : undefined,
+                });
     }
 
     /**
@@ -713,12 +736,12 @@ export default class Grid extends PIXI.Container {
 
     /** Generates containers for each tile */
     generateTileGraphics() {
-        for (const [_, tile] of Object.entries(this.tiles)) {
+        for (const tile of Object.values(this.tiles)) {
             if (tile) {
                 const tileGraphics: PIXI.Container = tile.getContainer(
                     this.size
                 );
-                this.addChild(tileGraphics);
+                this.tilesContainer.addChild(tileGraphics);
             }
         }
     }
@@ -728,9 +751,20 @@ export default class Grid extends PIXI.Container {
         this.renderGrid();
     }
 
-    /** Updates all the graphics of the tiles */
-    updateTiles() {
-        this.renderTiles();
+    /**
+     * Updates all the graphics of the tiles
+     *
+     * @param options
+     * @param options.updateSize
+     * @param options.newGraphics
+     * @param options.newDirection
+     */
+    updateTiles(options: {
+        updateSize?: boolean;
+        newGraphics?: boolean;
+        newDirection?: boolean;
+    }) {
+        this.renderTiles(options);
     }
 
     /** Updates the selection */
@@ -740,11 +774,35 @@ export default class Grid extends PIXI.Container {
 
     /**
      * Update the grids graphics
+     *
+     * @param root0
+     * @param root0.updateGridLines
+     * @param root0.updateTiles
+     * @param root0.updateSelection
+     * @param root0.updateTiles.updateSize
+     * @param root0.updateTiles.newGraphics
+     * @param root0.updateTiles.newDirection
      */
-    update() {
-        this.updateGridLines();
-        this.updateTiles();
-        this.updateSelection();
+    update({
+        updateGridLines = true,
+        updateTiles = {
+            updateSize: false,
+            newGraphics: false,
+            newDirection: false,
+        },
+        updateSelection = true,
+    }: {
+        updateGridLines?: boolean;
+        updateTiles: {
+            updateSize?: boolean | undefined;
+            newGraphics?: boolean | undefined;
+            newDirection?: boolean | undefined;
+        };
+        updateSelection?: boolean;
+    }) {
+        if (updateGridLines) this.updateGridLines();
+        this.updateTiles(updateTiles);
+        if (updateSelection) this.updateSelection();
     }
 
     convertToGraph = () => {
