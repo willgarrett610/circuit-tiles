@@ -177,8 +177,6 @@ export abstract class Tile {
         );
     }
 
-    canUse = () => true;
-
     onClick?(e: PIXI.interaction.InteractionEvent): void;
     onContext?(e: CMouseEvent): void;
 
@@ -239,6 +237,9 @@ export abstract class Tile {
             if (newDirection) this.updateRotation();
             // TODO this might not be very efficient
             // Only need to rerender when state is changed
+            // Perhaps we could have a function to call whenever state is changed that requires
+            // need new graphics and a variable is set to true and if it is true then this
+            // function will run, and after it is run it will set the variable back to false
             if (newGraphics) this.updateContainer?.();
         }
     }
