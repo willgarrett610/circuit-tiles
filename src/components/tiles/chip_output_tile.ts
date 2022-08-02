@@ -38,14 +38,12 @@ export default class ChipOutputTile extends IOTile {
                 this.openRenameMenu();
             } else if (name === "recolor") {
                 const close = createOutputHueForm({
-                    title: "Recoler Output",
+                    title: "Recolor Output",
                     hue: this.hue,
                     onSubmit: ({ hue }) => {
                         if (!state.currentChipGrid) return;
 
-                        for (const tile of Object.values(
-                            state.currentChipGrid.grids.chip.tiles
-                        )) {
+                        for (const tile of state.currentChipGrid.grids.chip.tiles.values()) {
                             if (
                                 tile instanceof ChipOutputTile &&
                                 tile.id === this.id
@@ -55,9 +53,7 @@ export default class ChipOutputTile extends IOTile {
                             }
                         }
 
-                        for (const tile of Object.values(
-                            state.currentChipGrid.grids.structure.tiles
-                        )) {
+                        for (const tile of state.currentChipGrid.grids.structure.tiles.values()) {
                             if (
                                 tile instanceof ChipOutputTile &&
                                 tile.id === this.id

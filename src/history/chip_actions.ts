@@ -17,12 +17,12 @@ interface PlaceChipPayload {
 
 export const setChip: Action<PlaceChipPayload> = {
     do: async ({ grid, chip: placedChip, chipFormerLocation }) => {
-        placedChip.tiles = {};
+        placedChip.tiles = new Map();
         grid.chips.push(placedChip);
         const chip = placedChip.chip.getRootOriginal();
         chip.placedChips.add(placedChip);
         const structure = chip.structure;
-        const structureTiles = Object.values(structure);
+        const structureTiles = structure.values();
 
         const offset = chipFormerLocation;
 
@@ -88,7 +88,7 @@ export const deleteChip: Action<RemoveChipPayload> = {
         const index = grid.chips.indexOf(placedChip);
         if (index === -1) return;
 
-        for (const chipTile of Object.values(placedChip.tiles)) {
+        for (const chipTile of placedChip.tiles.values()) {
             if (chipTile)
                 await grid.removeTile(chipTile.x, chipTile.y, true, true);
         }
@@ -98,7 +98,7 @@ export const deleteChip: Action<RemoveChipPayload> = {
         grid.update({ updateTiles: { newGraphics: true } });
     },
     undo: ({ payload: { chip: placedChip, grid } }) => {
-        placedChip.tiles = {};
+        placedChip.tiles = new Map();
 
         (grid as InteractiveGrid).placeChip(
             placedChip.chip.getRootOriginal(),

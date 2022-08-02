@@ -72,9 +72,9 @@ export default abstract class IOTile extends ChipTile {
                 if (value === this.id) return true;
                 return (
                     state.currentChipGrid !== undefined &&
-                    !Object.values(state.currentChipGrid?.chip.tiles).find(
-                        (v) => v instanceof this.type && v.id === value
-                    ) &&
+                    !Array.from(
+                        state.currentChipGrid?.chip.tiles.values()
+                    ).find((v) => v instanceof this.type && v.id === value) &&
                     value.length > 0 &&
                     value.length <= 6
                 );
@@ -90,8 +90,8 @@ export default abstract class IOTile extends ChipTile {
                     (value: { name: string; tile: IOTile }) =>
                         value.name === this.id
                 );
-                const inputTileS = Object.values(
-                    state.currentChipGrid.chip.structure
+                const inputTileS = Array.from(
+                    state.currentChipGrid.chip.structure.values()
                 ).find(
                     (value) =>
                         value instanceof this.type && value.id === this.id

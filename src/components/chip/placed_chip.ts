@@ -13,7 +13,7 @@ export class PlacedChip {
     location: { x: number; y: number };
     rotation: Rotation;
     chip: Chip;
-    tiles: { [key: string]: ChipTile | undefined } = {};
+    tiles: Map<string, ChipTile> = new Map();
     grid: Grid;
     scopeName: string;
 
@@ -55,7 +55,7 @@ export class PlacedChip {
      * @returns tile at location
      */
     getTile(x: number, y: number) {
-        return this.tiles[`${x},${y}`];
+        return this.tiles.get(`${x},${y}`);
     }
 
     /**
@@ -66,7 +66,7 @@ export class PlacedChip {
      * @param tile
      */
     setTile(x: number, y: number, tile: ChipTile) {
-        this.tiles[`${x},${y}`] = tile;
+        this.tiles.set(`${x},${y}`, tile);
     }
 
     /**
@@ -76,7 +76,7 @@ export class PlacedChip {
      * @param y y coordinate
      */
     deleteTile(x: number, y: number) {
-        delete this.tiles[`${x},${y}`];
+        this.tiles.delete(`${x},${y}`);
     }
 
     /**
@@ -90,7 +90,7 @@ export class PlacedChip {
         const graphic = new PIXI.Graphics();
         const color = this.chip.color;
 
-        for (const tile of Object.values(this.tiles)) {
+        for (const tile of this.tiles.values()) {
             if (!tile) continue;
             const tileLocation = locationToTuple(tile);
 

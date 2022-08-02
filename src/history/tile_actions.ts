@@ -31,6 +31,7 @@ export const setTile: Action<PlaceTilePayload> = {
     undo: ({ payload }) => {
         const tile = payload.grid.getTile(payload.x, payload.y);
         if (tile) {
+            // tile.container?.destroy();
             payload.grid.removeChild(tile.getContainer(payload.grid.size));
             payload.grid.dispatchHandler("postRemoveTile", tile);
         }
@@ -50,6 +51,7 @@ export const editTile: Action<EditTilePayload, Tile> = {
         const refTile = grid.getTile(x, y);
 
         if (refTile) {
+            // refTile.container?.destroy();
             grid.removeChild(refTile.getContainer(grid.size));
             const newTile = tile.clone();
             grid.setTile(x, y, newTile);
@@ -63,11 +65,13 @@ export const editTile: Action<EditTilePayload, Tile> = {
         const tile = grid.getTile(x, y);
         if (!tile) return;
         if (prevValue) {
+            // tile.container?.destroy();
             grid.removeChild(tile.getContainer(grid.size));
             grid.setTile(x, y, prevValue);
             grid.addChild(prevValue.getContainer(grid.size));
             prevValue.updateContainer?.();
         } else {
+            // tile.container?.destroy();
             grid.removeChild(tile.getContainer(grid.size));
             grid.deleteTile(x, y);
         }
@@ -85,6 +89,7 @@ export const deleteTile: Action<DeleteTilePayload, Tile> = {
         const tile = grid.getTile(x, y);
         if (tile) {
             const prevTile = tile?.clone();
+            // tile.container?.destroy();
             grid.removeChild(tile?.getContainer(grid.size));
             grid.deleteTile(x, y);
             await grid.dispatchHandler("postRemoveTile", tile);
@@ -94,7 +99,10 @@ export const deleteTile: Action<DeleteTilePayload, Tile> = {
     undo: ({ payload: { x, y, grid }, prevValue }) => {
         if (prevValue) {
             const tile = grid.getTile(x, y);
-            if (tile) grid.removeChild(tile.getContainer(grid.size));
+            if (tile) {
+                // tile.container?.destroy();
+                grid.removeChild(tile.getContainer(grid.size));
+            }
             grid.setTile(x, y, prevValue);
             grid.addChild(prevValue.getContainer(grid.size));
             if (prevValue instanceof IOTile) prevValue.generateText();

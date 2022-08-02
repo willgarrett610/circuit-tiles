@@ -20,7 +20,7 @@ export default class InteractiveChipGrid extends InteractiveGrid {
     constructor(
         chip: Chip,
         size: number,
-        tiles?: { [key: string]: Tile | undefined },
+        tiles?: Map<string, Tile>,
         placedChips?: PlacedChip[]
     ) {
         super(size, tiles);

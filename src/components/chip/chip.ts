@@ -5,7 +5,7 @@ import { locationToPair, locationToTuple } from "../../utils";
 import ChipGridMode from "../../utils/chip_grid_mode";
 import { Direction, Rotation } from "../../utils/directions";
 import { add, sub } from "../../utils/math";
-import { mapObject } from "../../utils/objects";
+import { mapMap } from "../../utils/objects";
 import InteractiveGrid from "../grid/interactive_grid";
 import ChipInputTile from "../tiles/chip_input_tile";
 import ChipOutputTile from "../tiles/chip_output_tile";
@@ -29,12 +29,10 @@ export class Chip {
     name: string;
     color: number;
     hue: number;
-    tiles: { [key: string]: Tile | undefined } = {};
+    tiles: Map<string, Tile> = new Map();
     inputTiles: { name: string; tile: ChipInputTile }[] = [];
     outputTiles: { name: string; tile: ChipOutputTile }[] = [];
-    structure: {
-        [key: string]: ChipTile | undefined;
-    } = {};
+    structure: Map<string, ChipTile> = new Map();
     originalChip?: Chip;
 
     placedChips = new Set<PlacedChip>();
@@ -98,7 +96,7 @@ export class Chip {
      * @returns tile at location
      */
     getTile(x: number, y: number) {
-        return this.tiles[`${x},${y}`];
+        return this.tiles.get(`${x},${y}`);
     }
 
     /**
@@ -109,7 +107,7 @@ export class Chip {
      * @returns tile with the id
      */
     getTileById(id: string, type: typeof ChipTile): ChipTile | undefined {
-        return Object.values(this.tiles).find(
+        return Array.from(this.tiles.values()).find(
             (value) => value instanceof type && value.id === id
         ) as ChipTile | undefined;
     }
@@ -122,7 +120,7 @@ export class Chip {
      * @param tile
      */
     setTile(x: number, y: number, tile: Tile) {
-        this.tiles[`${x},${y}`] = tile;
+        this.tiles.set(`${x},${y}`, tile);
     }
 
     /**
@@ -132,7 +130,7 @@ export class Chip {
      * @param y y coordinate
      */
     deleteTile(x: number, y: number) {
-        delete this.tiles[`${x},${y}`];
+        this.tiles.delete(`${x},${y}`);
     }
 
     /**
@@ -143,7 +141,7 @@ export class Chip {
      * @returns tile at location
      */
     getStructureTile(x: number, y: number) {
-        return this.structure[`${x},${y}`];
+        return this.structure.get(`${x},${y}`);
     }
 
     /**
@@ -154,7 +152,7 @@ export class Chip {
      * @param tile
      */
     setStructureTile(x: number, y: number, tile: ChipTile) {
-        this.structure[`${x},${y}`] = tile;
+        this.structure.set(`${x},${y}`, tile);
     }
 
     /**
@@ -164,7 +162,7 @@ export class Chip {
      * @param y y coordinate
      */
     deleteStructureTile(x: number, y: number) {
-        delete this.structure[`${x},${y}`];
+        this.structure.delete(`${x},${y}`);
     }
 
     /**
@@ -219,8 +217,8 @@ export class Chip {
                 (x) => x.tile.id !== tile.id
             );
         } else return;
-        const key = Object.keys(this.structure).find(
-            (x) => this.structure[x]?.id === tile.id
+        const key = [...this.structure.keys()].find(
+            (x) => this.structure.get(x)?.id === tile.id
         );
         if (key) {
             const split = key.split(",");
@@ -401,26 +399,25 @@ export class Chip {
      * @returns true if the chip is structured
      */
     isStructured() {
+        const structureTiles = Array.from(this.structure.values());
+
         if (
-            Object.values(this.structure).filter(
-                (tile) => !(tile instanceof StructureTile)
-            ).length !==
+            structureTiles.filter((tile) => !(tile instanceof StructureTile))
+                .length !==
             this.inputTiles.length + this.outputTiles.length
         ) {
             this.wasStructured = false;
             return false;
         }
 
-        const tile = Object.values(this.structure).find(
-            (tile) => tile instanceof Tile
-        );
+        const tile = structureTiles.find((tile) => tile instanceof Tile);
 
         if (!tile) {
             this.wasStructured = true;
             return true;
         }
 
-        let tilesLeft = Object.values(this.structure).filter((x) => x !== tile);
+        let tilesLeft = structureTiles.filter((x) => x !== tile);
 
         const isJoint = (tile: Tile) => {
             for (const direction of Direction.values()) {
@@ -452,7 +449,7 @@ export class Chip {
      * @returns top left tile location of structure
      */
     getTopLeftStructure(): [number, number] {
-        const structureTiles = Object.values(this.structure);
+        const structureTiles = Array.from(this.structure.values());
 
         if (structureTiles.length === 0) return [0, 0];
 
@@ -475,7 +472,7 @@ export class Chip {
      */
     rotate(rotation: Rotation = Rotation.CLOCKWISE) {
         const topLeft = this.getTopLeftStructure();
-        const newStructure: { [key: string]: ChipTile } = {};
+        const newStructure: Map<string, ChipTile> = new Map();
         for (const key of Object.keys(this.structure)) {
             const split = key.split(",");
             const x = parseInt(split[0]);
@@ -483,33 +480,33 @@ export class Chip {
             const newX = x - topLeft[1];
             const newY = y - topLeft[0];
 
-            const prevTile = this.structure[key];
+            const prevTile = this.structure.get(key);
             if (!prevTile) continue;
 
             switch (rotation) {
                 case Rotation.CLOCKWISE: {
-                    newStructure[`${-newY},${newX}`] = prevTile;
+                    newStructure.set(`${-newY},${newX}`, prevTile);
                     prevTile.x = -newY;
                     prevTile.y = newX;
 
                     break;
                 }
                 case Rotation.HALF_TURN: {
-                    newStructure[`${-newX},${-newY}`] = prevTile;
+                    newStructure.set(`${-newX},${-newY}`, prevTile);
                     prevTile.x = -newX;
                     prevTile.y = -newY;
 
                     break;
                 }
                 case Rotation.COUNTER_CLOCKWISE: {
-                    newStructure[`${newY},${-newX}`] = prevTile;
+                    newStructure.set(`${newY},${-newX}`, prevTile);
                     prevTile.x = newY;
                     prevTile.y = -newX;
 
                     break;
                 }
                 case Rotation.NORMAL: {
-                    newStructure[`${newX},${newY}`] = prevTile;
+                    newStructure.set(`${newX},${newY}`, prevTile);
                     prevTile.x = newX;
                     prevTile.y = newY;
 
@@ -529,8 +526,8 @@ export class Chip {
     clone(noteOriginal: boolean = false) {
         const newChip = new Chip(this.name, this.color, this.hue);
         if (noteOriginal) newChip.originalChip = this.originalChip || this;
-        newChip.tiles = mapObject(this.tiles, (tile) => tile?.clone());
-        newChip.structure = mapObject(
+        newChip.tiles = mapMap(this.tiles, (tile) => tile?.clone());
+        newChip.structure = mapMap(
             this.structure,
             (tile) => tile?.clone() as any
         );

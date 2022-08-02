@@ -49,6 +49,23 @@ export function mapObject<T>(
 }
 
 /**
+ * Applies callback to each key value pair in the given map
+ *
+ * @param map The map to iterate over
+ * @param callback Callback that takes in each key value pair
+ * @returns New map with the callback applied to each key value pair
+ */
+export function mapMap<K, T>(
+    map: Map<K, T>,
+    callback: (value: T, key: K) => T
+): Map<K, T> {
+    const newMap = new Map<K, T>();
+    for (const [key, value] of map) newMap.set(key, callback(value, key));
+
+    return newMap;
+}
+
+/**
  * Check if an object is empty
  *
  * @param object object to check

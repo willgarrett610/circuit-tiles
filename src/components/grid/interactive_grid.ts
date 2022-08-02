@@ -45,7 +45,7 @@ export default class InteractiveGrid extends Grid {
      * @param size pixel size of grid tile
      * @param tiles initial tiles
      */
-    constructor(size: number, tiles?: { [key: string]: Tile | undefined }) {
+    constructor(size: number, tiles?: Map<string, Tile>) {
         super(size, tiles);
 
         subscribe("interactive", (value) => {
@@ -449,7 +449,7 @@ export default class InteractiveGrid extends Grid {
         )
             return false;
         const structureOffset = chip.getTopLeftStructure();
-        for (const structureTile of Object.values(chip.structure)) {
+        for (const structureTile of chip.structure.values()) {
             if (!structureTile) continue;
             const tileLocation = sub(
                 add(location, [structureTile.x, structureTile.y]),
@@ -580,7 +580,10 @@ export default class InteractiveGrid extends Grid {
         const gridPos = this.screenToGrid(...this.mousePos, true);
 
         if (this.prevHighlightTileGraphics.length > 0) {
-            this.prevHighlightTileGraphics.forEach((x) => this.removeChild(x));
+            this.prevHighlightTileGraphics.forEach((x) => {
+                // x.destroy();
+                this.removeChild(x);
+            });
             this.prevHighlightTileGraphics = [];
         }
 
@@ -676,7 +679,7 @@ export default class InteractiveGrid extends Grid {
         // }
         const valid = this.isValidChipPlacement(gridPos, chip);
         const structure = chip.structure;
-        const structureTiles = Object.values(structure);
+        const structureTiles = structure.values();
         const structureOffset = chip.getTopLeftStructure();
 
         const color = valid ? chip.color : config.colors.chipInvalidPlacement;

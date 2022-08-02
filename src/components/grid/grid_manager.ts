@@ -67,6 +67,8 @@ export default class GridManager extends PIXI.Container {
      */
     setInChipGrid(val: boolean) {
         this.inChipGrid = val;
+
+        // for (const child of this.children) child.destroy();
         this.removeChildren();
         if (this.inChipGrid) {
             if (state.chipGridMode === ChipGridMode.STRUCTURING) {

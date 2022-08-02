@@ -18,7 +18,7 @@ type LogicTile = {
 export default class Graph {
     nodes: LogicNode[] = []; // consider changing to a map where the key is the tile
     scopes: string[][] = [];
-    logicTiles: { [key: string]: LogicTile | undefined } = {};
+    logicTiles: Map<string, LogicTile> = new Map();
 
     getLogicTile = (
         x: number,
@@ -27,25 +27,24 @@ export default class Graph {
         extraInput: boolean = false
     ) => {
         const scopeStr = scope.join(",");
-        return this.logicTiles[`${x},${y}.${scopeStr}${extraInput ? "&" : ""}`];
+        return this.logicTiles.get(
+            `${x},${y}.${scopeStr}${extraInput ? "&" : ""}`
+        );
     };
 
     setLogicTile = (tile: LogicTile) => {
         const location = tile.location;
         const scopeStr = location.scope.join(",");
-        this.logicTiles[
+        this.logicTiles.set(
             `${location.x},${location.y}.${scopeStr}${
                 location.extraInput ? "&" : ""
-            }`
-        ] = tile;
+            }`,
+            tile
+        );
     };
 
-    getTile = (
-        x: number,
-        y: number,
-        tiles: { [key: string]: Tile | undefined }
-    ) => {
-        return tiles[`${x},${y}`];
+    getTile = (x: number, y: number, tiles: Map<string, Tile>) => {
+        return tiles.get(`${x},${y}`);
     };
 
     /**
@@ -73,13 +72,13 @@ export default class Graph {
      * @param tiles
      * @param scope
      */
-    addTiles(tiles: { [key: string]: Tile | undefined }, scope: string[]) {
+    addTiles(tiles: Map<string, Tile>, scope: string[]) {
         // If the given scope already has been added
         if (this.scopeExists(scope)) return;
 
         this.scopes.push(scope);
 
-        for (const tile of Object.values(tiles)) {
+        for (const tile of tiles.values()) {
             if (!tile || (tile instanceof IOTile && !tile.chip)) continue;
             if (tile.isNode && tile.toNode) {
                 // handle chip input / output tiles such that it leads to the chip's corresponding logic node
@@ -149,7 +148,7 @@ export default class Graph {
     }
 
     createLogicEdge = (
-        tiles: { [key: string]: Tile | undefined },
+        tiles: Map<string, Tile>,
         initialTile: Tile,
         scope: string[]
     ) => {
@@ -215,7 +214,7 @@ export default class Graph {
         graph.addTiles(grid.tiles, ["global"]);
 
         // connect all the logic nodes
-        for (const logicTile of Object.values(graph.logicTiles)) {
+        for (const logicTile of graph.logicTiles.values()) {
             if (!logicTile) continue;
             const connections = logicTile.tile.getConnections();
             const connectionsTemplate = logicTile.tile.getConnectionTemplate();
