@@ -17,15 +17,17 @@ const includesTile = (tiles: Tile[], search: Tile) => {
 };
 
 export const doTick = async () => {
+    // Uncomment line below to deactivate logic
+    // if (true as boolean) return;
     if (!lib) lib = await init();
 
     const grid = gridManager.mainGrid;
     // TODO Only generate graph when tiles have changed
     const graph = Graph.genFromGrid(grid);
-    console.log(graph);
+    // console.log(graph);
     const nodes = graph.convertForRust();
-    console.log(nodes);
-    console.log(updatedTiles);
+    // console.log(nodes);
+    // console.log(updatedTiles);
 
     const updatedIndices = [];
 
@@ -33,19 +35,19 @@ export const doTick = async () => {
     // TODO Shouldn't loop through all tiles, but only updated tiles
     for (let i = 0; i < graph.nodes.length; i++) {
         const node = graph.nodes[i];
-        console.log("node", node);
+        // console.log("node", node);
         if (node.originTile && includesTile(updatedTiles, node.originTile)) {
             updatedIndices.push(i);
         }
     }
     updatedTiles = [];
 
-    console.log(updatedIndices);
+    // console.log(updatedIndices);
 
     const updates = lib.compute_logic(nodes, Int32Array.from(updatedIndices));
 
-    console.log(graph.nodes);
-    console.log("update", updates);
+    // console.log(graph.nodes);
+    // console.log("update", updates);
 
     for (let i = 0; i < updates.length; i += 2) {
         const index = updates[i];

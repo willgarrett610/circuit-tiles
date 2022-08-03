@@ -28,8 +28,8 @@ impl Update for Graph {
     fn update_values(&mut self, index: usize, state: bool) {
         console_error_panic_hook::set_once();
         use web_sys::console;
-        console::log_1(&JsValue::from("update"));
-        console::log_2(&JsValue::from(index as f64), &JsValue::from(state));
+        // console::log_1(&JsValue::from("update"));
+        // console::log_2(&JsValue::from(index as f64), &JsValue::from(state));
         if self.nodes[index].state != state {
             let mut node = &mut self.nodes[index];
             node.updated = true;
@@ -37,8 +37,8 @@ impl Update for Graph {
             self.updated.push(&JsValue::from_f64(index as f64));
             self.updated.push(&JsValue::from_bool(state));
 
-            console::log_1(&JsValue::from_str("Updated: "));
-            console::log_2(&JsValue::from(index as f64), &JsValue::from(state));
+            // console::log_1(&JsValue::from_str("Updated: "));
+            // console::log_2(&JsValue::from(index as f64), &JsValue::from(state));
         }
     }
 }
@@ -55,13 +55,13 @@ pub fn update_tile(graph: &mut Graph, index: usize) {
     console_error_panic_hook::set_once();
     use web_sys::console;
     if graph.nodes[index].updated {
-        console::log_2(
-            &JsValue::from("already updated"),
-            &JsValue::from(index as f64),
-        );
+        // console::log_2(
+        //     &JsValue::from("already updated"),
+        //     &JsValue::from(index as f64),
+        // );
         return;
     }
-    console::log_2(&JsValue::from("update tile"), &JsValue::from(index as f64));
+    // console::log_2(&JsValue::from("update tile"), &JsValue::from(index as f64));
 
     let node = &graph.nodes[index];
 
@@ -76,7 +76,7 @@ pub fn update_tile(graph: &mut Graph, index: usize) {
             }
         }
 
-        console::log_1(&JsValue::from("will update"));
+        // console::log_1(&JsValue::from("will update"));
 
         // Invert input if node is a not tile
         if graph.nodes[index].tile_type == 1 {
@@ -90,11 +90,11 @@ pub fn update_tile(graph: &mut Graph, index: usize) {
 
     //TODO Add logic for delay tile
     for i in outputs {
-        console::log_2(&JsValue::from("i"), &JsValue::from(i as f64));
-        console::log_2(
-            &JsValue::from(graph.nodes[i].state),
-            &JsValue::from(graph.nodes[index].state),
-        );
+        // console::log_2(&JsValue::from("i"), &JsValue::from(i as f64));
+        // console::log_2(
+        //     &JsValue::from(graph.nodes[i].state),
+        //     &JsValue::from(graph.nodes[index].state),
+        // );
         if will_state_change(
             graph.nodes[i].state,
             graph.nodes[index].state,
@@ -130,7 +130,7 @@ pub fn compute_logic(
 
     // Find the index of each node in the nodes_data array
     while i < nodes_data.len() {
-        console::log_2(&"index: ".into(), &JsValue::from(i as i32));
+        // console::log_2(&"index: ".into(), &JsValue::from(i as i32));
         index_map.push((map_index, i));
 
         i += (nodes_data[(i + 2) as usize] + nodes_data[(i + 3) as usize]) as usize + 4;
@@ -164,17 +164,17 @@ pub fn compute_logic(
             node.outputs.push(nodes_data[i] as usize);
         }
 
-        console::log_1(&"---------------node---------------".into());
-        console::log_2(&"arr_index".into(), &JsValue::from(node.arr_index as i32));
-        console::log_2(&"index".into(), &JsValue::from(node.index as i32));
-        console::log_2(&"tile_type".into(), &JsValue::from(node.tile_type as i32));
-        console::log_2(&"state".into(), &JsValue::from(node.state as i32));
-        for i in 0..node.inputs.len() {
-            console::log_2(&"inputs".into(), &JsValue::from(node.inputs[i] as i32));
-        }
-        for i in 0..node.outputs.len() {
-            console::log_2(&"outputs".into(), &JsValue::from(node.outputs[i] as i32));
-        }
+        // console::log_1(&"---------------node---------------".into());
+        // console::log_2(&"arr_index".into(), &JsValue::from(node.arr_index as i32));
+        // console::log_2(&"index".into(), &JsValue::from(node.index as i32));
+        // console::log_2(&"tile_type".into(), &JsValue::from(node.tile_type as i32));
+        // console::log_2(&"state".into(), &JsValue::from(node.state as i32));
+        // for i in 0..node.inputs.len() {
+        //     console::log_2(&"inputs".into(), &JsValue::from(node.inputs[i] as i32));
+        // }
+        // for i in 0..node.outputs.len() {
+        //     console::log_2(&"outputs".into(), &JsValue::from(node.outputs[i] as i32));
+        // }
         nodes.push(node);
     }
 
