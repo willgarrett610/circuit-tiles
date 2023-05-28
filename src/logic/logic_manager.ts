@@ -17,6 +17,9 @@ const includesTile = (tiles: Tile[], search: Tile) => {
 };
 
 export const doTick = async () => {
+    // TODO: ticking is called too often and needs fix
+    if (true as boolean) return;
+
     if (!lib) lib = await init();
 
     const grid = gridManager.mainGrid;

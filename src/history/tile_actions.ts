@@ -20,6 +20,7 @@ export const setTile: Action<PlaceTilePayload> = {
         };
 
         const newTile = payload.tile;
+        newTile.generateContainer();
         await payload.grid.dispatchHandler("preAddTile", payload.tile, reject2);
         if (isRejected) return;
 
@@ -31,9 +32,10 @@ export const setTile: Action<PlaceTilePayload> = {
     undo: ({ payload }) => {
         const tile = payload.grid.getTile(payload.x, payload.y);
         if (tile) {
-            // tile.container?.destroy();
             payload.grid.removeChild(tile.getContainer(payload.grid.size));
             payload.grid.dispatchHandler("postRemoveTile", tile);
+
+            // tile.dispose();
         }
         payload.grid.deleteTile(payload.x, payload.y);
     },

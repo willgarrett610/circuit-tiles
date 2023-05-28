@@ -291,9 +291,6 @@ export default class GUIWindow extends PIXI.Container {
         beginIndex?: number,
         endIndex?: number
     ): PIXI.DisplayObject[] {
-        // for (const child of this.container.children.slice(beginIndex, endIndex))
-        //     child.destroy();
-
         const children = this.container.removeChildren(beginIndex, endIndex);
         for (const child of children) {
             if ((child as any).__proto__ instanceof GUIComponent) {
@@ -304,6 +301,8 @@ export default class GUIWindow extends PIXI.Container {
                 }
             }
         }
+        for (const child of this.container.children.slice(beginIndex, endIndex))
+            child.destroy();
         return children;
     }
 

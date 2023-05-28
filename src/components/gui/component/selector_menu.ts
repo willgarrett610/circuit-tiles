@@ -103,8 +103,6 @@ export default class SelectorMenu extends GUIWindow {
     generateComponents() {
         const btnLayout = this.layout as LineWrapLayout;
 
-        // this.removeChildren(0, this.children.length - 1);
-        // for (const child of this.children) child.destroy();
         this.removeChildren();
 
         // Add header text to Selector window

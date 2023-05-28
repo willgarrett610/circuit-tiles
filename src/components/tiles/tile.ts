@@ -19,6 +19,7 @@ export abstract class Tile {
     copyProps = ["connections", "label", "x", "y", "direction", "signalActive"];
     isNode = false;
     isWire = false;
+    isDisposed = false;
 
     protected connections: {
         up: boolean;
@@ -193,7 +194,8 @@ export abstract class Tile {
      * @returns container
      */
     getContainer(size: number): PIXI.Container {
-        if (!this.container) {
+        console.log(this.container);
+        if (!this.container || this.isDisposed) {
             this.container = this.generateContainer();
             this.container.zIndex = 100;
 
@@ -203,6 +205,7 @@ export abstract class Tile {
             if (this.onContext) onContextMenu(this.container, this.onContext);
             this.postGenerate?.();
         }
+        console.log(this.container);
         this.container.width = size;
         this.container.height = size;
         this.container.pivot.x =
@@ -241,7 +244,6 @@ export abstract class Tile {
             // need new graphics and a variable is set to true and if it is true then this
             // function will run, and after it is run it will set the variable back to false
             if (newGraphics) {
-                console.log("updating container");
                 this.updateContainer?.();
             }
         }
@@ -286,6 +288,14 @@ export abstract class Tile {
     }
 
     createClone?(tile: Tile): void;
+
+    /**
+     * disposes of tile's graphics
+     */
+    dispose() {
+        this.isDisposed = true;
+        this.container?.destroy({ children: true });
+    }
 }
 
 /** sprite tile */
@@ -299,6 +309,13 @@ export abstract class SpriteTile extends Tile {
      */
     generateContainer() {
         return new PIXI.Sprite(this.texture);
+    }
+
+    /**
+     * disposes of tile
+     */
+    dispose() {
+        this.container?.destroy({ children: true, texture: true });
     }
 }
 

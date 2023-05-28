@@ -603,7 +603,7 @@ export default class InteractiveGrid extends Grid {
 
         if (this.prevHighlightTileGraphics.length > 0) {
             this.prevHighlightTileGraphics.forEach((x) => {
-                // x.destroy();
+                x.destroy();
                 this.removeChild(x);
             });
             this.prevHighlightTileGraphics = [];

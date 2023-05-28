@@ -197,7 +197,7 @@ export default class Graph {
             return edgeLocations;
         };
 
-        logicEdge.locations = findEdge(initialTile);
+        // logicEdge.locations = findEdge(initialTile);
         return logicEdge;
     };
 
