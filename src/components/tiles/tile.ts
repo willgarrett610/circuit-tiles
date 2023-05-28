@@ -194,7 +194,6 @@ export abstract class Tile {
      * @returns container
      */
     getContainer(size: number): PIXI.Container {
-        console.log(this.container);
         if (!this.container || this.isDisposed) {
             this.container = this.generateContainer();
             this.container.zIndex = 100;
@@ -205,7 +204,7 @@ export abstract class Tile {
             if (this.onContext) onContextMenu(this.container, this.onContext);
             this.postGenerate?.();
         }
-        console.log(this.container);
+
         this.container.width = size;
         this.container.height = size;
         this.container.pivot.x =
