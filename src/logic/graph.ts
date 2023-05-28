@@ -5,6 +5,7 @@ import { ConnectionType, Tile } from "../components/tiles/tile";
 import CircuitLocation from "./circuit_location";
 import LogicNode from "./node";
 import ChipInputTile from "../components/tiles/chip_input_tile";
+import { TileManager } from "../utils/TileManager";
 
 type LogicTile = {
     tile: Tile;
@@ -43,10 +44,6 @@ export default class Graph {
         );
     };
 
-    getTile = (x: number, y: number, tiles: Map<string, Tile>) => {
-        return tiles.get(`${x},${y}`);
-    };
-
     /**
      * Checks if the given scope exists
      *
@@ -72,13 +69,13 @@ export default class Graph {
      * @param tiles
      * @param scope
      */
-    addTiles(tiles: Map<string, Tile>, scope: string[]) {
+    addTiles(tiles: TileManager, scope: string[]) {
         // If the given scope already has been added
         if (this.scopeExists(scope)) return;
 
         this.scopes.push(scope);
 
-        for (const tile of tiles.values()) {
+        for (const tile of tiles) {
             if (!tile || (tile instanceof IOTile && !tile.chip)) continue;
             if (tile.isNode && tile.toNode) {
                 // handle chip input / output tiles such that it leads to the chip's corresponding logic node
@@ -86,7 +83,7 @@ export default class Graph {
                 if (tile instanceof IOTile) {
                     const chip = tile.chip;
                     if (chip) {
-                        const chipTile = chip.chip.getTileById(
+                        const chipTile = chip.chip.tiles.getTileById(
                             tile.id,
                             tile.type
                         );
@@ -148,7 +145,7 @@ export default class Graph {
     }
 
     createLogicEdge = (
-        tiles: Map<string, Tile>,
+        tiles: TileManager,
         initialTile: Tile,
         scope: string[]
     ) => {
@@ -177,10 +174,9 @@ export default class Graph {
 
             for (const connectionOffset of connectionOffsets) {
                 if (!connections[connectionOffset.side]) continue;
-                const connectedTile = this.getTile(
+                const connectedTile = tiles.getTile(
                     tile.x + connectionOffset.offset[0],
-                    tile.y + connectionOffset.offset[1],
-                    tiles
+                    tile.y + connectionOffset.offset[1]
                 );
                 if (
                     !connectedTile ||

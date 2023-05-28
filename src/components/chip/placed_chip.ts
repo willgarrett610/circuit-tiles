@@ -3,8 +3,8 @@ import { locationToTuple } from "../../utils";
 import { Direction, Rotation } from "../../utils/directions";
 import { add } from "../../utils/math";
 import Grid from "../grid/grid";
-import ChipTile from "../tiles/chip_tile";
 import { Chip } from "./chip";
+import { TileManager } from "../../utils/TileManager";
 
 /**
  * placed chip
@@ -13,7 +13,7 @@ export class PlacedChip {
     location: { x: number; y: number };
     rotation: Rotation;
     chip: Chip;
-    tiles: Map<string, ChipTile> = new Map();
+    tiles = new TileManager();
     grid: Grid;
     scopeName: string;
 
@@ -48,38 +48,6 @@ export class PlacedChip {
     }
 
     /**
-     * get tile at location
-     *
-     * @param x x coordinate
-     * @param y y coordinate
-     * @returns tile at location
-     */
-    getTile(x: number, y: number) {
-        return this.tiles.get(`${x},${y}`);
-    }
-
-    /**
-     * set tile at location
-     *
-     * @param x x coordinate
-     * @param y y coordinate
-     * @param tile
-     */
-    setTile(x: number, y: number, tile: ChipTile) {
-        this.tiles.set(`${x},${y}`, tile);
-    }
-
-    /**
-     * remove tile at coordinate
-     *
-     * @param x x coordinate
-     * @param y y coordinate
-     */
-    deleteTile(x: number, y: number) {
-        this.tiles.delete(`${x},${y}`);
-    }
-
-    /**
      * build graphic for outline of chip
      *
      * @param grid
@@ -90,7 +58,7 @@ export class PlacedChip {
         const graphic = new PIXI.Graphics();
         const color = this.chip.color;
 
-        for (const tile of this.tiles.values()) {
+        for (const tile of this.tiles) {
             if (!tile) continue;
             const tileLocation = locationToTuple(tile);
 
@@ -101,7 +69,9 @@ export class PlacedChip {
                     tileLocation,
                     directionOffset
                 ) as [number, number];
-                const adjacentTile = this.getTile(...adjacentTileLocation);
+                const adjacentTile = this.tiles.getTile(
+                    ...adjacentTileLocation
+                );
 
                 if (adjacentTile) continue;
 
@@ -136,13 +106,13 @@ export class PlacedChip {
                     tileLocation,
                     Direction.getOffset(Direction.RIGHT)
                 ) as [number, number];
-                const tileToRight = this.getTile(...tileToRightLocation);
+                const tileToRight = this.tiles.getTile(...tileToRightLocation);
 
                 const tileToLeftLocation = add(
                     tileLocation,
                     Direction.getOffset(Direction.LEFT)
                 ) as [number, number];
-                const tileToLeft = this.getTile(...tileToLeftLocation);
+                const tileToLeft = this.tiles.getTile(...tileToLeftLocation);
 
                 graphic.lineStyle(lineWidth, color);
                 switch (direction) {

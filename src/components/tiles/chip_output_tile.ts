@@ -43,7 +43,8 @@ export default class ChipOutputTile extends IOTile {
                     onSubmit: ({ hue }) => {
                         if (!state.currentChipGrid) return;
 
-                        for (const tile of state.currentChipGrid.grids.chip.tiles.values()) {
+                        for (const tile of state.currentChipGrid.grids.chip
+                            .tiles) {
                             if (
                                 tile instanceof ChipOutputTile &&
                                 tile.id === this.id
@@ -53,7 +54,8 @@ export default class ChipOutputTile extends IOTile {
                             }
                         }
 
-                        for (const tile of state.currentChipGrid.grids.structure.tiles.values()) {
+                        for (const tile of state.currentChipGrid.grids.structure
+                            .tiles) {
                             if (
                                 tile instanceof ChipOutputTile &&
                                 tile.id === this.id

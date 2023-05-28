@@ -276,7 +276,7 @@ export abstract class Tile {
      */
     clone() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const output: Tile = new (this.type as any)(this.x, this.y);
+        const output: this = new (this.type as any)(this.x, this.y);
         output.connections = { ...this.connections };
         output.direction = this.direction;
         output.signalActive = this.signalActive;

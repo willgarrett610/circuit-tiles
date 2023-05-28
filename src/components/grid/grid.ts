@@ -3,7 +3,7 @@ import * as PIXI from "pixi.js";
 import { dimensions } from "../../utils";
 import { clamp } from "../../utils/math";
 import config from "../../config";
-import { ConnectionType, GraphicsTile, Tile } from "../tiles/tile";
+import { ConnectionType, Tile } from "../tiles/tile";
 import { Direction, rotateClockWise } from "../../utils/directions";
 import state from "../../state";
 import { EditMode } from "../../utils/edit_mode";
@@ -20,6 +20,7 @@ import ChipOutputTile from "../tiles/chip_output_tile";
 import { ChipOutputTileType, TileType } from "../tiles/tile_types";
 import ChipGridMode from "../../utils/chip_grid_mode";
 import IOTile from "../tiles/io_tile";
+import { TileManager } from "../../utils/TileManager";
 
 type Handler<P> = Array<(payload: P, reject?: () => void) => Promise<void>>;
 
@@ -36,7 +37,7 @@ interface GridHandlers {
 export default class Grid extends PIXI.Container {
     startingSize: number;
     size: number;
-    tiles: Map<string, Tile> = new Map();
+    tiles = new TileManager();
     chips: PlacedChip[] = [];
 
     lineGraphics: PIXI.Graphics;
@@ -81,7 +82,7 @@ export default class Grid extends PIXI.Container {
      * @param size pixel size of grid tile
      * @param tiles initial tiles
      */
-    constructor(size: number, tiles?: Map<string, Tile>) {
+    constructor(size: number, tiles?: TileManager) {
         super();
 
         this.startingSize = size;
@@ -111,38 +112,6 @@ export default class Grid extends PIXI.Container {
         this.addChild(this.tilesContainer);
 
         this.renderGrid();
-    }
-
-    /**
-     * get tile at location
-     *
-     * @param x x coordinate
-     * @param y y coordinate
-     * @returns tile at location
-     */
-    getTile(x: number, y: number) {
-        return this.tiles.get(`${x},${y}`);
-    }
-
-    /**
-     * set tile at location
-     *
-     * @param x x coordinate
-     * @param y y coordinate
-     * @param tile
-     */
-    setTile(x: number, y: number, tile: Tile) {
-        this.tiles.set(`${x},${y}`, tile);
-    }
-
-    /**
-     * remove tile at coordinate
-     *
-     * @param x x coordinate
-     * @param y y coordinate
-     */
-    deleteTile(x: number, y: number) {
-        this.tiles.delete(`${x},${y}`);
     }
 
     addHandler = <T extends keyof GridHandlers>(
@@ -225,7 +194,7 @@ export default class Grid extends PIXI.Container {
      * @param y y coordinate
      */
     async handleForceConnection(x: number, y: number) {
-        let tile = this.getTile(x, y);
+        let tile = this.tiles.getTile(x, y);
         if (!tile) return;
 
         for (const key in tile.getConnectionForce()) {
@@ -233,7 +202,7 @@ export default class Grid extends PIXI.Container {
             const force = tile.getConnectionForce()[forceDirectionKey];
             const forceDirection = Direction.fromString(forceDirectionKey);
             if (force) {
-                const forceTile = this.getTile(
+                const forceTile = this.tiles.getTile(
                     tile.x + Direction.getOffset(forceDirection)[0],
                     tile.y + Direction.getOffset(forceDirection)[1]
                 );
@@ -244,13 +213,13 @@ export default class Grid extends PIXI.Container {
                         forceDirection,
                         true
                     );
-                    tile = this.getTile(x, y) as Tile;
+                    tile = this.tiles.getTile(x, y) as Tile;
                 }
             }
         }
 
         for (const direction of Direction.values()) {
-            const adjacentTile = this.getTile(
+            const adjacentTile = this.tiles.getTile(
                 tile.x + Direction.getOffset(direction)[0],
                 tile.y + Direction.getOffset(direction)[1]
             );
@@ -261,7 +230,7 @@ export default class Grid extends PIXI.Container {
                     ]
                 ) {
                     await this.connectTiles(tile, adjacentTile, direction);
-                    tile = this.getTile(x, y) as Tile;
+                    tile = this.tiles.getTile(x, y) as Tile;
                 }
             }
         }
@@ -288,7 +257,7 @@ export default class Grid extends PIXI.Container {
         noHistory = false,
         fromChipPlacement = false
     ): Promise<Tile | undefined> {
-        const tileAtLocation = this.getTile(x, y);
+        const tileAtLocation = this.tiles.getTile(x, y);
         if (tileAtLocation) {
             const interacting = this.historyManager.interacting;
             if (!interacting) this.historyManager.beginInteraction();
@@ -314,17 +283,17 @@ export default class Grid extends PIXI.Container {
                     false,
                     !noHistory
                 );
-                tileAtLocation.chip?.deleteTile(x, y);
-                tileAtLocation.chip?.setTile(x, y, newTileAtLocation);
+                tileAtLocation.chip?.tiles.deleteTile(x, y);
+                tileAtLocation.chip?.tiles.setTile(x, y, newTileAtLocation);
             }
             if (direction !== undefined && prevTile)
                 await this.connectTiles(
-                    this.getTile(x, y) as Tile,
+                    this.tiles.getTile(x, y) as Tile,
                     prevTile,
                     direction
                 );
             if (!interacting) this.historyManager.endInteraction();
-            return this.getTile(x, y);
+            return this.tiles.getTile(x, y);
         }
 
         const tileObj = new type.tile(x, y);
@@ -365,7 +334,7 @@ export default class Grid extends PIXI.Container {
 
         if (!interacting) this.historyManager.endInteraction();
 
-        return this.getTile(x, y) as Tile;
+        return this.tiles.getTile(x, y) as Tile;
     }
 
     removingExtraTiles = false;
@@ -385,7 +354,7 @@ export default class Grid extends PIXI.Container {
         removeChip = false,
         noHistory = false
     ) {
-        const tile = this.getTile(x, y);
+        const tile = this.tiles.getTile(x, y);
         if (!tile) return false;
         tile.dispose();
 
@@ -444,7 +413,7 @@ export default class Grid extends PIXI.Container {
             { offset: [0, 1], side: "up" },
         ];
         for (const removalSpot of removalSpots) {
-            const adjacentTile = this.getTile(
+            const adjacentTile = this.tiles.getTile(
                 x + removalSpot.offset[0],
                 y + removalSpot.offset[1]
             );
@@ -503,7 +472,7 @@ export default class Grid extends PIXI.Container {
      * @param y y coordinate
      */
     async rotateTile(x: number, y: number) {
-        const tile = this.getTile(x, y);
+        const tile = this.tiles.getTile(x, y);
         if (tile && tile.breakOnRotate) {
             const newTile = tile.clone();
             if (newTile.rotatable) {
@@ -539,7 +508,7 @@ export default class Grid extends PIXI.Container {
                 { offset: [0, 1], side: "up" },
             ];
             for (const removalSpot of removalSpots) {
-                const adjacentTile = this.getTile(
+                const adjacentTile = this.tiles.getTile(
                     x + removalSpot.offset[0],
                     y + removalSpot.offset[1]
                 );
@@ -691,7 +660,7 @@ export default class Grid extends PIXI.Container {
         newGraphics = false,
         newDirection = false,
     }) {
-        for (const tile of this.tiles.values())
+        for (const tile of this.tiles.getTiles())
             if (tile)
                 tile.update({
                     newDirection,
@@ -708,7 +677,7 @@ export default class Grid extends PIXI.Container {
      */
     renderChipOutlines(mouseX: number, mouseY: number) {
         // TODO: make this more efficient
-        const tile = this.getTile(mouseX, mouseY);
+        const tile = this.tiles.getTile(mouseX, mouseY);
         // for (const child of this.chipOutlines.children) child.destroy();
         this.chipOutlines.removeChildren();
         for (const chip of this.chips) {
@@ -738,7 +707,7 @@ export default class Grid extends PIXI.Container {
 
     /** Generates containers for each tile */
     generateTileGraphics() {
-        for (const tile of this.tiles.values()) {
+        for (const tile of this.tiles.getTiles()) {
             if (tile) {
                 const tileGraphics: PIXI.Container = tile.getContainer(
                     this.size
@@ -787,7 +756,7 @@ export default class Grid extends PIXI.Container {
 
         for (let i = x - 1; i <= x + 1; i++)
             for (let j = y - 1; j <= y + 1; j++) {
-                const tile = this.getTile(i, j);
+                const tile = this.tiles.getTile(i, j);
                 if (tile)
                     tile.update({
                         newDirection,

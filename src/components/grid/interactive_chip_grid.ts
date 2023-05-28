@@ -1,6 +1,6 @@
+import { TileManager } from "../../utils/TileManager";
 import { Chip } from "../chip/chip";
 import { PlacedChip } from "../chip/placed_chip";
-import { Tile } from "../tiles/tile";
 import InteractiveGrid from "./interactive_grid";
 
 /**
@@ -20,7 +20,7 @@ export default class InteractiveChipGrid extends InteractiveGrid {
     constructor(
         chip: Chip,
         size: number,
-        tiles?: Map<string, Tile>,
+        tiles?: TileManager,
         placedChips?: PlacedChip[]
     ) {
         super(size, tiles);
