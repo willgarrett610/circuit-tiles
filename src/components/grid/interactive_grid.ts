@@ -120,6 +120,8 @@ export default class InteractiveGrid extends Grid {
             this.screenToGrid(...this.mousePos, true)
         );
 
+        const updatedGridPoints: [number, number][] = [];
+
         let updated = false;
 
         if (mouseDown.left || mouseDown.middle) {
@@ -179,6 +181,15 @@ export default class InteractiveGrid extends Grid {
 
                             for (const gridPoint of gridPoints)
                                 this.removeTile(...locationToTuple(gridPoint));
+
+                            updatedGridPoints.push(
+                                ...gridPoints.map(
+                                    (gridPoint): [number, number] => [
+                                        gridPoint.x,
+                                        gridPoint.y,
+                                    ]
+                                )
+                            );
                         } else if (state.editMode === EditMode.CURSOR) {
                             this.dragData.endLocation.screen = locationToPair(
                                 this.mousePos
@@ -220,6 +231,15 @@ export default class InteractiveGrid extends Grid {
 
                                 prevTile = newTile;
                             }
+
+                            updatedGridPoints.push(
+                                ...gridPoints.map(
+                                    (gridPoint): [number, number] => [
+                                        gridPoint.x,
+                                        gridPoint.y,
+                                    ]
+                                )
+                            );
                         }
 
                         this.update({
@@ -229,6 +249,7 @@ export default class InteractiveGrid extends Grid {
                                 newGraphics: true,
                             },
                             updateSelection: true,
+                            locations: updatedGridPoints,
                         });
                     }
                 }
@@ -316,6 +337,7 @@ export default class InteractiveGrid extends Grid {
                     newGraphics: true,
                     updateSize: true,
                 },
+                locations: [gridPoint],
             });
         }
 
@@ -821,6 +843,7 @@ export default class InteractiveGrid extends Grid {
                 newDirection?: boolean | undefined;
             };
             updateSelection?: boolean | undefined;
+            locations?: [number, number][];
         },
         updateChipOutlines = true,
         updateHighlightTile = true

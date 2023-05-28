@@ -240,7 +240,10 @@ export abstract class Tile {
             // Perhaps we could have a function to call whenever state is changed that requires
             // need new graphics and a variable is set to true and if it is true then this
             // function will run, and after it is run it will set the variable back to false
-            if (newGraphics) this.updateContainer?.();
+            if (newGraphics) {
+                console.log("updating container");
+                this.updateContainer?.();
+            }
         }
     }
 
@@ -307,7 +310,7 @@ export abstract class GraphicsTile extends Tile {
 
     /** clears graphics */
     clearGraphics() {
-        if (!this.graphics) return;
+        if (!this.graphics) throw new Error("graphics is undefined");
 
         this.graphics.clear();
 

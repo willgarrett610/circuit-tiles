@@ -3,7 +3,7 @@ import * as PIXI from "pixi.js";
 import { dimensions } from "../../utils";
 import { clamp } from "../../utils/math";
 import config from "../../config";
-import { ConnectionType, Tile } from "../tiles/tile";
+import { ConnectionType, GraphicsTile, Tile } from "../tiles/tile";
 import { Direction, rotateClockWise } from "../../utils/directions";
 import state from "../../state";
 import { EditMode } from "../../utils/edit_mode";
@@ -387,7 +387,7 @@ export default class Grid extends PIXI.Container {
     ) {
         const tile = this.getTile(x, y);
         if (!tile) return false;
-        // (tile as GraphicsTile).graphics?.destroy();
+        // if (tile instanceof GraphicsTile) tile.graphics?.destroy();
 
         if (
             state.editMode === EditMode.ERASER &&
@@ -769,6 +769,34 @@ export default class Grid extends PIXI.Container {
         this.renderTiles(options);
     }
 
+    updateTilesAround = (
+        location: [number, number],
+        options: {
+            updateSize?: boolean;
+            newGraphics?: boolean;
+            newDirection?: boolean;
+        }
+    ) => {
+        const [x, y] = location;
+
+        const {
+            updateSize = false,
+            newGraphics = false,
+            newDirection = false,
+        } = options;
+
+        for (let i = x - 1; i <= x + 1; i++)
+            for (let j = y - 1; j <= y + 1; j++) {
+                const tile = this.getTile(i, j);
+                if (tile)
+                    tile.update({
+                        newDirection,
+                        newGraphics,
+                        newSize: updateSize ? this.size : undefined,
+                    });
+            }
+    };
+
     /** Updates the selection */
     updateSelection() {
         this.renderSelection();
@@ -784,6 +812,7 @@ export default class Grid extends PIXI.Container {
      * @param root0.updateTiles.updateSize
      * @param root0.updateTiles.newGraphics
      * @param root0.updateTiles.newDirection
+     * @param root0.locations
      */
     update({
         updateGridLines = true,
@@ -793,6 +822,7 @@ export default class Grid extends PIXI.Container {
             newDirection: false,
         },
         updateSelection = true,
+        locations,
     }: {
         updateGridLines?: boolean;
         updateTiles: {
@@ -801,9 +831,13 @@ export default class Grid extends PIXI.Container {
             newDirection?: boolean | undefined;
         };
         updateSelection?: boolean;
+        locations?: [number, number][];
     }) {
         if (updateGridLines) this.updateGridLines();
-        this.updateTiles(updateTiles);
+        if (locations) {
+            for (const location of locations)
+                this.updateTilesAround(location, updateTiles);
+        } else this.updateTiles(updateTiles);
         if (updateSelection) this.updateSelection();
     }
 
