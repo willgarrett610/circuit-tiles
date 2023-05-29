@@ -169,12 +169,12 @@ pub fn compute_logic(
         // console::log_2(&"index".into(), &JsValue::from(node.index as i32));
         // console::log_2(&"tile_type".into(), &JsValue::from(node.tile_type as i32));
         // console::log_2(&"state".into(), &JsValue::from(node.state as i32));
-        for i in 0..node.inputs.len() {
-            // console::log_2(&"inputs".into(), &JsValue::from(node.inputs[i] as i32));
-        }
-        for i in 0..node.outputs.len() {
-            // console::log_2(&"outputs".into(), &JsValue::from(node.outputs[i] as i32));
-        }
+        // for i in 0..node.inputs.len() {
+        //     console::log_2(&"inputs".into(), &JsValue::from(node.inputs[i] as i32));
+        // }
+        // for i in 0..node.outputs.len() {
+        //     console::log_2(&"outputs".into(), &JsValue::from(node.outputs[i] as i32));
+        // }
         nodes.push(node);
     }
 

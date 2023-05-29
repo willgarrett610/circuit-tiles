@@ -18,6 +18,7 @@ const includesTile = (tiles: Tile[], search: Tile) => {
 
 export const doTick = async () => {
     // TODO: ticking is called too often and needs fix
+    // Uncomment line below to deactivate logic
     if (true as boolean) return;
 
     if (!lib) lib = await init();
