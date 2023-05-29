@@ -91,9 +91,11 @@ export default class TileSelector extends SelectorMenu {
                                     .filter(
                                         (value) =>
                                             state.currentChipGrid?.chip &&
-                                            !Array.from(
-                                                state.currentChipGrid.chip.structure.values()
-                                            ).find((x) => x?.id === value.name)
+                                            !state.currentChipGrid.chip.structure
+                                                .getTiles()
+                                                .find(
+                                                    (x) => x?.id === value.name
+                                                )
                                     )
                                     .map(({ name, tile }) =>
                                         tile instanceof ChipOutputTile

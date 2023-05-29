@@ -6,6 +6,7 @@ import ChipTile from "../components/tiles/chip_tile";
 import IOTile from "../components/tiles/io_tile";
 import { findType, TileType } from "../components/tiles/tile_types";
 import { locationToTuple } from "../utils";
+import { TileManager } from "../utils/TileManager";
 import { add, sub } from "../utils/math";
 import { Action } from "./history_manager";
 
@@ -17,12 +18,12 @@ interface PlaceChipPayload {
 
 export const setChip: Action<PlaceChipPayload> = {
     do: async ({ grid, chip: placedChip, chipFormerLocation }) => {
-        placedChip.tiles = new Map();
+        placedChip.tiles = new TileManager();
         grid.chips.push(placedChip);
         const chip = placedChip.chip.getRootOriginal();
         chip.placedChips.add(placedChip);
         const structure = chip.structure;
-        const structureTiles = structure.values();
+        const structureTiles = structure.getTiles();
 
         const offset = chipFormerLocation;
 
@@ -56,7 +57,7 @@ export const setChip: Action<PlaceChipPayload> = {
                     placedTile.hue = (structureTile as ChipOutputTile).hue;
                 placedTile.id = structureTile.id;
                 placedTile.chip = placedChip;
-                placedChip.setTile(...tileLocation, placedTile);
+                placedChip.tiles.setTile(...tileLocation, placedTile);
                 if (placedTile instanceof IOTile) {
                     placedTile.generateText();
                 }
@@ -88,7 +89,7 @@ export const deleteChip: Action<RemoveChipPayload> = {
         const index = grid.chips.indexOf(placedChip);
         if (index === -1) return;
 
-        for (const chipTile of placedChip.tiles.values()) {
+        for (const chipTile of placedChip.tiles) {
             if (chipTile)
                 await grid.removeTile(chipTile.x, chipTile.y, true, true);
         }
@@ -98,7 +99,7 @@ export const deleteChip: Action<RemoveChipPayload> = {
         grid.update({ updateTiles: { newGraphics: true } });
     },
     undo: ({ payload: { chip: placedChip, grid } }) => {
-        placedChip.tiles = new Map();
+        placedChip.tiles = new TileManager();
 
         (grid as InteractiveGrid).placeChip(
             placedChip.chip.getRootOriginal(),

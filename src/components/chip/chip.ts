@@ -2,6 +2,7 @@
 import { showStructureClashAlert } from "../../menus/structure_clash_alert";
 import state, { setState } from "../../state";
 import { locationToPair, locationToTuple } from "../../utils";
+import { TileManager } from "../../utils/TileManager";
 import ChipGridMode from "../../utils/chip_grid_mode";
 import { Direction, Rotation } from "../../utils/directions";
 import { add, sub } from "../../utils/math";
@@ -29,10 +30,10 @@ export class Chip {
     name: string;
     color: number;
     hue: number;
-    tiles: Map<string, Tile> = new Map();
+    tiles = new TileManager();
     inputTiles: { name: string; tile: ChipInputTile }[] = [];
     outputTiles: { name: string; tile: ChipOutputTile }[] = [];
-    structure: Map<string, ChipTile> = new Map();
+    structure = new TileManager<ChipTile>();
     originalChip?: Chip;
 
     placedChips = new Set<PlacedChip>();
@@ -89,83 +90,6 @@ export class Chip {
     }
 
     /**
-     * get tile at location
-     *
-     * @param x x coordinate
-     * @param y y coordinate
-     * @returns tile at location
-     */
-    getTile(x: number, y: number) {
-        return this.tiles.get(`${x},${y}`);
-    }
-
-    /**
-     * Get a tile by its id
-     *
-     * @param id id of the tile
-     * @param type type of the tile
-     * @returns tile with the id
-     */
-    getTileById(id: string, type: typeof ChipTile): ChipTile | undefined {
-        return Array.from(this.tiles.values()).find(
-            (value) => value instanceof type && value.id === id
-        ) as ChipTile | undefined;
-    }
-
-    /**
-     * set tile at location
-     *
-     * @param x x coordinate
-     * @param y y coordinate
-     * @param tile
-     */
-    setTile(x: number, y: number, tile: Tile) {
-        this.tiles.set(`${x},${y}`, tile);
-    }
-
-    /**
-     * remove tile at coordinate
-     *
-     * @param x x coordinate
-     * @param y y coordinate
-     */
-    deleteTile(x: number, y: number) {
-        this.tiles.delete(`${x},${y}`);
-    }
-
-    /**
-     * get tile at location
-     *
-     * @param x x coordinate
-     * @param y y coordinate
-     * @returns tile at location
-     */
-    getStructureTile(x: number, y: number) {
-        return this.structure.get(`${x},${y}`);
-    }
-
-    /**
-     * set tile at location
-     *
-     * @param x x coordinate
-     * @param y y coordinate
-     * @param tile
-     */
-    setStructureTile(x: number, y: number, tile: ChipTile) {
-        this.structure.set(`${x},${y}`, tile);
-    }
-
-    /**
-     * remove tile at coordinate
-     *
-     * @param x x coordinate
-     * @param y y coordinate
-     */
-    deleteStructureTile(x: number, y: number) {
-        this.structure.delete(`${x},${y}`);
-    }
-
-    /**
      * Called after a tile is added to the chip
      *
      * @param tile Tile that was added
@@ -217,13 +141,11 @@ export class Chip {
                 (x) => x.tile.id !== tile.id
             );
         } else return;
-        const key = [...this.structure.keys()].find(
-            (x) => this.structure.get(x)?.id === tile.id
-        );
-        if (key) {
-            const split = key.split(",");
-            const x = parseInt(split[0]);
-            const y = parseInt(split[1]);
+        const location = this.structure
+            .getLocations()
+            .find((x) => this.structure.getTile(...x)?.id === tile.id);
+        if (location) {
+            const [x, y] = location;
             state.currentChipGrid?.grids.structure.removeTile(x, y);
         }
     }
@@ -253,7 +175,7 @@ export class Chip {
                 locationToTuple(placedChip.location),
                 offset
             ) as [number, number];
-            const tile = grid.getTile(...gridLocation);
+            const tile = grid.tiles.getTile(...gridLocation);
             if (tile) {
                 clashes = true;
                 break;
@@ -328,7 +250,7 @@ export class Chip {
                     placedTile.hue = (tile as ChipOutputTile).hue;
                 placedTile.id = tile.id;
                 placedTile.chip = placedChip;
-                placedChip.setTile(...gridLocation, placedTile);
+                placedChip.tiles.setTile(...gridLocation, placedTile);
                 if (placedTile instanceof IOTile) {
                     placedTile.generateText();
                 }
@@ -377,7 +299,7 @@ export class Chip {
                 offset
             ) as [number, number];
             grid.removeTile(...gridLocation, true, true);
-            placedChip.deleteTile(...gridLocation);
+            placedChip.tiles.deleteTile(...gridLocation);
 
             grid.update({ updateTiles: { newGraphics: true } });
             placedChip.location = locationToPair(
@@ -399,7 +321,7 @@ export class Chip {
      * @returns true if the chip is structured
      */
     isStructured() {
-        const structureTiles = Array.from(this.structure.values());
+        const structureTiles = this.structure.getTiles();
 
         if (
             structureTiles.filter((tile) => !(tile instanceof StructureTile))
@@ -422,7 +344,7 @@ export class Chip {
         const isJoint = (tile: Tile) => {
             for (const direction of Direction.values()) {
                 const offset = Direction.getOffset(direction);
-                const neighbor = this.getStructureTile(
+                const neighbor = this.structure.getTile(
                     tile.x + offset[0],
                     tile.y + offset[1]
                 );
@@ -449,7 +371,7 @@ export class Chip {
      * @returns top left tile location of structure
      */
     getTopLeftStructure(): [number, number] {
-        const structureTiles = Array.from(this.structure.values());
+        const structureTiles = this.structure.getTiles();
 
         if (structureTiles.length === 0) return [0, 0];
 
@@ -472,41 +394,39 @@ export class Chip {
      */
     rotate(rotation: Rotation = Rotation.CLOCKWISE) {
         const topLeft = this.getTopLeftStructure();
-        const newStructure: Map<string, ChipTile> = new Map();
-        for (const key of Object.keys(this.structure)) {
-            const split = key.split(",");
-            const x = parseInt(split[0]);
-            const y = parseInt(split[1]);
+        const newStructure = new TileManager<ChipTile>();
+        for (const location of this.structure.getLocations()) {
+            const [x, y] = location;
             const newX = x - topLeft[1];
             const newY = y - topLeft[0];
 
-            const prevTile = this.structure.get(key);
+            const prevTile = this.structure.getTile(...location);
             if (!prevTile) continue;
 
             switch (rotation) {
                 case Rotation.CLOCKWISE: {
-                    newStructure.set(`${-newY},${newX}`, prevTile);
+                    newStructure.setTile(-newY, newX, prevTile);
                     prevTile.x = -newY;
                     prevTile.y = newX;
 
                     break;
                 }
                 case Rotation.HALF_TURN: {
-                    newStructure.set(`${-newX},${-newY}`, prevTile);
+                    newStructure.setTile(-newX, -newY, prevTile);
                     prevTile.x = -newX;
                     prevTile.y = -newY;
 
                     break;
                 }
                 case Rotation.COUNTER_CLOCKWISE: {
-                    newStructure.set(`${newY},${-newX}`, prevTile);
+                    newStructure.setTile(newY, -newX, prevTile);
                     prevTile.x = newY;
                     prevTile.y = -newX;
 
                     break;
                 }
                 case Rotation.NORMAL: {
-                    newStructure.set(`${newX},${newY}`, prevTile);
+                    newStructure.setTile(newX, newY, prevTile);
                     prevTile.x = newX;
                     prevTile.y = newY;
 
@@ -526,23 +446,16 @@ export class Chip {
     clone(noteOriginal: boolean = false) {
         const newChip = new Chip(this.name, this.color, this.hue);
         if (noteOriginal) newChip.originalChip = this.originalChip || this;
-        newChip.tiles = mapMap(this.tiles, (tile) => tile?.clone());
-        newChip.structure = mapMap(
-            this.structure,
-            (tile) => tile?.clone() as any
-        );
-        newChip.inputTiles = this.inputTiles.map((inputTile) => {
-            return {
-                name: inputTile.name,
-                tile: inputTile.tile.clone() as ChipInputTile,
-            };
-        });
-        newChip.outputTiles = this.outputTiles.map((outputTile) => {
-            return {
-                name: outputTile.name,
-                tile: outputTile.tile.clone() as ChipOutputTile,
-            };
-        });
+        newChip.tiles = this.tiles.clone();
+        newChip.structure = this.structure.clone();
+        newChip.inputTiles = this.inputTiles.map((inputTile) => ({
+            name: inputTile.name,
+            tile: inputTile.tile.clone() as ChipInputTile,
+        }));
+        newChip.outputTiles = this.outputTiles.map((outputTile) => ({
+            name: outputTile.name,
+            tile: outputTile.tile.clone() as ChipOutputTile,
+        }));
         return newChip;
     }
 }

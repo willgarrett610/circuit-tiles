@@ -82,6 +82,7 @@ const main = async () => {
     });
 
     gridManager.mainGrid.addHandler("postAddTile", async (tile) => {
+        // TODO: this should be changed such that it is added once the mouse is released so it doesn't keep going on drag
         addUpdatedTile(tile);
         if (state.running) doTick();
     });

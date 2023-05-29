@@ -19,6 +19,7 @@ export abstract class Tile {
     copyProps = ["connections", "label", "x", "y", "direction", "signalActive"];
     isNode = false;
     isWire = false;
+    isDisposed = false;
 
     protected connections: {
         up: boolean;
@@ -193,7 +194,7 @@ export abstract class Tile {
      * @returns container
      */
     getContainer(size: number): PIXI.Container {
-        if (!this.container) {
+        if (!this.container || this.isDisposed) {
             this.container = this.generateContainer();
             this.container.zIndex = 100;
 
@@ -203,6 +204,7 @@ export abstract class Tile {
             if (this.onContext) onContextMenu(this.container, this.onContext);
             this.postGenerate?.();
         }
+
         this.container.width = size;
         this.container.height = size;
         this.container.pivot.x =
@@ -240,7 +242,9 @@ export abstract class Tile {
             // Perhaps we could have a function to call whenever state is changed that requires
             // need new graphics and a variable is set to true and if it is true then this
             // function will run, and after it is run it will set the variable back to false
-            if (newGraphics) this.updateContainer?.();
+            if (newGraphics) {
+                this.updateContainer?.();
+            }
         }
     }
 
@@ -272,7 +276,7 @@ export abstract class Tile {
      */
     clone() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const output: Tile = new (this.type as any)(this.x, this.y);
+        const output: this = new (this.type as any)(this.x, this.y);
         output.connections = { ...this.connections };
         output.direction = this.direction;
         output.signalActive = this.signalActive;
@@ -283,6 +287,15 @@ export abstract class Tile {
     }
 
     createClone?(tile: Tile): void;
+
+    /**
+     * disposes of tile's graphics
+     */
+    dispose() {
+        this.isDisposed = true;
+        this.container?.destroy({ children: true });
+        this.container = undefined;
+    }
 }
 
 /** sprite tile */
@@ -297,6 +310,15 @@ export abstract class SpriteTile extends Tile {
     generateContainer() {
         return new PIXI.Sprite(this.texture);
     }
+
+    /**
+     * disposes of tile
+     */
+    dispose() {
+        this.isDisposed = true;
+        this.container?.destroy({ children: true, texture: true });
+        this.container = undefined;
+    }
 }
 
 /** graphics tile */
@@ -307,7 +329,7 @@ export abstract class GraphicsTile extends Tile {
 
     /** clears graphics */
     clearGraphics() {
-        if (!this.graphics) return;
+        if (!this.graphics) throw new Error("graphics is undefined");
 
         this.graphics.clear();
 
@@ -336,5 +358,15 @@ export abstract class GraphicsTile extends Tile {
     updateContainer() {
         this.clearGraphics();
         this.drawGraphics();
+    }
+
+    /**
+     * disposes of tile
+     */
+    dispose() {
+        this.isDisposed = true;
+        this.container?.destroy({ children: true });
+        this.container = undefined;
+        this.graphics = undefined;
     }
 }

@@ -100,6 +100,6 @@ export default class ChipInputTile extends IOTile {
         this.setExtraInputTile(
             tile.extraInputTile?.clone() as ButtonTile | LeverTile | undefined
         );
-        this.updateContainer();
+        // this.updateContainer();
     }
 }
