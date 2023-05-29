@@ -92,9 +92,7 @@ export default class GridManager extends PIXI.Container {
      * @returns chip grid state
      */
     getGrid() {
-        return this.inChipGrid &&
-            state.currentChipGrid?.grids.structure &&
-            state.currentChipGrid?.grids.chip
+        return this.inChipGrid && state.currentChipGrid?.grids.structure && state.currentChipGrid?.grids.chip
             ? state.chipGridMode === ChipGridMode.STRUCTURING
                 ? state.currentChipGrid.grids.structure
                 : state.currentChipGrid.grids.chip

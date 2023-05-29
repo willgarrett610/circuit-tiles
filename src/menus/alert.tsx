@@ -17,11 +17,7 @@ type AlertProps = {
  * @param buttonText
  * @returns promise of selection
  */
-export function showAlert(
-    titleText?: string,
-    alertText?: string,
-    buttonText?: string
-) {
+export function showAlert(titleText?: string, alertText?: string, buttonText?: string) {
     return new Promise<boolean>((resolve) => {
         const close = createAlert({
             alertText,
@@ -53,12 +49,7 @@ export function createAlert(props: AlertProps) {
     return close;
 }
 
-export const ChipForm: MenuComponent<AlertProps> = ({
-    titleText,
-    alertText,
-    buttonText,
-    onSubmit,
-}) => (
+export const ChipForm: MenuComponent<AlertProps> = ({ titleText, alertText, buttonText, onSubmit }) => (
     <div
         className={css({
             pointerEvents: "auto",

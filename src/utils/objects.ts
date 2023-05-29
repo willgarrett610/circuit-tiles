@@ -18,16 +18,9 @@ export function entries<T>(input: T[]): [number, T][];
  * @param input any object or array
  * @returns entries of arrays with index and value as tuple
  */
-export function entries<T>(
-    input: T | T[]
-): [number, T][] | [keyof T, T[keyof T]][] {
-    if (Array.isArray(input))
-        return Object.entries(input).map(([key, value]) => [+key, value]);
-    else
-        return Object.entries(input).map(([key, value]) => [
-            key as keyof T,
-            value,
-        ]);
+export function entries<T>(input: T | T[]): [number, T][] | [keyof T, T[keyof T]][] {
+    if (Array.isArray(input)) return Object.entries(input).map(([key, value]) => [+key, value]);
+    else return Object.entries(input).map(([key, value]) => [key as keyof T, value]);
 }
 
 /**
@@ -42,8 +35,7 @@ export function mapObject<T>(
     callback: (value: T, key: string) => T
 ): { [key: string]: T } {
     const newObject: { [key: string]: T } = {};
-    for (const key of Object.keys(object))
-        newObject[key] = callback(object[key], key);
+    for (const key of Object.keys(object)) newObject[key] = callback(object[key], key);
 
     return newObject;
 }
@@ -55,10 +47,7 @@ export function mapObject<T>(
  * @param callback Callback that takes in each key value pair
  * @returns New map with the callback applied to each key value pair
  */
-export function mapMap<K, T>(
-    map: Map<K, T>,
-    callback: (value: T, key: K) => T
-): Map<K, T> {
+export function mapMap<K, T>(map: Map<K, T>, callback: (value: T, key: K) => T): Map<K, T> {
     const newMap = new Map<K, T>();
     for (const [key, value] of map) newMap.set(key, callback(value, key));
 

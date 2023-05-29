@@ -17,7 +17,7 @@ module.exports = {
                 test: /\.tsx?$/,
                 use: "ts-loader",
                 exclude: /node_modules/,
-            }
+            },
         ],
     },
     experiments: {
@@ -26,10 +26,10 @@ module.exports = {
     resolve: {
         extensions: [".tsx", ".ts", ".js", ".wasm"],
         alias: {
-            "react": "preact/compat",
+            react: "preact/compat",
             "react-dom/test-utils": "preact/test-utils",
-            "react-dom": "preact/compat",     // Must be below test-utils
-            "react/jsx-runtime": "preact/jsx-runtime"
+            "react-dom": "preact/compat", // Must be below test-utils
+            "react/jsx-runtime": "preact/jsx-runtime",
         },
     },
     output: {
@@ -48,14 +48,14 @@ module.exports = {
         //     cleanAfterEveryBuildPatterns: ["dist"]
         // }),
         new CopyPlugin({
-            patterns: [{ from: "assets", to: "assets" }]
+            patterns: [{ from: "assets", to: "assets" }],
         }),
         new WasmPackPlugin({
             crateDirectory: path.join(__dirname, "crate"),
             forceWatch: true,
             forceMode: "development",
             watchDirectories: [path.resolve(__dirname, "crate/src")],
-        })
+        }),
     ],
     devServer: {
         client: {

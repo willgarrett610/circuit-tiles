@@ -46,8 +46,7 @@ export const ChipForm: MenuComponent<ChipFormProps> = ({
     const submitButton = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
-        if (submitButton.current)
-            submitButton.current.disabled = !verifyText(textInputValue);
+        if (submitButton.current) submitButton.current.disabled = !verifyText(textInputValue);
     }, []);
 
     return (
@@ -121,10 +120,7 @@ export const ChipForm: MenuComponent<ChipFormProps> = ({
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         onInput={(e: any) => {
                             setTextInputValue(e.target.value);
-                            if (submitButton.current)
-                                submitButton.current.disabled = !verifyText(
-                                    e.target.value
-                                );
+                            if (submitButton.current) submitButton.current.disabled = !verifyText(e.target.value);
                         }}
                     />
                 </div>

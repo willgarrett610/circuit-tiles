@@ -65,12 +65,8 @@ export default class ChipInputTile extends IOTile {
                 (this.container.width * 0.9) / this.container.scale.x
             );
             extraContainer.pivot.set(0, 0);
-            extraContainer.x =
-                this.container.width / (2 * this.container.scale.x) -
-                extraContainer.width / 2;
-            extraContainer.y =
-                this.container.height / (2 * this.container.scale.y) -
-                extraContainer.height / 2;
+            extraContainer.x = this.container.width / (2 * this.container.scale.x) - extraContainer.width / 2;
+            extraContainer.y = this.container.height / (2 * this.container.scale.y) - extraContainer.height / 2;
             this.container?.addChild(extraContainer);
         }
         this.updateContainer();
@@ -80,11 +76,7 @@ export default class ChipInputTile extends IOTile {
     drawGraphics(): void {
         if (!this.graphics) return;
 
-        this.graphics.beginFill(
-            this.signalActive
-                ? config.colors.activeInput
-                : config.colors.inactiveInput
-        );
+        this.graphics.beginFill(this.signalActive ? config.colors.activeInput : config.colors.inactiveInput);
         this.graphics.lineStyle(4, 0x000000);
         this.graphics.drawRect(6, 6, 108, 108);
         this.graphics.endFill();
@@ -97,9 +89,7 @@ export default class ChipInputTile extends IOTile {
      */
     createClone(tile: ChipInputTile): void {
         super.createClone(tile);
-        this.setExtraInputTile(
-            tile.extraInputTile?.clone() as ButtonTile | LeverTile | undefined
-        );
+        this.setExtraInputTile(tile.extraInputTile?.clone() as ButtonTile | LeverTile | undefined);
         // this.updateContainer();
     }
 }

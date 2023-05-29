@@ -132,29 +132,16 @@ export function subscribe<T extends keyof State>(
  * @param name Name of the state variable to change
  * @param value New value for the variable
  */
-export function setStateByName<T extends keyof State>(
-    name: T,
-    value: State[T]
-) {
+export function setStateByName<T extends keyof State>(name: T, value: State[T]) {
     const prevValue = state[name];
     state[name] = value;
 
-    const allCallbacks: Array<
-        SpecificStateCallback<keyof State> | StateCallback
-    > = [];
+    const allCallbacks: Array<SpecificStateCallback<keyof State> | StateCallback> = [];
 
-    allCallbacks.push(
-        ...specificCallbacks.filter(
-            (specificCallback) => specificCallback.name === name
-        )
-    );
-    allCallbacks.push(
-        ...callbacks.filter((callback) => callback.names.includes(name))
-    );
+    allCallbacks.push(...specificCallbacks.filter((specificCallback) => specificCallback.name === name));
+    allCallbacks.push(...callbacks.filter((callback) => callback.names.includes(name)));
 
-    for (const callback of allCallbacks.sort(
-        (a, b) => b.priority - a.priority
-    )) {
+    for (const callback of allCallbacks.sort((a, b) => b.priority - a.priority)) {
         if ("name" in callback) {
             callback.callback(value, prevValue);
         } else {
@@ -172,8 +159,7 @@ export function setStateByName<T extends keyof State>(
 export function setState<T extends keyof State>(newState: {
     [key in T]: State[T];
 }) {
-    for (const key in newState)
-        setStateByName(key as T, (newState as any)[key as T]);
+    for (const key in newState) setStateByName(key as T, (newState as any)[key as T]);
 }
 
 /**
@@ -182,29 +168,16 @@ export function setState<T extends keyof State>(newState: {
  * @param name
  * @param callback
  */
-export function setStateProp<T extends keyof State>(
-    name: T,
-    callback?: (value: State[T]) => void
-) {
+export function setStateProp<T extends keyof State>(name: T, callback?: (value: State[T]) => void) {
     callback?.(state[name]);
     const value = state[name];
 
-    const allCallbacks: Array<
-        SpecificStateCallback<keyof State> | StateCallback
-    > = [];
+    const allCallbacks: Array<SpecificStateCallback<keyof State> | StateCallback> = [];
 
-    allCallbacks.push(
-        ...specificCallbacks.filter(
-            (specificCallback) => specificCallback.name === name
-        )
-    );
-    allCallbacks.push(
-        ...callbacks.filter((callback) => callback.names.includes(name))
-    );
+    allCallbacks.push(...specificCallbacks.filter((specificCallback) => specificCallback.name === name));
+    allCallbacks.push(...callbacks.filter((callback) => callback.names.includes(name)));
 
-    for (const callback of allCallbacks.sort(
-        (a, b) => b.priority - a.priority
-    )) {
+    for (const callback of allCallbacks.sort((a, b) => b.priority - a.priority)) {
         if ("name" in callback) {
             callback.callback(value, undefined);
         } else {

@@ -10,6 +10,7 @@
         "esModuleInterop": true,
         "moduleResolution": "node",
         "downlevelIteration": true,
+        "useDefineForClassFields": true,
         "sourceMap": true,
         "skipLibCheck": true
     }

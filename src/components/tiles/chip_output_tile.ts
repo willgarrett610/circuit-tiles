@@ -43,23 +43,15 @@ export default class ChipOutputTile extends IOTile {
                     onSubmit: ({ hue }) => {
                         if (!state.currentChipGrid) return;
 
-                        for (const tile of state.currentChipGrid.grids.chip
-                            .tiles) {
-                            if (
-                                tile instanceof ChipOutputTile &&
-                                tile.id === this.id
-                            ) {
+                        for (const tile of state.currentChipGrid.grids.chip.tiles) {
+                            if (tile instanceof ChipOutputTile && tile.id === this.id) {
                                 tile.hue = hue;
                                 tile.updateContainer();
                             }
                         }
 
-                        for (const tile of state.currentChipGrid.grids.structure
-                            .tiles) {
-                            if (
-                                tile instanceof ChipOutputTile &&
-                                tile.id === this.id
-                            ) {
+                        for (const tile of state.currentChipGrid.grids.structure.tiles) {
+                            if (tile instanceof ChipOutputTile && tile.id === this.id) {
                                 tile.hue = hue;
                                 tile.updateContainer();
                             }
@@ -76,11 +68,7 @@ export default class ChipOutputTile extends IOTile {
     drawGraphics(): void {
         if (!this.graphics) return;
 
-        this.graphics.beginFill(
-            this.signalActive
-                ? hslToHex(this.hue, 80, 39)
-                : hslToHex(this.hue, 78, 16)
-        );
+        this.graphics.beginFill(this.signalActive ? hslToHex(this.hue, 80, 39) : hslToHex(this.hue, 78, 16));
         this.graphics.lineStyle(4, 0x000000);
         this.graphics.drawRect(6, 6, 108, 108);
         this.graphics.endFill();

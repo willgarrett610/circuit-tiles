@@ -66,21 +66,13 @@ export default class DelayTile extends GraphicsTile {
 
         // this.graphics.endFill();
 
-        this.graphics.beginFill(
-            this.signalActive
-                ? config.colors.activeTile
-                : config.colors.inactiveTile
-        );
+        this.graphics.beginFill(this.signalActive ? config.colors.activeTile : config.colors.inactiveTile);
         this.graphics.lineStyle(5);
         this.graphics.drawRect(40, 15, 40, 90);
         this.graphics.endFill();
 
         this.graphics.lineStyle(0);
-        this.graphics.beginFill(
-            this.signalActive
-                ? config.colors.inactiveTile
-                : config.colors.activeTile
-        );
+        this.graphics.beginFill(this.signalActive ? config.colors.inactiveTile : config.colors.activeTile);
         this.graphics.drawRect(
             42.5,
             map(this.time / this.delay, 0, 1, 102.5, 17.5),

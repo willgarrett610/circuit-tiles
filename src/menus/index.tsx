@@ -14,10 +14,7 @@ export type MenuComponent<T> =
  * @param props
  * @returns returns function to close menu
  */
-export function buildMenu<T extends object>(
-    MenuComponent: MenuComponent<T>,
-    props: T
-) {
+export function buildMenu<T extends object>(MenuComponent: MenuComponent<T>, props: T) {
     const builtComponent = <MenuComponent close={close} {...props} />;
     setState({
         openMenus: [...state.openMenus, builtComponent],
@@ -27,9 +24,7 @@ export function buildMenu<T extends object>(
     /** closes the menu */
     function close() {
         setState({
-            openMenus: state.openMenus.filter(
-                (openMenu) => openMenu !== builtComponent
-            ),
+            openMenus: state.openMenus.filter((openMenu) => openMenu !== builtComponent),
             interactive: true,
         });
     }
@@ -45,11 +40,7 @@ export function buildMenu<T extends object>(
  * @param autoClose if true, the pop up will close when the user clicks outside of it
  * @returns returns function to close menu
  */
-export function buildPopUp<T extends object>(
-    PopUpComponent: MenuComponent<T>,
-    props: T,
-    autoClose = true
-) {
+export function buildPopUp<T extends object>(PopUpComponent: MenuComponent<T>, props: T, autoClose = true) {
     const builtComponent = (
         <Overlay onClick={() => autoClose && close()}>
             <PopUpComponent close={close} {...props} />
@@ -63,9 +54,7 @@ export function buildPopUp<T extends object>(
     /** closes the pop up */
     function close() {
         setState({
-            openMenus: state.openMenus.filter(
-                (openMenu) => openMenu !== builtComponent
-            ),
+            openMenus: state.openMenus.filter((openMenu) => openMenu !== builtComponent),
             interactive: true,
         });
     }

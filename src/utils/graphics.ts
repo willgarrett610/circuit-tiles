@@ -24,10 +24,7 @@ export function generateRoundedRectContainer(
     h: number,
     color: number,
     { topLeft = 0, topRight = 0, botRight = 0, botLeft = 0 },
-    graphicUpdater?: (
-        graphics: PIXI.Graphics,
-        colorChanger: (color: number) => void
-    ) => void
+    graphicUpdater?: (graphics: PIXI.Graphics, colorChanger: (color: number) => void) => void
 ): PIXI.Container {
     const container = new PIXI.Container();
     container.x = x;

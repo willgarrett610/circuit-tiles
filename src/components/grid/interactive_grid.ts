@@ -11,12 +11,7 @@ import ChipGridMode from "../../utils/chip_grid_mode";
 import { displayContextMenu } from "../../utils/context_menu";
 import { Direction, Rotation, rotationToString } from "../../utils/directions";
 import { EditMode } from "../../utils/edit_mode";
-import {
-    CMouseEvent,
-    mouseDown,
-    onContextMenu,
-    pressedKeys,
-} from "../../utils/event";
+import { CMouseEvent, mouseDown, onContextMenu, pressedKeys } from "../../utils/event";
 import { add, sub } from "../../utils/math";
 import { Chip } from "../chip/chip";
 import { PlacedChip } from "../chip/placed_chip";
@@ -117,9 +112,7 @@ export default class InteractiveGrid extends Grid {
         this.prevMousePos = [...this.mousePos];
         this.prevGridPos = [...this.gridPos];
         this.mousePos = [e.pageX, e.pageY];
-        this.gridPos = locationToTuple(
-            this.screenToGrid(...this.mousePos, true)
-        );
+        this.gridPos = locationToTuple(this.screenToGrid(...this.mousePos, true));
 
         const updatedGridPoints: [number, number][] = [];
 
@@ -127,119 +120,63 @@ export default class InteractiveGrid extends Grid {
 
         if (mouseDown.left || mouseDown.middle) {
             if (
-                (mouseDown.left &&
-                    (e.shiftKey ||
-                        pressedKeys["Space"] ||
-                        state.editMode === EditMode.PAN)) ||
+                (mouseDown.left && (e.shiftKey || pressedKeys["Space"] || state.editMode === EditMode.PAN)) ||
                 mouseDown.middle
             ) {
-                const prevGridPos = this.screenToGrid(
-                    ...this.prevMousePos,
-                    false,
-                    true
-                );
-                const newGridPos = this.screenToGrid(
-                    ...this.mousePos,
-                    false,
-                    true
-                );
+                const prevGridPos = this.screenToGrid(...this.prevMousePos, false, true);
+                const newGridPos = this.screenToGrid(...this.mousePos, false, true);
 
                 this.x += newGridPos.x - prevGridPos.x;
                 this.y += newGridPos.y - prevGridPos.y;
 
-                this.update(
-                    { updateGridLines: true, updateTiles: {} },
-                    false,
-                    false
-                );
+                this.update({ updateGridLines: true, updateTiles: {} }, false, false);
             } else {
-                const prevGridPos = this.screenToGrid(
-                    ...this.prevMousePos,
-                    true
-                );
+                const prevGridPos = this.screenToGrid(...this.prevMousePos, true);
                 const newGridPos = this.screenToGrid(...this.mousePos, true);
 
-                if (
-                    prevGridPos.x !== newGridPos.x ||
-                    prevGridPos.y !== newGridPos.y
-                ) {
+                if (prevGridPos.x !== newGridPos.x || prevGridPos.y !== newGridPos.y) {
                     if (mouseDown.left) {
                         if (state.editMode === EditMode.ERASER) {
-                            gridManager.modeManager.currentInteraction =
-                                Interaction.REMOVING;
+                            gridManager.modeManager.currentInteraction = Interaction.REMOVING;
 
                             const gridPoints = this.gridPointsBetween(
-                                ...locationToTuple(
-                                    this.screenToGrid(
-                                        ...this.prevMousePos,
-                                        true
-                                    )
-                                ),
-                                ...locationToTuple(
-                                    this.screenToGrid(...this.mousePos, true)
-                                )
+                                ...locationToTuple(this.screenToGrid(...this.prevMousePos, true)),
+                                ...locationToTuple(this.screenToGrid(...this.mousePos, true))
                             );
 
-                            for (const gridPoint of gridPoints)
-                                this.removeTile(...locationToTuple(gridPoint));
+                            for (const gridPoint of gridPoints) this.removeTile(...locationToTuple(gridPoint));
 
                             updatedGridPoints.push(
-                                ...gridPoints.map(
-                                    (gridPoint): [number, number] => [
-                                        gridPoint.x,
-                                        gridPoint.y,
-                                    ]
-                                )
+                                ...gridPoints.map((gridPoint): [number, number] => [gridPoint.x, gridPoint.y])
                             );
                         } else if (state.editMode === EditMode.CURSOR) {
-                            this.dragData.endLocation.screen = locationToPair(
-                                this.mousePos
-                            );
+                            this.dragData.endLocation.screen = locationToPair(this.mousePos);
 
-                            this.dragData.endLocation.grid = this.screenToGrid(
-                                ...this.mousePos,
-                                true
-                            );
+                            this.dragData.endLocation.grid = this.screenToGrid(...this.mousePos, true);
                         } else if (state.editMode === EditMode.TILE) {
-                            gridManager.modeManager.currentInteraction =
-                                Interaction.PLACING;
+                            gridManager.modeManager.currentInteraction = Interaction.PLACING;
 
                             const gridPoints = this.gridPointsBetween(
-                                ...locationToTuple(
-                                    this.screenToGrid(
-                                        ...this.prevMousePos,
-                                        true
-                                    )
-                                ),
-                                ...locationToTuple(
-                                    this.screenToGrid(...this.mousePos, true)
-                                )
+                                ...locationToTuple(this.screenToGrid(...this.prevMousePos, true)),
+                                ...locationToTuple(this.screenToGrid(...this.mousePos, true))
                             );
 
                             let prevTile: Tile | undefined = undefined;
                             for (let i = 0; i < gridPoints.length; i++) {
                                 const gridPoint = gridPoints[i];
 
-                                const newTile: Tile | undefined =
-                                    await this.addTile(
-                                        ...locationToTuple(gridPoint),
-                                        state.selectableTiles[
-                                            state.selectedTileIndex
-                                        ],
-                                        prevTile,
-                                        gridPoint.direction
-                                    );
+                                const newTile: Tile | undefined = await this.addTile(
+                                    ...locationToTuple(gridPoint),
+                                    state.selectableTiles[state.selectedTileIndex],
+                                    prevTile,
+                                    gridPoint.direction
+                                );
 
                                 prevTile = newTile;
                             }
 
                             updatedGridPoints.push(
-                                ...gridPoints.map(
-                                    (gridPoint): [number, number] => [
-                                        gridPoint.x,
-                                        gridPoint.y,
-                                    ]
-                                )
+                                ...gridPoints.map((gridPoint): [number, number] => [gridPoint.x, gridPoint.y])
                             );
                         }
 
@@ -262,11 +199,7 @@ export default class InteractiveGrid extends Grid {
         }
 
         // check if prevGridPos is different then gridPos
-        if (
-            !updated &&
-            (this.prevGridPos[0] !== this.gridPos[0] ||
-                this.prevGridPos[1] !== this.gridPos[1])
-        ) {
+        if (!updated && (this.prevGridPos[0] !== this.gridPos[0] || this.prevGridPos[1] !== this.gridPos[1])) {
             this.renderChipOutlines(...this.gridPos);
             this.updateChipOutline();
             this.updateHighlightTile();
@@ -280,33 +213,22 @@ export default class InteractiveGrid extends Grid {
             !pressedKeys["Space"] &&
             state.editMode !== EditMode.PAN
         ) {
-            const gridPoint = locationToTuple(
-                this.screenToGrid(...this.mousePos, true)
-            );
+            const gridPoint = locationToTuple(this.screenToGrid(...this.mousePos, true));
 
             if (state.editMode === EditMode.ERASER) {
-                gridManager.modeManager.currentInteraction =
-                    Interaction.REMOVING;
+                gridManager.modeManager.currentInteraction = Interaction.REMOVING;
                 this.removeTile(...gridPoint);
             } else if (state.editMode === EditMode.CURSOR) {
                 // do nothing
-            } else if (
-                state.editMode === EditMode.TILE &&
-                state.selectedTileIndex !== -1
-            ) {
-                if (
-                    gridManager.modeManager.currentInteraction ===
-                    Interaction.NONE
-                ) {
+            } else if (state.editMode === EditMode.TILE && state.selectedTileIndex !== -1) {
+                if (gridManager.modeManager.currentInteraction === Interaction.NONE) {
                     const tile = this.tiles.getTile(...gridPoint);
                     if (
                         !(
                             tile instanceof ChipInputTile &&
                             (tile.extraInputTile ||
                                 ChipInputTile.extraInputTypes.includes(
-                                    state.selectableTiles[
-                                        state.selectedTileIndex
-                                    ].name
+                                    state.selectableTiles[state.selectedTileIndex].name
                                 ))
                         )
                     ) {
@@ -314,15 +236,9 @@ export default class InteractiveGrid extends Grid {
                     }
                 }
 
-                gridManager.modeManager.currentInteraction =
-                    Interaction.PLACING;
+                gridManager.modeManager.currentInteraction = Interaction.PLACING;
 
-                this.addTile(
-                    ...gridPoint,
-                    state.selectableTiles[state.selectedTileIndex],
-                    undefined,
-                    undefined
-                );
+                this.addTile(...gridPoint, state.selectableTiles[state.selectedTileIndex], undefined, undefined);
             } else if (
                 state.editMode === EditMode.CHIP &&
                 state.selectedTileIndex !== -1 &&
@@ -355,9 +271,7 @@ export default class InteractiveGrid extends Grid {
     onContext = (e: CMouseEvent) => {
         if (config.debugMode && state.editMode === EditMode.CURSOR)
             displayContextMenu(e.pageX, e.pageY, "debugTile").then((pick) => {
-                const gridPoint = locationToTuple(
-                    this.screenToGrid(...this.mousePos, true)
-                );
+                const gridPoint = locationToTuple(this.screenToGrid(...this.mousePos, true));
                 const tile = this.tiles.getTile(...gridPoint);
                 switch (pick) {
                     case "location": {
@@ -377,9 +291,7 @@ export default class InteractiveGrid extends Grid {
                             rotatable: tile?.rotatable,
                             rotation:
                                 tile?.direction +
-                                (tile?.direction !== undefined
-                                    ? " : " + rotationToString(tile.direction)
-                                    : ""),
+                                (tile?.direction !== undefined ? " : " + rotationToString(tile.direction) : ""),
                         });
                         break;
                     }
@@ -437,14 +349,7 @@ export default class InteractiveGrid extends Grid {
         if (!this.isValidChipPlacement(location, chip)) return;
 
         this.historyManager.beginInteraction();
-        const placedChip =
-            injectPlaceChip ||
-            new PlacedChip(
-                locationToPair(location),
-                Rotation.NORMAL,
-                chip,
-                this
-            );
+        const placedChip = injectPlaceChip || new PlacedChip(locationToPair(location), Rotation.NORMAL, chip, this);
 
         // originalChip.placedChips.add(placedChip);
 
@@ -465,19 +370,15 @@ export default class InteractiveGrid extends Grid {
      * @returns true if chip can be placed
      */
     isValidChipPlacement(location: [number, number], chip: Chip) {
-        if (
-            (state.chipEditor &&
-                state.chipGridMode === ChipGridMode.STRUCTURING) ||
-            !chip?.originalChip?.wasStructured
-        )
+        if ((state.chipEditor && state.chipGridMode === ChipGridMode.STRUCTURING) || !chip?.originalChip?.wasStructured)
             return false;
         const structureOffset = chip.getTopLeftStructure();
         for (const structureTile of chip.structure) {
             if (!structureTile) continue;
-            const tileLocation = sub(
-                add(location, [structureTile.x, structureTile.y]),
-                structureOffset
-            ) as [number, number];
+            const tileLocation = sub(add(location, [structureTile.x, structureTile.y]), structureOffset) as [
+                number,
+                number
+            ];
             const tileAtLocation = this.tiles.getTile(...tileLocation);
 
             // there was a tile in the way
@@ -492,8 +393,7 @@ export default class InteractiveGrid extends Grid {
 
     keyDown = (e: KeyboardEvent) => {
         const currTime = Date.now();
-        if (currTime - this.lastKeyActionTime < this.keyActionCooldownTime)
-            return;
+        if (currTime - this.lastKeyActionTime < this.keyActionCooldownTime) return;
         if (e.ctrlKey && e.code === "KeyZ") {
             e.preventDefault();
             this.lastKeyActionTime = currTime;
@@ -523,17 +423,11 @@ export default class InteractiveGrid extends Grid {
             if (e.code === "Digit0") {
                 e.preventDefault();
 
-                const prevPos = this.screenToGrid(
-                    this.width / 2,
-                    this.height / 2
-                );
+                const prevPos = this.screenToGrid(this.width / 2, this.height / 2);
 
                 this.size = this.startingSize;
 
-                const newPos = this.screenToGrid(
-                    this.width / 2,
-                    this.height / 2
-                );
+                const newPos = this.screenToGrid(this.width / 2, this.height / 2);
 
                 this.x += (newPos.x - prevPos.x) * this.size;
                 this.y += (newPos.y - prevPos.y) * this.size;
@@ -552,23 +446,11 @@ export default class InteractiveGrid extends Grid {
                     this.dragData.startLocation.grid &&
                     this.dragData.endLocation.grid
                 ) {
-                    const minX = Math.min(
-                        this.dragData.startLocation.grid.x,
-                        this.dragData.endLocation.grid.x
-                    );
-                    const minY = Math.min(
-                        this.dragData.startLocation.grid.y,
-                        this.dragData.endLocation.grid.y
-                    );
+                    const minX = Math.min(this.dragData.startLocation.grid.x, this.dragData.endLocation.grid.x);
+                    const minY = Math.min(this.dragData.startLocation.grid.y, this.dragData.endLocation.grid.y);
 
-                    const maxX = Math.max(
-                        this.dragData.startLocation.grid.x,
-                        this.dragData.endLocation.grid.x
-                    );
-                    const maxY = Math.max(
-                        this.dragData.startLocation.grid.y,
-                        this.dragData.endLocation.grid.y
-                    );
+                    const maxX = Math.max(this.dragData.startLocation.grid.x, this.dragData.endLocation.grid.x);
+                    const maxY = Math.max(this.dragData.startLocation.grid.y, this.dragData.endLocation.grid.y);
 
                     this.historyManager.beginInteraction();
                     for (let x = minX; x <= maxX; x++) {
@@ -632,9 +514,7 @@ export default class InteractiveGrid extends Grid {
                 (tempTile as ChipOutputTile).hue = (tileType as any).hue;
             }
             tempTile.forGraphicOnly = true;
-            const tileGraphics: PIXI.Container = tempTile.getContainer(
-                this.size
-            );
+            const tileGraphics: PIXI.Container = tempTile.getContainer(this.size);
             tileGraphics.alpha = 0.5;
             this.addChild(tileGraphics);
             this.prevHighlightTileGraphics.push(tileGraphics);
@@ -648,12 +528,7 @@ export default class InteractiveGrid extends Grid {
         this.hlTile.clear();
         this.hlTile.beginFill(config.colors.highlightTile);
         this.hlTile.lineStyle(0);
-        this.hlTile.drawRect(
-            gridScreenPos.x,
-            gridScreenPos.y,
-            this.size,
-            this.size
-        );
+        this.hlTile.drawRect(gridScreenPos.x, gridScreenPos.y, this.size, this.size);
     };
 
     prevCloneChip?: {
@@ -666,16 +541,13 @@ export default class InteractiveGrid extends Grid {
 
         if (
             state.editMode !== EditMode.CHIP ||
-            (state.chipEditor &&
-                state.chipGridMode === ChipGridMode.STRUCTURING) ||
+            (state.chipEditor && state.chipGridMode === ChipGridMode.STRUCTURING) ||
             !state.chips?.[state.selectedTileIndex]?.wasStructured
         ) {
             this.chipOutlineGraphics.clear();
             return;
         }
-        const gridPos = locationToTuple(
-            this.screenToGrid(...this.mousePos, true)
-        );
+        const gridPos = locationToTuple(this.screenToGrid(...this.mousePos, true));
         const selectedChip = state.chips[state.selectedTileIndex];
 
         if (!selectedChip) return;
@@ -710,18 +582,16 @@ export default class InteractiveGrid extends Grid {
 
         for (const structureTile of structureTiles) {
             if (!structureTile) continue;
-            const tileLocation = sub(
-                add(gridPos, [structureTile.x, structureTile.y]),
-                structureOffset
-            ) as [number, number];
+            const tileLocation = sub(add(gridPos, [structureTile.x, structureTile.y]), structureOffset) as [
+                number,
+                number
+            ];
 
             const tileAtLocation = this.tiles.getTile(...tileLocation);
 
             const type = findType(structureTile.type) as TileType;
             if (type.tile === ChipOutputTile) {
-                (type as ChipOutputTileType).hue = (
-                    structureTile as ChipOutputTile
-                ).hue;
+                (type as ChipOutputTileType).hue = (structureTile as ChipOutputTile).hue;
             }
 
             this.previewTiles.push({
@@ -734,24 +604,14 @@ export default class InteractiveGrid extends Grid {
                 this.chipOutlineGraphics.beginFill(chip.color, 0.2);
             } else {
                 if (tileAtLocation) {
-                    this.chipOutlineGraphics.beginFill(
-                        config.colors.chipInvalidPlacement,
-                        0.8
-                    );
+                    this.chipOutlineGraphics.beginFill(config.colors.chipInvalidPlacement, 0.8);
                 } else {
                     this.chipOutlineGraphics.beginFill(chip.color, 0.2);
                 }
             }
             this.chipOutlineGraphics.lineStyle(undefined);
             this.chipOutlineGraphics.drawRect(
-                ...locationToTuple(
-                    this.gridToScreen(
-                        tileLocation[0],
-                        tileLocation[1],
-                        true,
-                        false
-                    )
-                ),
+                ...locationToTuple(this.gridToScreen(tileLocation[0], tileLocation[1], true, false)),
                 this.size,
                 this.size
             );
@@ -759,40 +619,18 @@ export default class InteractiveGrid extends Grid {
             for (const direction of Direction.values()) {
                 const directionOffset = Direction.getOffset(direction);
 
-                const adjacentTileLocation = add(
-                    [structureTile.x, structureTile.y],
-                    directionOffset
-                ) as [number, number];
-                const adjacentTile = chip.structure.getTile(
-                    ...adjacentTileLocation
-                );
+                const adjacentTileLocation = add([structureTile.x, structureTile.y], directionOffset) as [
+                    number,
+                    number
+                ];
+                const adjacentTile = chip.structure.getTile(...adjacentTileLocation);
 
                 if (adjacentTile) continue;
 
-                const topLeft = this.gridToScreen(
-                    tileLocation[0],
-                    tileLocation[1],
-                    true,
-                    false
-                );
-                const topRight = this.gridToScreen(
-                    tileLocation[0] + 1,
-                    tileLocation[1],
-                    true,
-                    false
-                );
-                const bottomLeft = this.gridToScreen(
-                    tileLocation[0],
-                    tileLocation[1] + 1,
-                    true,
-                    false
-                );
-                const bottomRight = this.gridToScreen(
-                    tileLocation[0] + 1,
-                    tileLocation[1] + 1,
-                    true,
-                    false
-                );
+                const topLeft = this.gridToScreen(tileLocation[0], tileLocation[1], true, false);
+                const topRight = this.gridToScreen(tileLocation[0] + 1, tileLocation[1], true, false);
+                const bottomLeft = this.gridToScreen(tileLocation[0], tileLocation[1] + 1, true, false);
+                const bottomRight = this.gridToScreen(tileLocation[0] + 1, tileLocation[1] + 1, true, false);
 
                 this.chipOutlineGraphics.lineStyle(2, color, 0.5);
                 switch (direction) {
@@ -802,31 +640,19 @@ export default class InteractiveGrid extends Grid {
                         break;
                     }
                     case Direction.DOWN: {
-                        this.chipOutlineGraphics.moveTo(
-                            bottomLeft.x,
-                            bottomLeft.y
-                        );
-                        this.chipOutlineGraphics.lineTo(
-                            bottomRight.x,
-                            bottomRight.y
-                        );
+                        this.chipOutlineGraphics.moveTo(bottomLeft.x, bottomLeft.y);
+                        this.chipOutlineGraphics.lineTo(bottomRight.x, bottomRight.y);
                         break;
                     }
                     case Direction.LEFT: {
                         this.chipOutlineGraphics.moveTo(topLeft.x, topLeft.y);
-                        this.chipOutlineGraphics.lineTo(
-                            bottomLeft.x,
-                            bottomLeft.y
-                        );
+                        this.chipOutlineGraphics.lineTo(bottomLeft.x, bottomLeft.y);
 
                         break;
                     }
                     case Direction.RIGHT: {
                         this.chipOutlineGraphics.moveTo(topRight.x, topRight.y);
-                        this.chipOutlineGraphics.lineTo(
-                            bottomRight.x,
-                            bottomRight.y
-                        );
+                        this.chipOutlineGraphics.lineTo(bottomRight.x, bottomRight.y);
 
                         break;
                     }

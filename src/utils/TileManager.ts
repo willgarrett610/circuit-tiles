@@ -166,11 +166,7 @@ export class TileManager<T extends Tile = Tile> {
         const output = new TileManager<T>();
         for (const x in this.tileHolder) {
             for (const y in this.tileHolder[x]) {
-                output.setTile(
-                    Number(x),
-                    Number(y),
-                    this.tileHolder[x][y].clone()
-                );
+                output.setTile(Number(x), Number(y), this.tileHolder[x][y].clone());
             }
         }
 

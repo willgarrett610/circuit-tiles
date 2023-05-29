@@ -22,12 +22,7 @@ export default class LogicNode {
      * @param locations locations of tile
      * @param originTile tile of origin
      */
-    constructor(
-        name: string,
-        type: number,
-        locations: CircuitLocation[] = [],
-        originTile?: Tile
-    ) {
+    constructor(name: string, type: number, locations: CircuitLocation[] = [], originTile?: Tile) {
         this.name = name;
         this.locations = locations;
         this.type = type;

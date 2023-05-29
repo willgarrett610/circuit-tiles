@@ -55,11 +55,7 @@ export function initContextMenu(app_: PIXI.Application) {
  * @param menuName Menu name
  * @returns promise of what is clicked
  */
-export function displayContextMenu<T extends keyof typeof contextMenus>(
-    x: number,
-    y: number,
-    menuName: T
-) {
+export function displayContextMenu<T extends keyof typeof contextMenus>(x: number, y: number, menuName: T) {
     return new Promise<keyof typeof contextMenus[T] | null>((resolve) => {
         const menu = contextMenus[menuName];
 
@@ -67,10 +63,7 @@ export function displayContextMenu<T extends keyof typeof contextMenus>(
         overlay.backgroundRect.alpha = 0;
 
         x = Math.min(x, width() - config.contextMenuWidth);
-        y = Math.min(
-            y,
-            height() - Object.keys(menu).length * config.contextMenuItemHeight
-        );
+        y = Math.min(y, height() - Object.keys(menu).length * config.contextMenuItemHeight);
 
         const contextMenu = new GUIComponent(
             x,
@@ -81,19 +74,12 @@ export function displayContextMenu<T extends keyof typeof contextMenus>(
 
         contextMenu.backgroundSprite.alpha = 0.01;
         contextMenu.setDefaultContainer(
-            generateRoundedRectContainer(
-                0,
-                0,
-                contextMenu.width,
-                contextMenu.height,
-                config.colors.contextMenu,
-                {
-                    topLeft: 7,
-                    topRight: 7,
-                    botLeft: 7,
-                    botRight: 7,
-                }
-            )
+            generateRoundedRectContainer(0, 0, contextMenu.width, contextMenu.height, config.colors.contextMenu, {
+                topLeft: 7,
+                topRight: 7,
+                botLeft: 7,
+                botRight: 7,
+            })
         );
 
         let i = 0;

@@ -24,10 +24,10 @@ module.exports = {
     resolve: {
         extensions: [".tsx", ".ts", ".js", ".wasm"],
         alias: {
-            "react": "preact/compat",
+            react: "preact/compat",
             "react-dom/test-utils": "preact/test-utils",
-            "react-dom": "preact/compat",     // Must be below test-utils
-            "react/jsx-runtime": "preact/jsx-runtime"
+            "react-dom": "preact/compat", // Must be below test-utils
+            "react/jsx-runtime": "preact/jsx-runtime",
         },
     },
     output: {
@@ -40,10 +40,10 @@ module.exports = {
             template: "src/index.html",
         }),
         new CopyPlugin({
-            patterns: [{ from: "assets", to: "assets" }]
+            patterns: [{ from: "assets", to: "assets" }],
         }),
         new CleanWebpackPlugin({
-            cleanAfterEveryBuildPatterns: ["dist"]
+            cleanAfterEveryBuildPatterns: ["dist"],
         }),
         new WasmPackPlugin({
             crateDirectory: path.join(__dirname, "crate"),

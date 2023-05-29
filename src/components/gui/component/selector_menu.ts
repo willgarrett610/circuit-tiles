@@ -53,20 +53,12 @@ export default class SelectorMenu extends GUIWindow {
         this.title = title;
 
         this.tileSize =
-            (this.width -
-                config.tileSelector.margin *
-                    (config.tileSelector.tilePerColumn + 1)) /
+            (this.width - config.tileSelector.margin * (config.tileSelector.tilePerColumn + 1)) /
             config.tileSelector.tilePerColumn;
 
         this.btnGenerator = btnGenerator;
 
-        const btnLayout = new LineWrapLayout(
-            this.tileSize,
-            1,
-            config.tileSelector.margin,
-            0,
-            40
-        );
+        const btnLayout = new LineWrapLayout(this.tileSize, 1, config.tileSelector.margin, 0, 40);
 
         this.setLayout(btnLayout);
 
@@ -75,10 +67,7 @@ export default class SelectorMenu extends GUIWindow {
         const selectedGraphics = new PIXI.Graphics();
 
         selectedGraphics.beginFill(0, 0);
-        selectedGraphics.lineStyle(
-            config.tileSelector.selectedWidth,
-            config.colors.selectedTileBtn
-        );
+        selectedGraphics.lineStyle(config.tileSelector.selectedWidth, config.colors.selectedTileBtn);
         selectedGraphics.drawRect(
             config.tileSelector.selectedWidth / 2,
             config.tileSelector.selectedWidth / 2,
@@ -147,8 +136,7 @@ export default class SelectorMenu extends GUIWindow {
 
             if (btnData.onClick) tileBtn.on("click", btnData.onClick);
 
-            if (btnLayout.compHeight === 1)
-                btnLayout.compHeight = tileBtn.height;
+            if (btnLayout.compHeight === 1) btnLayout.compHeight = tileBtn.height;
 
             btnData.defaultContainer.zIndex = 100;
             btnData.defaultContainer.removeAllListeners();
@@ -158,12 +146,7 @@ export default class SelectorMenu extends GUIWindow {
             const hoverGraphics = new PIXI.Graphics();
 
             hoverGraphics.beginFill(config.colors.highlightTile);
-            hoverGraphics.drawRect(
-                0,
-                0,
-                btnData.hoverContainer.width,
-                btnData.hoverContainer.height
-            );
+            hoverGraphics.drawRect(0, 0, btnData.hoverContainer.width, btnData.hoverContainer.height);
             hoverGraphics.endFill();
 
             hoverGraphics.scale.x = 1 / btnData.hoverContainer.scale.x;

@@ -48,6 +48,7 @@
     },
     "dependencies": {
         "@emotion/css": "^11.7.1",
+        "mobx": "^6.9.0",
         "pixi.js": "5.2.1",
         "preact": "^10.6.4"
     }

@@ -2,13 +2,7 @@ import * as PIXI from "pixi.js";
 
 import config from "../../../config";
 import { createChipInputForm } from "../../../menus/create_chip";
-import state, {
-    setStateProp,
-    setState,
-    update,
-    publish,
-    multiSubscribe,
-} from "../../../state";
+import state, { setStateProp, setState, update, publish, multiSubscribe } from "../../../state";
 import { height } from "../../../utils";
 import ChipGridMode from "../../../utils/chip_grid_mode";
 import { displayContextMenu } from "../../../utils/context_menu";
@@ -74,9 +68,7 @@ export default class ChipSelector extends SelectorMenu {
                                 verifyText: (name) => {
                                     if (name.length === 0) return false;
                                     // make sure name is not already taken
-                                    return !state.chips.find(
-                                        (chip) => chip.name === name
-                                    );
+                                    return !state.chips.find((chip) => chip.name === name);
                                 },
                             });
                         },
@@ -88,9 +80,7 @@ export default class ChipSelector extends SelectorMenu {
 
                 const genContainer = (hover: boolean) => {
                     const graphics = new PIXI.Graphics();
-                    graphics.beginFill(
-                        isStructured ? chip.color : hslToHex(chip.hue, 50, 20)
-                    );
+                    graphics.beginFill(isStructured ? chip.color : hslToHex(chip.hue, 50, 20));
                     graphics.drawRect(0, 0, 100, 100);
                     graphics.endFill();
 
@@ -132,11 +122,7 @@ export default class ChipSelector extends SelectorMenu {
                     hoverContainer,
                     selectable: isStructured,
                     onContext: (e: CMouseEvent) => {
-                        displayContextMenu(
-                            e.pageX,
-                            e.pageY,
-                            "chipSelection"
-                        ).then((name) => {
+                        displayContextMenu(e.pageX, e.pageY, "chipSelection").then((name) => {
                             switch (name) {
                                 case "settings": {
                                     const close = createChipInputForm({
@@ -156,9 +142,7 @@ export default class ChipSelector extends SelectorMenu {
                                             if (name === chip.name) return true;
                                             if (name.length === 0) return false;
                                             // make sure name is not already taken
-                                            return !state.chips.find(
-                                                (chip) => chip.name === name
-                                            );
+                                            return !state.chips.find((chip) => chip.name === name);
                                         },
                                     });
 
@@ -188,14 +172,9 @@ export default class ChipSelector extends SelectorMenu {
                                         let i = 1;
                                         let newName = "";
                                         do {
-                                            newName =
-                                                newChip.name + "(" + i + ")";
+                                            newName = newChip.name + "(" + i + ")";
                                             i++;
-                                        } while (
-                                            state.chips.find(
-                                                (x) => x.name === newName
-                                            )
-                                        );
+                                        } while (state.chips.find((x) => x.name === newName));
                                         newChip.name = newName;
                                         chips.push(newChip);
                                     });
@@ -209,10 +188,7 @@ export default class ChipSelector extends SelectorMenu {
         );
         this.visible = false;
 
-        this.sizeLambda = () => [
-            config.selectorWidth,
-            height() - config.menubarSize,
-        ];
+        this.sizeLambda = () => [config.selectorWidth, height() - config.menubarSize];
 
         multiSubscribe(["chips", "chipGridMode", "editMode"], () => {
             this.generateComponents();

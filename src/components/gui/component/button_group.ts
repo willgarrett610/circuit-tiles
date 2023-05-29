@@ -24,8 +24,7 @@ export default class ButtonGroup {
      * @param i index of button
      */
     setSelected(i: number) {
-        if (this.selected !== -1)
-            this.buttons[i].removeChild(this.selectedOverlay);
+        if (this.selected !== -1) this.buttons[i].removeChild(this.selectedOverlay);
         this.selected = i;
         this.buttons[i].addChild(this.selectedOverlay);
         this.onSelectionChange?.(i);

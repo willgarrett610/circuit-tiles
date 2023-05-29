@@ -30,18 +30,10 @@ export const setChip: Action<PlaceChipPayload> = {
         for (const structureTile of structureTiles) {
             if (!structureTile) continue;
             const tileLocation = sub(
-                add(locationToTuple(placedChip.location), [
-                    structureTile.x,
-                    structureTile.y,
-                ]),
+                add(locationToTuple(placedChip.location), [structureTile.x, structureTile.y]),
                 offset
             ) as [number, number];
-            await grid.removeTile(
-                tileLocation[0],
-                tileLocation[1],
-                undefined,
-                true
-            );
+            await grid.removeTile(tileLocation[0], tileLocation[1], undefined, true);
             const placedTile = (await grid.addTile(
                 tileLocation[0],
                 tileLocation[1],
@@ -53,8 +45,7 @@ export const setChip: Action<PlaceChipPayload> = {
             )) as ChipTile | undefined;
 
             if (placedTile) {
-                if (placedTile instanceof ChipOutputTile)
-                    placedTile.hue = (structureTile as ChipOutputTile).hue;
+                if (placedTile instanceof ChipOutputTile) placedTile.hue = (structureTile as ChipOutputTile).hue;
                 placedTile.id = structureTile.id;
                 placedTile.chip = placedChip;
                 placedChip.tiles.setTile(...tileLocation, placedTile);
@@ -90,8 +81,7 @@ export const deleteChip: Action<RemoveChipPayload> = {
         if (index === -1) return;
 
         for (const chipTile of placedChip.tiles) {
-            if (chipTile)
-                await grid.removeTile(chipTile.x, chipTile.y, true, true);
+            if (chipTile) await grid.removeTile(chipTile.x, chipTile.y, true, true);
         }
 
         await grid.dispatchHandler("postRemoveChip", placedChip);

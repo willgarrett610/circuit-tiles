@@ -114,10 +114,7 @@ export default class Grid extends PIXI.Container {
         this.renderGrid();
     }
 
-    addHandler = <T extends keyof GridHandlers>(
-        handlerName: T,
-        callback: GridHandlers[T][number]
-    ) => {
+    addHandler = <T extends keyof GridHandlers>(handlerName: T, callback: GridHandlers[T][number]) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.handlers[handlerName].push(callback as any);
     };
@@ -140,24 +137,15 @@ export default class Grid extends PIXI.Container {
      * @param direction direction from newTile to prevTile
      * @param forced if the connection should be forced
      */
-    async connectTiles(
-        toTile: Tile,
-        fromTile: Tile,
-        direction: Direction,
-        forced = false
-    ) {
+    async connectTiles(toTile: Tile, fromTile: Tile, direction: Direction, forced = false) {
         // Get direction of connection
-        const oppositeDirection = Direction.toLower(
-            Direction.getOpposite(direction)
-        );
+        const oppositeDirection = Direction.toLower(Direction.getOpposite(direction));
         const directDirection = Direction.toLower(direction);
 
         // Determine whether the tiles can be connected
         const canConnect =
-            toTile.getConnectionTemplate()[directDirection] !==
-                ConnectionType.BLOCKED &&
-            fromTile.getConnectionTemplate()[oppositeDirection] !==
-                ConnectionType.BLOCKED &&
+            toTile.getConnectionTemplate()[directDirection] !== ConnectionType.BLOCKED &&
+            fromTile.getConnectionTemplate()[oppositeDirection] !== ConnectionType.BLOCKED &&
             (forced || toTile.isWire || fromTile.isWire);
 
         // If the tiles can be connected and the previous tile is not already connected,
@@ -207,12 +195,7 @@ export default class Grid extends PIXI.Container {
                     tile.y + Direction.getOffset(forceDirection)[1]
                 );
                 if (forceTile) {
-                    await this.connectTiles(
-                        tile,
-                        forceTile,
-                        forceDirection,
-                        true
-                    );
+                    await this.connectTiles(tile, forceTile, forceDirection, true);
                     tile = this.tiles.getTile(x, y) as Tile;
                 }
             }
@@ -224,11 +207,7 @@ export default class Grid extends PIXI.Container {
                 tile.y + Direction.getOffset(direction)[1]
             );
             if (adjacentTile) {
-                if (
-                    adjacentTile.getConnectionForce()[
-                        Direction.toLower(Direction.getOpposite(direction))
-                    ]
-                ) {
+                if (adjacentTile.getConnectionForce()[Direction.toLower(Direction.getOpposite(direction))]) {
                     await this.connectTiles(tile, adjacentTile, direction);
                     tile = this.tiles.getTile(x, y) as Tile;
                 }
@@ -265,12 +244,10 @@ export default class Grid extends PIXI.Container {
             if (
                 tileAtLocation instanceof ChipInputTile &&
                 !tileAtLocation.extraInputTile &&
-                (extraTile instanceof ButtonTile ||
-                    extraTile instanceof LeverTile) &&
+                (extraTile instanceof ButtonTile || extraTile instanceof LeverTile) &&
                 !state.chipEditor
             ) {
-                const newTileAtLocation =
-                    tileAtLocation.clone() as ChipInputTile;
+                const newTileAtLocation = tileAtLocation.clone() as ChipInputTile;
                 newTileAtLocation.setExtraInputTile(extraTile);
                 await this.historyManager.performAction(
                     editTile,
@@ -287,11 +264,7 @@ export default class Grid extends PIXI.Container {
                 tileAtLocation.chip?.tiles.setTile(x, y, newTileAtLocation);
             }
             if (direction !== undefined && prevTile)
-                await this.connectTiles(
-                    this.tiles.getTile(x, y) as Tile,
-                    prevTile,
-                    direction
-                );
+                await this.connectTiles(this.tiles.getTile(x, y) as Tile, prevTile, direction);
             if (!interacting) this.historyManager.endInteraction();
             return this.tiles.getTile(x, y);
         }
@@ -302,15 +275,10 @@ export default class Grid extends PIXI.Container {
             tileObj.placedInChip = false;
         }
 
-        if (
-            tileObj instanceof IOTile &&
-            state.chipEditor &&
-            state.chipGridMode === ChipGridMode.EDITING
-        )
+        if (tileObj instanceof IOTile && state.chipEditor && state.chipGridMode === ChipGridMode.EDITING)
             tileObj.isInParentChip = true;
 
-        if (tileObj instanceof ChipOutputTile)
-            tileObj.hue = (type as ChipOutputTileType).hue;
+        if (tileObj instanceof ChipOutputTile) tileObj.hue = (type as ChipOutputTileType).hue;
 
         const interacting = this.historyManager.isInteracting();
         if (!interacting) this.historyManager.beginInteraction();
@@ -327,8 +295,7 @@ export default class Grid extends PIXI.Container {
             !noHistory
         );
 
-        if (prevTile && direction !== undefined)
-            await this.connectTiles(tileObj, prevTile, direction);
+        if (prevTile && direction !== undefined) await this.connectTiles(tileObj, prevTile, direction);
 
         await this.handleForceConnection(x, y);
 
@@ -348,12 +315,7 @@ export default class Grid extends PIXI.Container {
      * @param noHistory if history shouldn't be recorded
      * @returns success of deletion
      */
-    async removeTile(
-        x: number,
-        y: number,
-        removeChip = false,
-        noHistory = false
-    ) {
+    async removeTile(x: number, y: number, removeChip = false, noHistory = false) {
         const tile = this.tiles.getTile(x, y);
         if (!tile) return false;
 
@@ -367,12 +329,7 @@ export default class Grid extends PIXI.Container {
             this.removingExtraTiles = true;
         }
 
-        if (
-            !removeChip &&
-            state.editMode !== EditMode.CURSOR &&
-            tile instanceof ChipInputTile &&
-            tile.extraInputTile
-        ) {
+        if (!removeChip && state.editMode !== EditMode.CURSOR && tile instanceof ChipInputTile && tile.extraInputTile) {
             const newTile = tile.clone() as ChipInputTile;
             newTile.setExtraInputTile(undefined);
             await this.historyManager.performAction(
@@ -394,12 +351,7 @@ export default class Grid extends PIXI.Container {
         if (!removeChip && tile instanceof ChipTile && tile.chip) {
             this.removeChip(tile.chip, !noHistory);
         } else {
-            await this.historyManager.performAction(
-                deleteTile,
-                { x, y, grid: this },
-                false,
-                !noHistory
-            );
+            await this.historyManager.performAction(deleteTile, { x, y, grid: this }, false, !noHistory);
         }
 
         const removalSpots: {
@@ -412,15 +364,9 @@ export default class Grid extends PIXI.Container {
             { offset: [0, 1], side: "up" },
         ];
         for (const removalSpot of removalSpots) {
-            const adjacentTile = this.tiles.getTile(
-                x + removalSpot.offset[0],
-                y + removalSpot.offset[1]
-            );
+            const adjacentTile = this.tiles.getTile(x + removalSpot.offset[0], y + removalSpot.offset[1]);
 
-            if (
-                adjacentTile !== undefined &&
-                adjacentTile.getConnections()[removalSpot.side]
-            ) {
+            if (adjacentTile !== undefined && adjacentTile.getConnections()[removalSpot.side]) {
                 const newTile = adjacentTile.clone();
                 newTile.setConnection(removalSpot.side, false);
                 await this.historyManager.performAction(
@@ -507,15 +453,9 @@ export default class Grid extends PIXI.Container {
                 { offset: [0, 1], side: "up" },
             ];
             for (const removalSpot of removalSpots) {
-                const adjacentTile = this.tiles.getTile(
-                    x + removalSpot.offset[0],
-                    y + removalSpot.offset[1]
-                );
+                const adjacentTile = this.tiles.getTile(x + removalSpot.offset[0], y + removalSpot.offset[1]);
 
-                if (
-                    adjacentTile !== undefined &&
-                    adjacentTile.getConnections()[removalSpot.side]
-                ) {
+                if (adjacentTile !== undefined && adjacentTile.getConnections()[removalSpot.side]) {
                     const newAdjacentTile = adjacentTile.clone();
                     newAdjacentTile.setConnection(removalSpot.side, false);
                     await this.historyManager.performAction(editTile, {
@@ -561,75 +501,37 @@ export default class Grid extends PIXI.Container {
 
         this.lineGraphics.clear();
 
-        for (
-            let x = -Math.ceil(this.x / this.size);
-            x <= tileXCount - Math.floor(this.x / this.size);
-            x++
-        ) {
+        for (let x = -Math.ceil(this.x / this.size); x <= tileXCount - Math.floor(this.x / this.size); x++) {
             this.lineGraphics.beginFill(config.lineColor);
             this.lineGraphics.lineStyle(0);
             this.lineGraphics.drawRect(
-                x * this.size -
-                    (config.lineWidth *
-                        (x % Math.floor(clamp(200 / this.size, 3, 8)) === 0
-                            ? 2
-                            : 1)) /
-                        2,
+                x * this.size - (config.lineWidth * (x % Math.floor(clamp(200 / this.size, 3, 8)) === 0 ? 2 : 1)) / 2,
                 -this.y,
-                config.lineWidth *
-                    (x % Math.floor(clamp(200 / this.size, 3, 8)) === 0
-                        ? 2
-                        : 1),
+                config.lineWidth * (x % Math.floor(clamp(200 / this.size, 3, 8)) === 0 ? 2 : 1),
                 height
             );
         }
 
-        for (
-            let y = -Math.ceil(this.y / this.size);
-            y <= tileYCount - Math.floor(this.y / this.size);
-            y++
-        ) {
+        for (let y = -Math.ceil(this.y / this.size); y <= tileYCount - Math.floor(this.y / this.size); y++) {
             this.lineGraphics.beginFill(config.lineColor);
             this.lineGraphics.lineStyle(0);
             this.lineGraphics.drawRect(
                 -this.x,
-                y * this.size -
-                    (config.lineWidth *
-                        (y % Math.floor(clamp(200 / this.size, 3, 8)) === 0
-                            ? 2
-                            : 1)) /
-                        2,
+                y * this.size - (config.lineWidth * (y % Math.floor(clamp(200 / this.size, 3, 8)) === 0 ? 2 : 1)) / 2,
                 width,
-                config.lineWidth *
-                    (y % Math.floor(clamp(200 / this.size, 3, 8)) === 0 ? 2 : 1)
+                config.lineWidth * (y % Math.floor(clamp(200 / this.size, 3, 8)) === 0 ? 2 : 1)
             );
         }
     }
 
     /** render selection */
     renderSelection() {
-        if (
-            state.editMode === EditMode.CURSOR &&
-            this.dragData.startLocation.grid &&
-            this.dragData.endLocation.grid
-        ) {
-            const minX = Math.min(
-                this.dragData.startLocation.grid.x,
-                this.dragData.endLocation.grid.x
-            );
-            const minY = Math.min(
-                this.dragData.startLocation.grid.y,
-                this.dragData.endLocation.grid.y
-            );
+        if (state.editMode === EditMode.CURSOR && this.dragData.startLocation.grid && this.dragData.endLocation.grid) {
+            const minX = Math.min(this.dragData.startLocation.grid.x, this.dragData.endLocation.grid.x);
+            const minY = Math.min(this.dragData.startLocation.grid.y, this.dragData.endLocation.grid.y);
 
-            const maxX = Math.max(
-                this.dragData.startLocation.grid.x,
-                this.dragData.endLocation.grid.x
-            );
-            const maxY = Math.max(
-                this.dragData.startLocation.grid.y,
-                this.dragData.endLocation.grid.y
-            );
+            const maxX = Math.max(this.dragData.startLocation.grid.x, this.dragData.endLocation.grid.x);
+            const maxY = Math.max(this.dragData.startLocation.grid.y, this.dragData.endLocation.grid.y);
 
             const start = this.gridToScreen(minX, minY);
             const end = this.gridToScreen(maxX + 1, maxY + 1);
@@ -637,12 +539,7 @@ export default class Grid extends PIXI.Container {
             this.selectionGraphics.clear();
             this.selectionGraphics.beginFill(config.colors.gridSelection);
             this.selectionGraphics.lineStyle(4, config.colors.gridSelection);
-            this.selectionGraphics.drawRect(
-                start.x - this.x,
-                start.y - this.y,
-                end.x - start.x,
-                end.y - start.y
-            );
+            this.selectionGraphics.drawRect(start.x - this.x, start.y - this.y, end.x - start.x, end.y - start.y);
         }
     }
 
@@ -654,11 +551,7 @@ export default class Grid extends PIXI.Container {
      * @param root0.newGraphics
      * @param root0.newDirection
      */
-    renderTiles({
-        updateSize = false,
-        newGraphics = false,
-        newDirection = false,
-    }) {
+    renderTiles({ updateSize = false, newGraphics = false, newDirection = false }) {
         for (const tile of this.tiles.getTiles())
             if (tile)
                 tile.update({
@@ -680,12 +573,8 @@ export default class Grid extends PIXI.Container {
         // for (const child of this.chipOutlines.children) child.destroy();
         this.chipOutlines.removeChildren();
         for (const chip of this.chips) {
-            const hovering =
-                tile instanceof ChipTile &&
-                tile.chip?.scopeName === chip.scopeName;
-            this.chipOutlines.addChild(
-                chip.buildOutlineGraphic(this, hovering)
-            );
+            const hovering = tile instanceof ChipTile && tile.chip?.scopeName === chip.scopeName;
+            this.chipOutlines.addChild(chip.buildOutlineGraphic(this, hovering));
         }
     }
 
@@ -708,9 +597,7 @@ export default class Grid extends PIXI.Container {
     generateTileGraphics() {
         for (const tile of this.tiles.getTiles()) {
             if (tile) {
-                const tileGraphics: PIXI.Container = tile.getContainer(
-                    this.size
-                );
+                const tileGraphics: PIXI.Container = tile.getContainer(this.size);
                 this.tilesContainer.addChild(tileGraphics);
             }
         }
@@ -729,11 +616,7 @@ export default class Grid extends PIXI.Container {
      * @param options.newGraphics
      * @param options.newDirection
      */
-    updateTiles(options: {
-        updateSize?: boolean;
-        newGraphics?: boolean;
-        newDirection?: boolean;
-    }) {
+    updateTiles(options: { updateSize?: boolean; newGraphics?: boolean; newDirection?: boolean }) {
         this.renderTiles(options);
     }
 
@@ -747,11 +630,7 @@ export default class Grid extends PIXI.Container {
     ) => {
         const [x, y] = location;
 
-        const {
-            updateSize = false,
-            newGraphics = false,
-            newDirection = false,
-        } = options;
+        const { updateSize = false, newGraphics = false, newDirection = false } = options;
 
         for (let i = x - 1; i <= x + 1; i++)
             for (let j = y - 1; j <= y + 1; j++) {
@@ -803,8 +682,7 @@ export default class Grid extends PIXI.Container {
     }) {
         if (updateGridLines) this.updateGridLines();
         if (locations) {
-            for (const location of locations)
-                this.updateTilesAround(location, updateTiles);
+            for (const location of locations) this.updateTilesAround(location, updateTiles);
         } else this.updateTiles(updateTiles);
         if (updateSelection) this.updateSelection();
     }
@@ -889,11 +767,7 @@ export default class Grid extends PIXI.Container {
         y: number,
         floored = true,
         offset = true,
-        corner:
-            | "top-left"
-            | "top-right"
-            | "bottom-left"
-            | "bottom-right" = "top-left"
+        corner: "top-left" | "top-right" | "bottom-left" | "bottom-right" = "top-left"
     ) => {
         switch (corner) {
             case "top-left":

@@ -13,20 +13,18 @@ type StructureClashAlertProps = {
  * @returns promise of selection
  */
 export function showStructureClashAlert() {
-    return new Promise<{ continue: boolean; ignoreFurther: boolean }>(
-        (resolve) => {
-            const close = createStructureClashAlert({
-                onSubmit: (ignoreFurther) => {
-                    close();
-                    resolve({ continue: true, ignoreFurther });
-                },
-                onCancel: () => {
-                    close();
-                    resolve({ continue: false, ignoreFurther: false });
-                },
-            });
-        }
-    );
+    return new Promise<{ continue: boolean; ignoreFurther: boolean }>((resolve) => {
+        const close = createStructureClashAlert({
+            onSubmit: (ignoreFurther) => {
+                close();
+                resolve({ continue: true, ignoreFurther });
+            },
+            onCancel: () => {
+                close();
+                resolve({ continue: false, ignoreFurther: false });
+            },
+        });
+    });
 }
 
 /**
@@ -43,10 +41,7 @@ export function createStructureClashAlert(props: StructureClashAlertProps) {
     return close;
 }
 
-export const ChipForm: MenuComponent<StructureClashAlertProps> = ({
-    onSubmit,
-    onCancel,
-}) => {
+export const ChipForm: MenuComponent<StructureClashAlertProps> = ({ onSubmit, onCancel }) => {
     const ignoreFurtherCheckbox = useRef<HTMLInputElement>(null);
 
     return (
@@ -134,11 +129,7 @@ export const ChipForm: MenuComponent<StructureClashAlertProps> = ({
                             },
                         })}
                         id="chip_create_button"
-                        onClick={() =>
-                            onSubmit?.(
-                                Boolean(ignoreFurtherCheckbox?.current?.checked)
-                            )
-                        }
+                        onClick={() => onSubmit?.(Boolean(ignoreFurtherCheckbox?.current?.checked))}
                     >
                         Continue
                     </button>

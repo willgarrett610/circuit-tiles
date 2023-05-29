@@ -65,9 +65,7 @@ export namespace Direction {
      * @param direction direction to lower case
      * @returns provides direction in lower case
      */
-    export function toLower(
-        direction: Direction
-    ): "up" | "right" | "down" | "left" {
+    export function toLower(direction: Direction): "up" | "right" | "down" | "left" {
         switch (direction) {
             case Direction.UP:
                 return "up";

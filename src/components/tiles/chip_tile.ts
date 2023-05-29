@@ -18,10 +18,7 @@ export default abstract class ChipTile extends GraphicsTile {
      */
     placedInChip: boolean = true;
 
-    abstract type:
-        | typeof ChipInputTile
-        | typeof ChipOutputTile
-        | typeof StructureTile;
+    abstract type: typeof ChipInputTile | typeof ChipOutputTile | typeof StructureTile;
 
     rotatable = false;
 

@@ -45,8 +45,7 @@ export const TextInput: MenuComponent<TextInputProps> = ({
     const submitButton = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
-        if (submitButton.current)
-            submitButton.current.disabled = !verify(inputValue);
+        if (submitButton.current) submitButton.current.disabled = !verify(inputValue);
     }, []);
 
     return (
@@ -122,10 +121,7 @@ export const TextInput: MenuComponent<TextInputProps> = ({
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         onInput={(e: any) => {
                             setInputValue(e.target.value);
-                            if (submitButton.current)
-                                submitButton.current.disabled = !verify(
-                                    e.target.value
-                                );
+                            if (submitButton.current) submitButton.current.disabled = !verify(e.target.value);
                         }}
                     />
                 </div>

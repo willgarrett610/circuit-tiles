@@ -22,21 +22,11 @@ export default class ToolSelector extends GUIWindow {
      * @param chipSelector The chip selector
      */
     constructor(tileSelector: SelectorMenu, chipSelector: SelectorMenu) {
-        super(
-            0,
-            config.menubarSize,
-            config.menubarSize,
-            height() - config.menubarSize,
-            config.colors.menu
-        );
+        super(0, config.menubarSize, config.menubarSize, height() - config.menubarSize, config.colors.menu);
 
         this.sizeLambda = () => [this.width, height() - config.menubarSize];
 
-        const layout = new LineWrapLayout(
-            config.menubarSize,
-            config.menubarSize,
-            0
-        );
+        const layout = new LineWrapLayout(config.menubarSize, config.menubarSize, 0);
 
         const cursorTool = this.createToolBtn("cursor");
         const panTool = this.createToolBtn("pan");
@@ -110,13 +100,7 @@ export default class ToolSelector extends GUIWindow {
         toolHover.alpha = 0.2;
         toolHover.zIndex = 200;
 
-        const tool = new GUIComponent(
-            0,
-            0,
-            config.menubarSize,
-            config.menubarSize,
-            config.colors.menu
-        );
+        const tool = new GUIComponent(0, 0, config.menubarSize, config.menubarSize, config.colors.menu);
         const defaultContainer = new PIXI.Container();
         const defaultSprite = getSprite(spriteKey);
         defaultSprite.width = tool.cWidth;

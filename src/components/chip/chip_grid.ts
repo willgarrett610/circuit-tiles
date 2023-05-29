@@ -22,9 +22,7 @@ export default class ChipGrid {
     constructor(chip: Chip) {
         this.chip = chip;
         this.grids = {
-            chip: new InteractiveChipGrid(chip, 100, chip.tiles, [
-                ...chip.placedChipsInside,
-            ]),
+            chip: new InteractiveChipGrid(chip, 100, chip.tiles, [...chip.placedChipsInside]),
             structure: new InteractiveGrid(100, chip.structure),
         };
 
@@ -33,24 +31,14 @@ export default class ChipGrid {
             this.chip.chipDependencies.add(placedChip.chip.getRootOriginal());
         });
 
-        this.grids.chip.addHandler(
-            "postRemoveChip",
-            async (removedPlacedChip) => {
-                this.chip.placedChipsInside.splice(
-                    this.chip.placedChipsInside.indexOf(removedPlacedChip),
-                    1
-                );
+        this.grids.chip.addHandler("postRemoveChip", async (removedPlacedChip) => {
+            this.chip.placedChipsInside.splice(this.chip.placedChipsInside.indexOf(removedPlacedChip), 1);
 
-                const ogChip = removedPlacedChip.chip.getRootOriginal();
-                if (
-                    this.chip.placedChipsInside.every(
-                        (pCI) => pCI.chip.getRootOriginal() !== ogChip
-                    )
-                ) {
-                    this.chip.chipDependencies.delete(ogChip);
-                }
+            const ogChip = removedPlacedChip.chip.getRootOriginal();
+            if (this.chip.placedChipsInside.every((pCI) => pCI.chip.getRootOriginal() !== ogChip)) {
+                this.chip.chipDependencies.delete(ogChip);
             }
-        );
+        });
 
         this.grids.chip.addHandler("postAddTile", async (tile) => {
             this.chip.tileAdded(tile);
@@ -63,19 +51,13 @@ export default class ChipGrid {
         });
 
         this.grids.structure.addHandler("preAddTile", async (tile, reject) => {
-            if (
-                (await this.chip.checkClash(tile as ChipTile)) ===
-                ClashResult.CLASH
-            ) {
+            if ((await this.chip.checkClash(tile as ChipTile)) === ClashResult.CLASH) {
                 reject?.();
             }
         });
 
         this.grids.structure.addHandler("postAddTile", async (tile) => {
-            if (
-                tile instanceof ChipInputTile ||
-                tile instanceof ChipOutputTile
-            ) {
+            if (tile instanceof ChipInputTile || tile instanceof ChipOutputTile) {
                 tile.id = state.selectableTiles[state.selectedTileIndex].name;
                 tile.generateText();
             }

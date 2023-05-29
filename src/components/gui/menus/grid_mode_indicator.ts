@@ -74,10 +74,7 @@ export default class GridModeIndicator extends GUIWindow {
             gridModeBoldText.text = text;
             gridModeText.x = gridModeBoldText.x + gridModeBoldText.width;
             textContainer.x =
-                (config.chipModeIndicator.width -
-                    config.chipModeIndicator.closeBtnSize) /
-                    2 -
-                textContainer.width / 2;
+                (config.chipModeIndicator.width - config.chipModeIndicator.closeBtnSize) / 2 - textContainer.width / 2;
         });
 
         const gridModeText = new PIXI.Text("", {
@@ -101,9 +98,7 @@ export default class GridModeIndicator extends GUIWindow {
                 gridModeText.text = chip.name.slice(0, 10) + "...";
             }
 
-            textContainer.x =
-                (this.width - config.chipModeIndicator.closeBtnSize) / 2 -
-                textContainer.width / 2;
+            textContainer.x = (this.width - config.chipModeIndicator.closeBtnSize) / 2 - textContainer.width / 2;
         });
 
         textContainer.addChild(gridModeBoldText);
@@ -115,10 +110,7 @@ export default class GridModeIndicator extends GUIWindow {
         textContainer.y = (this.height - textContainer.height) / 2;
 
         textContainer.x =
-            (config.chipModeIndicator.width -
-                config.chipModeIndicator.closeBtnSize) /
-                2 -
-            textContainer.width / 2;
+            (config.chipModeIndicator.width - config.chipModeIndicator.closeBtnSize) / 2 - textContainer.width / 2;
 
         defaultContainer.addChild(textContainer);
 
@@ -134,10 +126,7 @@ export default class GridModeIndicator extends GUIWindow {
             if (state.isStructured) {
                 setState({ chipEditor: false });
             } else {
-                showAlert(
-                    "Alert",
-                    "You must finish structuring before you can exit."
-                );
+                showAlert("Alert", "You must finish structuring before you can exit.");
             }
         };
 

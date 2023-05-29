@@ -78,10 +78,7 @@ export const contextListeners: Array<DisplayObjectMouseEvent> = [];
  * @param object Pixi DisplayObject
  * @param listener CWheelEvent listener
  */
-export function onScroll(
-    object: PIXI.DisplayObject,
-    listener: (ev: CWheelEvent) => any
-) {
+export function onScroll(object: PIXI.DisplayObject, listener: (ev: CWheelEvent) => any) {
     scrollListeners.push({ object, listener });
 }
 
@@ -91,10 +88,7 @@ export function onScroll(
  * @param object Pixi DisplayObject
  * @param listener CMouseEvent listener
  */
-export function onContextMenu(
-    object: PIXI.DisplayObject,
-    listener: (ev: CMouseEvent) => any
-) {
+export function onContextMenu(object: PIXI.DisplayObject, listener: (ev: CMouseEvent) => any) {
     contextListeners.push({ object, listener });
 }
 
@@ -116,10 +110,7 @@ export function handleEvent(e: WheelEvent | MouseEvent, app: PIXI.Application) {
         listeners = contextListeners;
     }
 
-    const hitObject = app.renderer.plugins.interaction.hitTest(
-        new PIXI.Point(cE.pageX, cE.pageY),
-        app.stage
-    );
+    const hitObject = app.renderer.plugins.interaction.hitTest(new PIXI.Point(cE.pageX, cE.pageY), app.stage);
 
     if (hitObject) {
         let testObject = hitObject;
@@ -157,14 +148,8 @@ export function onKeyPress(listener: (this: Window, ev: KeyboardEvent) => any) {
 }
 
 export const mouseDown = { left: false, middle: false, right: false };
-window.addEventListener(
-    "mouseup",
-    (e) => ((mouseDown as any)[["left", "middle", "right"][e.button]] = false)
-);
-window.addEventListener(
-    "mousedown",
-    (e) => ((mouseDown as any)[["left", "middle", "right"][e.button]] = true)
-);
+window.addEventListener("mouseup", (e) => ((mouseDown as any)[["left", "middle", "right"][e.button]] = false));
+window.addEventListener("mousedown", (e) => ((mouseDown as any)[["left", "middle", "right"][e.button]] = true));
 
 export const pressedKeys: { [key: string]: boolean } = {};
 window.addEventListener("keyup", (e) => (pressedKeys[e.code] = false));

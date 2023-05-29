@@ -44,12 +44,7 @@ export default class MenuBar extends GUIWindow {
      * @returns {GUIComponent}
      */
     private createPlayPauseBtn(playBtn: boolean) {
-        const btn = new GUIComponent(
-            2,
-            2,
-            config.menubarSize - 4,
-            config.menubarSize - 4
-        );
+        const btn = new GUIComponent(2, 2, config.menubarSize - 4, config.menubarSize - 4);
         btn.backgroundSprite.alpha = 0;
 
         const defaultCont = new PIXI.Container();
@@ -150,8 +145,7 @@ export default class MenuBar extends GUIWindow {
 
             btn.defaultContainer?.addChild(chipGridModeText);
             btn.defaultContainer?.addChild(swapSprite);
-            btn.x =
-                width() - (btn.defaultContainer as PIXI.Container).width - 5;
+            btn.x = width() - (btn.defaultContainer as PIXI.Container).width - 5;
         });
 
         const swapSprite = getSprite("swap");

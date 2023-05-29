@@ -6,13 +6,8 @@
  * @param max maximum number
  * @returns returns the number between min and max
  */
-export function clamp(
-    x: number,
-    min: number | undefined,
-    max: number | undefined
-) {
-    if (min !== undefined && max !== undefined && min > max)
-        throw Error("Invalid Min Max values");
+export function clamp(x: number, min: number | undefined, max: number | undefined) {
+    if (min !== undefined && max !== undefined && min > max) throw Error("Invalid Min Max values");
     if (min !== undefined && x < min) return min;
     if (max !== undefined && x > max) return max;
     return x;
@@ -37,8 +32,7 @@ export function map(
     outMax: number,
     clamped: boolean = true
 ): number {
-    if (clamped)
-        return map(clamp(x, inMin, inMax), inMin, inMax, outMin, outMax, false);
+    if (clamped) return map(clamp(x, inMin, inMax), inMin, inMax, outMin, outMax, false);
     return ((x - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
 }
 

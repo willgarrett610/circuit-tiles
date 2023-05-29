@@ -78,9 +78,7 @@ export default class ButtonTile extends GraphicsTile {
     drawGraphics() {
         if (!this.graphics) return;
 
-        this.graphics.beginFill(
-            this.signalActive ? this.onColor : this.offColor
-        );
+        this.graphics.beginFill(this.signalActive ? this.onColor : this.offColor);
 
         this.graphics.lineStyle(3, 0x000000);
         this.graphics.drawRoundedRect(10, 10, 100, 100, 20);

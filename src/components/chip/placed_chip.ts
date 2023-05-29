@@ -27,12 +27,7 @@ export class PlacedChip {
      * @param chip chip to place
      * @param grid
      */
-    constructor(
-        location: { x: number; y: number },
-        rotation: Rotation,
-        chip: Chip,
-        grid: Grid
-    ) {
+    constructor(location: { x: number; y: number }, rotation: Rotation, chip: Chip, grid: Grid) {
         this.location = location;
         this.rotation = rotation;
         this.chip = chip;
@@ -65,93 +60,44 @@ export class PlacedChip {
             for (const direction of Direction.values()) {
                 const directionOffset = Direction.getOffset(direction);
 
-                const adjacentTileLocation = add(
-                    tileLocation,
-                    directionOffset
-                ) as [number, number];
-                const adjacentTile = this.tiles.getTile(
-                    ...adjacentTileLocation
-                );
+                const adjacentTileLocation = add(tileLocation, directionOffset) as [number, number];
+                const adjacentTile = this.tiles.getTile(...adjacentTileLocation);
 
                 if (adjacentTile) continue;
 
                 const lineWidth = hovering ? 4 : 2;
 
-                const topLeft = grid.gridToScreen(
-                    tileLocation[0],
-                    tileLocation[1],
-                    true,
-                    false
-                );
-                const topRight = grid.gridToScreen(
-                    tileLocation[0] + 1,
-                    tileLocation[1],
-                    true,
-                    false
-                );
-                const bottomLeft = grid.gridToScreen(
-                    tileLocation[0],
-                    tileLocation[1] + 1,
-                    true,
-                    false
-                );
-                const bottomRight = grid.gridToScreen(
-                    tileLocation[0] + 1,
-                    tileLocation[1] + 1,
-                    true,
-                    false
-                );
+                const topLeft = grid.gridToScreen(tileLocation[0], tileLocation[1], true, false);
+                const topRight = grid.gridToScreen(tileLocation[0] + 1, tileLocation[1], true, false);
+                const bottomLeft = grid.gridToScreen(tileLocation[0], tileLocation[1] + 1, true, false);
+                const bottomRight = grid.gridToScreen(tileLocation[0] + 1, tileLocation[1] + 1, true, false);
 
-                const tileToRightLocation = add(
-                    tileLocation,
-                    Direction.getOffset(Direction.RIGHT)
-                ) as [number, number];
+                const tileToRightLocation = add(tileLocation, Direction.getOffset(Direction.RIGHT)) as [number, number];
                 const tileToRight = this.tiles.getTile(...tileToRightLocation);
 
-                const tileToLeftLocation = add(
-                    tileLocation,
-                    Direction.getOffset(Direction.LEFT)
-                ) as [number, number];
+                const tileToLeftLocation = add(tileLocation, Direction.getOffset(Direction.LEFT)) as [number, number];
                 const tileToLeft = this.tiles.getTile(...tileToLeftLocation);
 
                 graphic.lineStyle(lineWidth, color);
                 switch (direction) {
                     case Direction.UP: {
-                        graphic.moveTo(
-                            topLeft.x - (tileToLeft ? lineWidth : 0),
-                            topLeft.y + lineWidth / 2
-                        );
-                        graphic.lineTo(
-                            topRight.x + (tileToRight ? lineWidth : 0),
-                            topRight.y + lineWidth / 2
-                        );
+                        graphic.moveTo(topLeft.x - (tileToLeft ? lineWidth : 0), topLeft.y + lineWidth / 2);
+                        graphic.lineTo(topRight.x + (tileToRight ? lineWidth : 0), topRight.y + lineWidth / 2);
                         break;
                     }
                     case Direction.DOWN: {
-                        graphic.moveTo(
-                            bottomLeft.x - (tileToLeft ? lineWidth : 0),
-                            bottomLeft.y - lineWidth / 2
-                        );
-                        graphic.lineTo(
-                            bottomRight.x + (tileToRight ? lineWidth : 0),
-                            bottomRight.y - lineWidth / 2
-                        );
+                        graphic.moveTo(bottomLeft.x - (tileToLeft ? lineWidth : 0), bottomLeft.y - lineWidth / 2);
+                        graphic.lineTo(bottomRight.x + (tileToRight ? lineWidth : 0), bottomRight.y - lineWidth / 2);
                         break;
                     }
                     case Direction.LEFT: {
                         graphic.moveTo(topLeft.x + lineWidth / 2, topLeft.y);
-                        graphic.lineTo(
-                            bottomLeft.x + lineWidth / 2,
-                            bottomLeft.y
-                        );
+                        graphic.lineTo(bottomLeft.x + lineWidth / 2, bottomLeft.y);
                         break;
                     }
                     case Direction.RIGHT: {
                         graphic.moveTo(topRight.x - lineWidth / 2, topRight.y);
-                        graphic.lineTo(
-                            bottomRight.x - lineWidth / 2,
-                            bottomRight.y
-                        );
+                        graphic.lineTo(bottomRight.x - lineWidth / 2, bottomRight.y);
                         break;
                     }
                 }

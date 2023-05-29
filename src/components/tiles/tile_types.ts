@@ -70,11 +70,7 @@ const tileTypes = [
     new TileType("Delay", DelayTile),
     new TileType("Button", ButtonTile),
     new TileType("Input", ChipInputTile),
-    new ChipOutputTileType(
-        "Output",
-        ChipOutputTile,
-        config.colors.defaultOutputHue
-    ),
+    new ChipOutputTileType("Output", ChipOutputTile, config.colors.defaultOutputHue),
 ];
 
 /**
@@ -95,9 +91,7 @@ export function findType(type: TileConstructor): TileType | undefined {
  * @returns list of tile types
  */
 export function getTileTypes(chipTileIncluded = true): TileType[] {
-    return chipTileIncluded
-        ? tileTypes
-        : tileTypes.filter((x) => (x.tile as any).chipTile === false);
+    return chipTileIncluded ? tileTypes : tileTypes.filter((x) => (x.tile as any).chipTile === false);
 }
 
 export default getTileTypes;

@@ -86,11 +86,7 @@ export abstract class Tile {
      * @returns rotation
      */
     private getRotatedKey(dir: Direction) {
-        return Direction.toLower(
-            Direction.values()[
-                (dir.valueOf() - this.direction.valueOf() + 4) % 4
-            ]
-        );
+        return Direction.toLower(Direction.values()[(dir.valueOf() - this.direction.valueOf() + 4) % 4]);
     }
 
     /**
@@ -103,17 +99,11 @@ export abstract class Tile {
      * @param connections.left left connection
      * @returns new rotated connections
      */
-    private rotateConnections<T>(connections: {
-        up: T;
-        right: T;
-        down: T;
-        left: T;
-    }) {
+    private rotateConnections<T>(connections: { up: T; right: T; down: T; left: T }) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const rotatedConnections: any = {};
         for (const dir of Direction.values()) {
-            rotatedConnections[Direction.toLower(dir)] =
-                connections[this.getRotatedKey(dir)];
+            rotatedConnections[Direction.toLower(dir)] = connections[this.getRotatedKey(dir)];
         }
         return rotatedConnections as {
             up: T;
@@ -170,12 +160,7 @@ export abstract class Tile {
      * @returns whether the tile is connected to anything
      */
     hasConnections(): boolean {
-        return (
-            this.connections.up ||
-            this.connections.right ||
-            this.connections.down ||
-            this.connections.left
-        );
+        return this.connections.up || this.connections.right || this.connections.down || this.connections.left;
     }
 
     onClick?(e: PIXI.interaction.InteractionEvent): void;
@@ -198,8 +183,7 @@ export abstract class Tile {
             this.container = this.generateContainer();
             this.container.zIndex = 100;
 
-            if (this.onClick || this.onContext)
-                this.container.interactive = true;
+            if (this.onClick || this.onContext) this.container.interactive = true;
             if (this.onClick) this.container.addListener("click", this.onClick);
             if (this.onContext) onContextMenu(this.container, this.onContext);
             this.postGenerate?.();
@@ -207,10 +191,8 @@ export abstract class Tile {
 
         this.container.width = size;
         this.container.height = size;
-        this.container.pivot.x =
-            this.container.width / (this.container.scale.x * 2);
-        this.container.pivot.y =
-            this.container.height / (this.container.scale.y * 2);
+        this.container.pivot.x = this.container.width / (this.container.scale.x * 2);
+        this.container.pivot.y = this.container.height / (this.container.scale.y * 2);
         this.container.x = this.x * size + size / 2;
         this.container.y = this.y * size + size / 2;
         this.container.rotation = (this.direction.valueOf() * Math.PI) / 2;

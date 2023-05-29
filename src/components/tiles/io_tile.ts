@@ -47,12 +47,8 @@ export default abstract class IOTile extends ChipTile {
     getConnectionTemplate() {
         const connectionTemplate = super.getConnectionTemplate();
         if (this.isInParentChip) {
-            for (const key of Object.keys(
-                connectionTemplate
-            ) as (keyof typeof connectionTemplate)[]) {
-                connectionTemplate[key] = this.invertConnectionType(
-                    connectionTemplate[key]
-                );
+            for (const key of Object.keys(connectionTemplate) as (keyof typeof connectionTemplate)[]) {
+                connectionTemplate[key] = this.invertConnectionType(connectionTemplate[key]);
             }
         }
         return connectionTemplate;
@@ -74,9 +70,7 @@ export default abstract class IOTile extends ChipTile {
                     state.currentChipGrid !== undefined &&
                     !state.currentChipGrid?.chip.tiles
                         .getTiles()
-                        .find(
-                            (v) => v instanceof this.type && v.id === value
-                        ) &&
+                        .find((v) => v instanceof this.type && v.id === value) &&
                     value.length > 0 &&
                     value.length <= 6
                 );
@@ -86,18 +80,12 @@ export default abstract class IOTile extends ChipTile {
 
                 value = value.trim();
 
-                const inputTileE = (
-                    state.currentChipGrid?.chip[this.chipTileKey] as any
-                ).find(
-                    (value: { name: string; tile: IOTile }) =>
-                        value.name === this.id
+                const inputTileE = (state.currentChipGrid?.chip[this.chipTileKey] as any).find(
+                    (value: { name: string; tile: IOTile }) => value.name === this.id
                 );
                 const inputTileS = state.currentChipGrid.chip.structure
                     .getTiles()
-                    .find(
-                        (value) =>
-                            value instanceof this.type && value.id === this.id
-                    ) as IOTile;
+                    .find((value) => value instanceof this.type && value.id === this.id) as IOTile;
                 if (inputTileE) {
                     inputTileE.tile.id = value;
                     inputTileE.name = value;
@@ -144,12 +132,8 @@ export default abstract class IOTile extends ChipTile {
                 fill: 0xffffff,
             });
             idText.anchor.set(0, 0);
-            idText.x =
-                this.container.width / (this.container.scale.x * 2) -
-                idText.width / 2;
-            idText.y =
-                this.container.height / (this.container.scale.y * 2) -
-                idText.height / 2;
+            idText.x = this.container.width / (this.container.scale.x * 2) - idText.width / 2;
+            idText.y = this.container.height / (this.container.scale.y * 2) - idText.height / 2;
             this.container.addChild(idText);
         }
     }

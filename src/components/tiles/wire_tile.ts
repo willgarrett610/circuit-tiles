@@ -25,13 +25,8 @@ export default class WireTile extends GraphicsTile {
     drawGraphics() {
         if (!this.graphics) return;
 
-        this.graphics.beginFill(
-            this.signalActive
-                ? config.colors.activeTile
-                : config.colors.inactiveTile
-        );
-        if (Object.values(this.connections).some((value) => value))
-            this.graphics.drawRect(40, 40, 40, 40);
+        this.graphics.beginFill(this.signalActive ? config.colors.activeTile : config.colors.inactiveTile);
+        if (Object.values(this.connections).some((value) => value)) this.graphics.drawRect(40, 40, 40, 40);
         else this.graphics.drawRect(30, 30, 60, 60);
 
         if (this.connections.up) this.graphics.drawRect(40, 0, 40, 40);

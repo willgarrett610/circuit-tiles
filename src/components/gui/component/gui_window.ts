@@ -73,12 +73,7 @@ export default class GUIWindow extends PIXI.Container {
         const border = new PIXI.Graphics();
         border.beginFill(0, 0);
         border.lineStyle(borderWidth, borderColor);
-        border.drawRect(
-            borderWidth / 2,
-            borderWidth / 2,
-            width - borderWidth,
-            height - borderWidth
-        );
+        border.drawRect(borderWidth / 2, borderWidth / 2, width - borderWidth, height - borderWidth);
         border.endFill();
         border.zIndex = 500;
 
@@ -115,17 +110,9 @@ export default class GUIWindow extends PIXI.Container {
         });
 
         onScroll(this, (e: WheelEvent) => {
-            if (
-                e.shiftKey &&
-                this.scrollableX &&
-                this.container.width > this.cWidth
-            ) {
+            if (e.shiftKey && this.scrollableX && this.container.width > this.cWidth) {
                 return;
-            } else if (
-                !e.shiftKey &&
-                this.scrollableY &&
-                this.container.height > this.cHeight
-            ) {
+            } else if (!e.shiftKey && this.scrollableY && this.container.height > this.cHeight) {
                 this.container.y = clamp(
                     this.container.y - e.deltaY,
                     this.cHeight - this.container.height - this.scrollMarginY,
@@ -216,9 +203,7 @@ export default class GUIWindow extends PIXI.Container {
      * @param children
      * @returns
      */
-    addChild(
-        ...children: (PIXI.DisplayObject | GUIComponent)[]
-    ): PIXI.DisplayObject | GUIComponent {
+    addChild(...children: (PIXI.DisplayObject | GUIComponent)[]): PIXI.DisplayObject | GUIComponent {
         for (const child of children) {
             if (child instanceof GUIComponent) {
                 this.components.push(child as GUIComponent);
@@ -249,9 +234,7 @@ export default class GUIWindow extends PIXI.Container {
      * @param child
      * @returns
      */
-    removeChild<TChildren extends PIXI.DisplayObject[]>(
-        ...child: TChildren
-    ): TChildren[0] {
+    removeChild<TChildren extends PIXI.DisplayObject[]>(...child: TChildren): TChildren[0] {
         for (const c of child) {
             if ((c as any).__proto__ instanceof GUIComponent) {
                 const index = this.components.indexOf(c as any);
@@ -287,10 +270,7 @@ export default class GUIWindow extends PIXI.Container {
      * @param endIndex
      * @returns
      */
-    removeChildren(
-        beginIndex?: number,
-        endIndex?: number
-    ): PIXI.DisplayObject[] {
+    removeChildren(beginIndex?: number, endIndex?: number): PIXI.DisplayObject[] {
         const children = this.container.removeChildren(beginIndex, endIndex);
         for (const child of children) {
             if ((child as any).__proto__ instanceof GUIComponent) {
@@ -301,8 +281,7 @@ export default class GUIWindow extends PIXI.Container {
                 }
             }
         }
-        for (const child of this.container.children.slice(beginIndex, endIndex))
-            child.destroy();
+        for (const child of this.container.children.slice(beginIndex, endIndex)) child.destroy();
         return children;
     }
 

@@ -38,10 +38,7 @@ export const doTick = async () => {
     for (let i = 0; i < graph.nodes.length; i++) {
         const node = graph.nodes[i];
         // console.log("node", node);
-        if (
-            node.originTile &&
-            includesTile(Array.from(updatedTiles), node.originTile)
-        ) {
+        if (node.originTile && includesTile(Array.from(updatedTiles), node.originTile)) {
             updatedIndices.push(i);
         }
     }
@@ -59,12 +56,7 @@ export const doTick = async () => {
         const state = updates[i + 1];
         const node = graph.nodes[index];
         for (const loc of node.locations) {
-            const logicTile = graph.getLogicTile(
-                loc.x,
-                loc.y,
-                loc.scope,
-                loc.extraInput
-            );
+            const logicTile = graph.getLogicTile(loc.x, loc.y, loc.scope, loc.extraInput);
             const tile = logicTile?.tile;
             if (tile) {
                 tile.setSignalActive(state);

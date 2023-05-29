@@ -34,10 +34,7 @@
     "compounds": [
         {
             "name": "Complete development",
-            "configurations": [
-                "Launch webpack-dev-server",
-                "Launch Chrome debug"
-            ]
+            "configurations": ["Launch webpack-dev-server", "Launch Chrome debug"]
         }
     ]
 }

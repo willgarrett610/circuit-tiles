@@ -38,13 +38,7 @@ export class GUIComponent extends PIXI.Container {
      * @param height
      * @param backgroundColor
      */
-    constructor(
-        x: number,
-        y: number,
-        width: number,
-        height: number,
-        backgroundColor: number = 0xffffff
-    ) {
+    constructor(x: number, y: number, width: number, height: number, backgroundColor: number = 0xffffff) {
         super();
 
         this.x = x;

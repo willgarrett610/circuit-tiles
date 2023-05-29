@@ -32,12 +32,7 @@ export default class HistoryManager {
      * @param redo True if this is a redo
      * @param record if true, the action will be recorded
      */
-    async performAction<T>(
-        action: Action<T, any>,
-        payload: T,
-        redo = false,
-        record = true
-    ) {
+    async performAction<T>(action: Action<T, any>, payload: T, redo = false, record = true) {
         let isRejected = false;
         const reject = () => (isRejected = true);
         const prevValue = await action.do(payload, reject);
@@ -66,8 +61,7 @@ export default class HistoryManager {
      */
     endInteraction(discard = false) {
         this.interacting = false;
-        if (this.interactionHistory.length > 0 && !discard)
-            this.history.push(this.interactionHistory);
+        if (this.interactionHistory.length > 0 && !discard) this.history.push(this.interactionHistory);
         this.interactionHistory = [];
     }
 
@@ -111,10 +105,7 @@ export default class HistoryManager {
 window.addEventListener("keydown", (event) => {
     if (event.code === "KeyZ" && event.ctrlKey && !event.shiftKey) {
         gridManager.getGrid().historyManager.undo();
-    } else if (
-        event.ctrlKey &&
-        (event.code === "KeyY" || (event.shiftKey && event.code === "KeyZ"))
-    ) {
+    } else if (event.ctrlKey && (event.code === "KeyY" || (event.shiftKey && event.code === "KeyZ"))) {
         gridManager.getGrid().historyManager.redo();
     }
 });

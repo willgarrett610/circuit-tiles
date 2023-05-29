@@ -21,27 +21,15 @@ export default class Graph {
     scopes: string[][] = [];
     logicTiles: Map<string, LogicTile> = new Map();
 
-    getLogicTile = (
-        x: number,
-        y: number,
-        scope: string[],
-        extraInput: boolean = false
-    ) => {
+    getLogicTile = (x: number, y: number, scope: string[], extraInput: boolean = false) => {
         const scopeStr = scope.join(",");
-        return this.logicTiles.get(
-            `${x},${y}.${scopeStr}${extraInput ? "&" : ""}`
-        );
+        return this.logicTiles.get(`${x},${y}.${scopeStr}${extraInput ? "&" : ""}`);
     };
 
     setLogicTile = (tile: LogicTile) => {
         const location = tile.location;
         const scopeStr = location.scope.join(",");
-        this.logicTiles.set(
-            `${location.x},${location.y}.${scopeStr}${
-                location.extraInput ? "&" : ""
-            }`,
-            tile
-        );
+        this.logicTiles.set(`${location.x},${location.y}.${scopeStr}${location.extraInput ? "&" : ""}`, tile);
     };
 
     /**
@@ -83,38 +71,21 @@ export default class Graph {
                 if (tile instanceof IOTile) {
                     const chip = tile.chip;
                     if (chip) {
-                        const chipTile = chip.chip.tiles.getTileById(
-                            tile.id,
-                            tile.type
-                        );
+                        const chipTile = chip.chip.tiles.getTileById(tile.id, tile.type);
                         if (chipTile) {
                             node.locations.push(
-                                new CircuitLocation(
-                                    [...scope, chip.scopeName],
-                                    chipTile.x,
-                                    chipTile.y
-                                )
+                                new CircuitLocation([...scope, chip.scopeName], chipTile.x, chipTile.y)
                             );
                             this.setLogicTile({
                                 tile: chipTile,
                                 node,
-                                location: new CircuitLocation(
-                                    [...scope, chip.scopeName],
-                                    chipTile.x,
-                                    chipTile.y
-                                ),
+                                location: new CircuitLocation([...scope, chip.scopeName], chipTile.x, chipTile.y),
                             });
-                            this.addTiles(chip.chip.tiles, [
-                                ...scope,
-                                chip.scopeName,
-                            ]);
+                            this.addTiles(chip.chip.tiles, [...scope, chip.scopeName]);
                         }
 
                         // Add chip input tile extraInput as a node
-                        if (
-                            tile instanceof ChipInputTile &&
-                            tile.extraInputTile
-                        ) {
+                        if (tile instanceof ChipInputTile && tile.extraInputTile) {
                             const extraInputTile = tile.extraInputTile;
                             const extraInputNode = extraInputTile.toNode(scope);
                             extraInputNode.locations[0].extraInput = true;
@@ -144,11 +115,7 @@ export default class Graph {
         }
     }
 
-    createLogicEdge = (
-        tiles: TileManager,
-        initialTile: Tile,
-        scope: string[]
-    ) => {
+    createLogicEdge = (tiles: TileManager, initialTile: Tile, scope: string[]) => {
         const logicEdge = new LogicNode("Or Wire", 0);
 
         const findEdge = (tile: Tile): CircuitLocation[] => {
@@ -180,11 +147,7 @@ export default class Graph {
                 );
                 if (
                     !connectedTile ||
-                    this.getLogicTile(
-                        tile.x + connectionOffset.offset[0],
-                        tile.y + connectionOffset.offset[1],
-                        scope
-                    )
+                    this.getLogicTile(tile.x + connectionOffset.offset[0], tile.y + connectionOffset.offset[1], scope)
                 )
                     continue;
                 edgeLocations.push(...findEdge(connectedTile));
@@ -237,24 +200,15 @@ export default class Graph {
                     );
                     if (!connectedTile) continue;
 
-                    if (
-                        connectionsTemplate[connectionOffset.side] ===
-                        ConnectionType.INPUT
-                    ) {
+                    if (connectionsTemplate[connectionOffset.side] === ConnectionType.INPUT) {
                         node.connectFrom(connectedTile.node);
-                    } else if (
-                        connectionsTemplate[connectionOffset.side] ===
-                        ConnectionType.OUTPUT
-                    ) {
+                    } else if (connectionsTemplate[connectionOffset.side] === ConnectionType.OUTPUT) {
                         node.connectTo(connectedTile.node);
                     }
                 }
 
                 // Connect chip input tile extraInput
-                if (
-                    logicTile.tile instanceof ChipInputTile &&
-                    logicTile.tile.extraInputTile
-                ) {
+                if (logicTile.tile instanceof ChipInputTile && logicTile.tile.extraInputTile) {
                     const extraInputTile = graph.getLogicTile(
                         logicTile.tile.x,
                         logicTile.tile.y,

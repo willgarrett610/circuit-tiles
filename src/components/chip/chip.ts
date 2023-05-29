@@ -114,9 +114,7 @@ export class Chip {
                         let newId: string;
                         do {
                             newId = "OUT" + i++;
-                        } while (
-                            this.outputTiles.find((x) => x.name === newId)
-                        );
+                        } while (this.outputTiles.find((x) => x.name === newId));
                         tile.id = newId;
                         this.outputTiles.push({ name: tile.id, tile: tile });
                     }
@@ -133,17 +131,11 @@ export class Chip {
      */
     tileRemoved(tile: Tile) {
         if (tile instanceof ChipInputTile) {
-            this.inputTiles = this.inputTiles.filter(
-                (x) => x.tile.id !== tile.id
-            );
+            this.inputTiles = this.inputTiles.filter((x) => x.tile.id !== tile.id);
         } else if (tile instanceof ChipOutputTile) {
-            this.outputTiles = this.outputTiles.filter(
-                (x) => x.tile.id !== tile.id
-            );
+            this.outputTiles = this.outputTiles.filter((x) => x.tile.id !== tile.id);
         } else return;
-        const location = this.structure
-            .getLocations()
-            .find((x) => this.structure.getTile(...x)?.id === tile.id);
+        const location = this.structure.getLocations().find((x) => this.structure.getTile(...x)?.id === tile.id);
         if (location) {
             const [x, y] = location;
             state.currentChipGrid?.grids.structure.removeTile(x, y);
@@ -160,21 +152,14 @@ export class Chip {
         this.prevTopLeftStructure = this.topLeftStructure;
         this.topLeftStructure = this.getTopLeftStructure();
 
-        if (!this.prevTopLeftStructure)
-            this.prevTopLeftStructure = this.topLeftStructure;
+        if (!this.prevTopLeftStructure) this.prevTopLeftStructure = this.topLeftStructure;
 
-        const offset = sub(
-            locationToTuple(tile),
-            this.prevTopLeftStructure
-        ) as [number, number];
+        const offset = sub(locationToTuple(tile), this.prevTopLeftStructure) as [number, number];
         let clashes = false;
         for (const placedChip of this.placedChips) {
             const grid = placedChip.grid;
 
-            const gridLocation = add(
-                locationToTuple(placedChip.location),
-                offset
-            ) as [number, number];
+            const gridLocation = add(locationToTuple(placedChip.location), offset) as [number, number];
             const tile = grid.tiles.getTile(...gridLocation);
             if (tile) {
                 clashes = true;
@@ -189,8 +174,7 @@ export class Chip {
 
                 if (!result.continue) return ClashResult.CLASH;
 
-                if (result.ignoreFurther)
-                    setState({ ignoreStructureClashWarning: true });
+                if (result.ignoreFurther) setState({ ignoreStructureClashWarning: true });
             }
 
             return ClashResult.IGNORE_CLASH;
@@ -209,33 +193,21 @@ export class Chip {
             throw Error("Should have been initialized in checkClash");
         }
 
-        const topLeftDiff = sub(
-            this.topLeftStructure,
-            this.prevTopLeftStructure
-        ) as [number, number];
+        const topLeftDiff = sub(this.topLeftStructure, this.prevTopLeftStructure) as [number, number];
 
-        const offset = sub(
-            locationToTuple(tile),
-            this.prevTopLeftStructure
-        ) as [number, number];
+        const offset = sub(locationToTuple(tile), this.prevTopLeftStructure) as [number, number];
 
         for (const placedChip of this.placedChips) {
             const grid = placedChip.grid;
             if (grid instanceof InteractiveGrid) grid.prevCloneChip = undefined;
-            const gridLocation = add(
-                locationToTuple(placedChip.location),
-                offset
-            ) as [number, number];
+            const gridLocation = add(locationToTuple(placedChip.location), offset) as [number, number];
             await grid.removeTile(...gridLocation);
         }
 
         for (const placedChip of this.placedChips) {
             const grid = placedChip.grid;
 
-            const gridLocation = add(
-                locationToTuple(placedChip.location),
-                offset
-            ) as [number, number];
+            const gridLocation = add(locationToTuple(placedChip.location), offset) as [number, number];
 
             const placedTile = (await grid.addTile(
                 ...gridLocation,
@@ -246,8 +218,7 @@ export class Chip {
             )) as ChipTile | undefined;
 
             if (placedTile) {
-                if (placedTile instanceof ChipOutputTile)
-                    placedTile.hue = (tile as ChipOutputTile).hue;
+                if (placedTile instanceof ChipOutputTile) placedTile.hue = (tile as ChipOutputTile).hue;
                 placedTile.id = tile.id;
                 placedTile.chip = placedChip;
                 placedChip.tiles.setTile(...gridLocation, placedTile);
@@ -259,10 +230,7 @@ export class Chip {
             // grid.update();
 
             placedChip.location = locationToPair(
-                add(locationToTuple(placedChip.location), topLeftDiff) as [
-                    number,
-                    number
-                ]
+                add(locationToTuple(placedChip.location), topLeftDiff) as [number, number]
             );
             // if (grid instanceof InteractiveGrid)
             //     (grid as InteractiveGrid).updateChipOutline();
@@ -278,35 +246,22 @@ export class Chip {
         this.prevTopLeftStructure = this.topLeftStructure;
         this.topLeftStructure = this.getTopLeftStructure();
 
-        if (!this.prevTopLeftStructure)
-            this.prevTopLeftStructure = this.topLeftStructure;
+        if (!this.prevTopLeftStructure) this.prevTopLeftStructure = this.topLeftStructure;
 
-        const topLeftDiff = sub(
-            this.topLeftStructure,
-            this.prevTopLeftStructure
-        ) as [number, number];
+        const topLeftDiff = sub(this.topLeftStructure, this.prevTopLeftStructure) as [number, number];
 
-        const offset = sub(
-            locationToTuple(tile),
-            this.prevTopLeftStructure
-        ) as [number, number];
+        const offset = sub(locationToTuple(tile), this.prevTopLeftStructure) as [number, number];
 
         for (const placedChip of this.placedChips) {
             const grid = placedChip.grid;
             if (grid instanceof InteractiveGrid) grid.prevCloneChip = undefined;
-            const gridLocation = add(
-                locationToTuple(placedChip.location),
-                offset
-            ) as [number, number];
+            const gridLocation = add(locationToTuple(placedChip.location), offset) as [number, number];
             grid.removeTile(...gridLocation, true, true);
             placedChip.tiles.deleteTile(...gridLocation);
 
             grid.update({ updateTiles: { newGraphics: true } });
             placedChip.location = locationToPair(
-                add(locationToTuple(placedChip.location), topLeftDiff) as [
-                    number,
-                    number
-                ]
+                add(locationToTuple(placedChip.location), topLeftDiff) as [number, number]
             );
             // if (grid instanceof InteractiveGrid)
             //     (grid as InteractiveGrid).updateChipOutline();
@@ -324,8 +279,7 @@ export class Chip {
         const structureTiles = this.structure.getTiles();
 
         if (
-            structureTiles.filter((tile) => !(tile instanceof StructureTile))
-                .length !==
+            structureTiles.filter((tile) => !(tile instanceof StructureTile)).length !==
             this.inputTiles.length + this.outputTiles.length
         ) {
             this.wasStructured = false;
@@ -344,10 +298,7 @@ export class Chip {
         const isJoint = (tile: Tile) => {
             for (const direction of Direction.values()) {
                 const offset = Direction.getOffset(direction);
-                const neighbor = this.structure.getTile(
-                    tile.x + offset[0],
-                    tile.y + offset[1]
-                );
+                const neighbor = this.structure.getTile(tile.x + offset[0], tile.y + offset[1]);
                 if (neighbor) {
                     const prevLength = tilesLeft.length;
                     tilesLeft = tilesLeft.filter((x) => x !== neighbor);
