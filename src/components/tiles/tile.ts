@@ -294,6 +294,7 @@ export abstract class Tile {
     dispose() {
         this.isDisposed = true;
         this.container?.destroy({ children: true });
+        this.container = undefined;
     }
 }
 
@@ -314,7 +315,9 @@ export abstract class SpriteTile extends Tile {
      * disposes of tile
      */
     dispose() {
+        this.isDisposed = true;
         this.container?.destroy({ children: true, texture: true });
+        this.container = undefined;
     }
 }
 
@@ -355,5 +358,15 @@ export abstract class GraphicsTile extends Tile {
     updateContainer() {
         this.clearGraphics();
         this.drawGraphics();
+    }
+
+    /**
+     * disposes of tile
+     */
+    dispose() {
+        this.isDisposed = true;
+        this.container?.destroy({ children: true });
+        this.container = undefined;
+        this.graphics = undefined;
     }
 }

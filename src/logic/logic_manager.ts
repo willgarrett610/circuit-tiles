@@ -7,7 +7,7 @@ let lib: typeof import("../../crate/pkg/index") | undefined;
 init().then((mod) => (lib = mod));
 
 let loop: NodeJS.Timer | undefined;
-let updatedTiles: Tile[] = [];
+let updatedTiles: Set<Tile> = new Set();
 
 const includesTile = (tiles: Tile[], search: Tile) => {
     for (const tile of tiles) {
@@ -37,11 +37,14 @@ export const doTick = async () => {
     for (let i = 0; i < graph.nodes.length; i++) {
         const node = graph.nodes[i];
         // console.log("node", node);
-        if (node.originTile && includesTile(updatedTiles, node.originTile)) {
+        if (
+            node.originTile &&
+            includesTile(Array.from(updatedTiles), node.originTile)
+        ) {
             updatedIndices.push(i);
         }
     }
-    updatedTiles = [];
+    updatedTiles = new Set();
 
     // console.log(updatedIndices);
 
@@ -91,7 +94,5 @@ export const stopLoop = () => {
 };
 
 export const addUpdatedTile = (tile: Tile) => {
-    if (!updatedTiles.includes(tile)) {
-        updatedTiles.push(tile);
-    }
+    updatedTiles.add(tile);
 };

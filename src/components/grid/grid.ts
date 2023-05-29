@@ -356,7 +356,6 @@ export default class Grid extends PIXI.Container {
     ) {
         const tile = this.tiles.getTile(x, y);
         if (!tile) return false;
-        tile.dispose();
 
         if (
             state.editMode === EditMode.ERASER &&

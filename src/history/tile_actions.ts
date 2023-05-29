@@ -33,9 +33,8 @@ export const setTile: Action<PlaceTilePayload> = {
         const tile = payload.grid.tiles.getTile(payload.x, payload.y);
         if (tile) {
             payload.grid.removeChild(tile.getContainer(payload.grid.size));
-            payload.grid.dispatchHandler("postRemoveTile", tile);
-
             // tile.dispose();
+            payload.grid.dispatchHandler("postRemoveTile", tile);
         }
         payload.grid.tiles.deleteTile(payload.x, payload.y);
     },
@@ -55,6 +54,7 @@ export const editTile: Action<EditTilePayload, Tile> = {
         if (refTile) {
             // refTile.container?.destroy();
             grid.removeChild(refTile.getContainer(grid.size));
+            // refTile.dispose();
             const newTile = tile.clone();
             grid.tiles.setTile(x, y, newTile);
             grid.addChild(newTile.getContainer(grid.size));
@@ -69,6 +69,7 @@ export const editTile: Action<EditTilePayload, Tile> = {
         if (prevValue) {
             // tile.container?.destroy();
             grid.removeChild(tile.getContainer(grid.size));
+            tile.dispose();
             grid.tiles.setTile(x, y, prevValue);
             grid.addChild(prevValue.getContainer(grid.size));
             prevValue.updateContainer?.();
@@ -76,6 +77,7 @@ export const editTile: Action<EditTilePayload, Tile> = {
             // tile.container?.destroy();
             grid.removeChild(tile.getContainer(grid.size));
             grid.tiles.deleteTile(x, y);
+            // tile.dispose();
         }
     },
 };
