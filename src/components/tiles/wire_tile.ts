@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
 import { ConnectionType, SpriteTile } from "./tile";
+import { getTexture } from "../sprites/sprite_loader";
 
 /**
  * Wire Tile
@@ -9,7 +10,7 @@ export default class WireTile extends SpriteTile {
     typeNumber = 0;
     label = "Wire";
 
-    texture: PIXI.Texture = PIXI.Texture.from("w_");
+    texture: PIXI.Texture = getTexture("w_");
 
     isWire = true;
     rotatable = false;
@@ -23,11 +24,14 @@ export default class WireTile extends SpriteTile {
 
     /** updates container */
     updateContainer?(): void {
-        this.texture = PIXI.Texture.from(
+        this.texture = getTexture(
             `w_${this.connections.left ? "l" : ""}${this.connections.right ? "r" : ""}${
                 this.connections.up ? "t" : ""
             }${this.connections.down ? "b" : ""}`
         );
+
+        this.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+
         if (this.container?.texture) {
             this.container.texture = this.texture;
         }

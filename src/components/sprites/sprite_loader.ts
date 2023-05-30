@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as PIXI from "pixi.js";
 
-const textures: any = {};
+const textures: Record<string, PIXI.Texture> = {};
 
 /**
  * gets all wire files
@@ -44,7 +44,7 @@ const textureFiles = [
     ...getWireFiles(),
 ];
 
-const loadSprites = () => {
+export const loadSprites = () => {
     const loader = PIXI.Loader.shared;
 
     for (const [name, path] of textureFiles) {
@@ -69,8 +69,10 @@ const loadSprites = () => {
     return prom;
 };
 
-const getSprite = (key: string): PIXI.Sprite => {
-    return new PIXI.Sprite(textures[key]);
+export const getTexture = (key: string): PIXI.Texture => {
+    return textures[key];
 };
 
-export { getSprite, loadSprites };
+export const getSprite = (key: string): PIXI.Sprite => {
+    return new PIXI.Sprite(textures[key]);
+};
