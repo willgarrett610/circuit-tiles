@@ -3,6 +3,34 @@ import * as PIXI from "pixi.js";
 
 const textures: any = {};
 
+/**
+ * gets all wire files
+ *
+ * @returns array of wire file names
+ */
+function getWireFiles() {
+    const direction = ["l", "r", "t", "b"];
+    const filePrefix = "./assets/sprites/wire/w_";
+    const fileSuffix = ".png";
+    const files: [string, string][] = [];
+
+    // for each possible direction toggled on and off
+    for (let i = 0; i < 2 ** direction.length; i++) {
+        let file = filePrefix;
+        let directionsText = "";
+        for (let j = 0; j < direction.length; j++) {
+            if (i & (1 << j)) {
+                directionsText += direction[j];
+            }
+        }
+        file += directionsText;
+        file += fileSuffix;
+        files.push(["w_" + directionsText, file]);
+    }
+
+    return files;
+}
+
 const textureFiles = [
     ["eraser", "./assets/sprites/eraser1.png"],
     ["tiles", "./assets/sprites/tiles.png"],
@@ -13,22 +41,23 @@ const textureFiles = [
     ["swap", "./assets/sprites/swap.png"],
     ["play", "./assets/sprites/play.svg"],
     ["pause", "./assets/sprites/pause.svg"],
+    ...getWireFiles(),
 ];
 
 const loadSprites = () => {
     const loader = PIXI.Loader.shared;
 
-    for (const texture of textureFiles) {
-        loader.add(texture[0], texture[1]);
+    for (const [name, path] of textureFiles) {
+        loader.add(name, path);
     }
 
     const prom: Promise<boolean> = new Promise<boolean>((resolve) => {
         loader.load((loader, resources) => {
             let success = true;
-            for (const texture of textureFiles) {
-                const res = resources[texture[0]];
+            for (const [name] of textureFiles) {
+                const res = resources[name];
                 if (res) {
-                    textures[texture[0]] = res.texture;
+                    textures[name] = res.texture;
                 } else {
                     success = false;
                 }

@@ -283,6 +283,7 @@ export abstract class Tile {
 /** sprite tile */
 export abstract class SpriteTile extends Tile {
     abstract texture: PIXI.Texture;
+    declare container: PIXI.Sprite | undefined;
 
     /**
      * generates container
@@ -298,7 +299,7 @@ export abstract class SpriteTile extends Tile {
      */
     dispose() {
         this.isDisposed = true;
-        this.container?.destroy({ children: true, texture: true });
+        // this.container?.destroy({ children: true, texture: true });
         this.container = undefined;
     }
 }

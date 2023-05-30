@@ -1,13 +1,15 @@
-import config from "../../config";
-import { ConnectionType, GraphicsTile } from "./tile";
+import * as PIXI from "pixi.js";
+import { ConnectionType, SpriteTile } from "./tile";
 
 /**
  * Wire Tile
  */
-export default class WireTile extends GraphicsTile {
+export default class WireTile extends SpriteTile {
     type = WireTile;
     typeNumber = 0;
     label = "Wire";
+
+    texture: PIXI.Texture = PIXI.Texture.from("w_");
 
     isWire = true;
     rotatable = false;
@@ -19,20 +21,16 @@ export default class WireTile extends GraphicsTile {
         right: ConnectionType.BOTH,
     };
 
-    /**
-     * draws graphics for wire tile
-     */
-    drawGraphics() {
-        if (!this.graphics) return;
-
-        this.graphics.beginFill(this.signalActive ? config.colors.activeTile : config.colors.inactiveTile);
-        if (Object.values(this.connections).some((value) => value)) this.graphics.drawRect(40, 40, 40, 40);
-        else this.graphics.drawRect(30, 30, 60, 60);
-
-        if (this.connections.up) this.graphics.drawRect(40, 0, 40, 40);
-        if (this.connections.down) this.graphics.drawRect(40, 80, 40, 40);
-        if (this.connections.left) this.graphics.drawRect(0, 40, 40, 40);
-        if (this.connections.right) this.graphics.drawRect(80, 40, 40, 40);
-        this.graphics.endFill();
+    /** updates container */
+    updateContainer?(): void {
+        this.texture = PIXI.Texture.from(
+            `w_${this.connections.left ? "l" : ""}${this.connections.right ? "r" : ""}${
+                this.connections.up ? "t" : ""
+            }${this.connections.down ? "b" : ""}`
+        );
+        if (this.container?.texture) {
+            this.container.texture = this.texture;
+        }
+        // throw new Error("Method not implemented.");
     }
 }

@@ -87,5 +87,5 @@ export const stopLoop = () => {
 };
 
 export const addUpdatedTile = (tile: Tile) => {
-    updatedTiles.add(tile);
+    // updatedTiles.add(tile);
 };
